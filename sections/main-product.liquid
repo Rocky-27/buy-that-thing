@@ -78,7 +78,13 @@
           <span>Free delivery included</span>
         </div>
         {% if product.description != blank %}
-          <div class="rte product-summary__description" data-product-description-summary>{{ product.description | strip_html | truncatewords: 42 }}</div>
+          <div class="product-summary__description-wrap" data-product-description-summary-wrap>
+            <div class="rte product-summary__description" data-product-description-summary></div>
+            <button class="text-link product-summary__description-toggle is-hidden" type="button" data-product-description-toggle aria-expanded="false">
+              Read more
+            </button>
+            <div class="product-summary__description-source" data-product-description-source hidden>{{ product.description }}</div>
+          </div>
         {% endif %}
 
         {% form 'product', product, class: 'product-form' %}

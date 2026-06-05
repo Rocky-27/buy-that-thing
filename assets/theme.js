@@ -1,52 +1,187 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const formatImportedDescription = (root, { summary = false } = {}) => {
-    if (!root) return;
+  const escapeHtml = (value) =>
+    value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  const normalizeDescriptionText = (root) => {
+    const clone = root.cloneNode(true);
+
+    clone.querySelectorAll('br').forEach((node) => node.replaceWith('\n'));
+
+    return clone.textContent
+      .replace(/\r/g, '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+
+  const splitLabelSegments = (text) => {
+    const normalized = text
+      .replace(/\s*-\s*([A-Z][A-Z\s&/()'-]{2,}:)/g, '\n$1')
+      .replace(/\s*([A-Z][A-Z\s&/()'-]{2,}:)/g, '\n$1')
+      .replace(/^\n+/, '');
+
+    return normalized
+      .split(/\n+/)
+      .map((segment) => segment.trim().replace(/^-\s*/, ''))
+      .filter(Boolean);
+  };
+
+  const isTitleLikeSegment = (segment) => {
+    const normalized = segment.replace(/^["'-\s]+|["'\s]+$/g, '').trim();
+    if (!normalized) return false;
+
+    const words = normalized.split(/\s+/);
+    const hasDescriptionWord = /description:?/i.test(normalized);
+    const longTitleShape = words.length >= 6 && normalized.length > 45;
+
+    return hasDescriptionWord || longTitleShape;
+  };
+
+  const formatSegment = (segment, tagName = 'p') => {
+    const colonIndex = segment.indexOf(':');
+    const hasShortLabel = colonIndex > 1 && colonIndex < 40;
+
+    if (!hasShortLabel) return `<${tagName}>${escapeHtml(segment)}</${tagName}>`;
+
+    const label = segment.slice(0, colonIndex + 1).trim();
+    const body = segment.slice(colonIndex + 1).trim();
+    return `<${tagName}><strong>${escapeHtml(label)}</strong>${body ? ` ${escapeHtml(body)}` : ''}</${tagName}>`;
+  };
+
+  const buildImportedDescriptionMarkup = (root, { summary = false } = {}) => {
+    if (!root) return null;
 
     const rawHtml = root.innerHTML.trim();
-    const rawText = root.textContent.replace(/\s+/g, ' ').trim();
-    const hasStructuredMarkup = /<(p|ul|ol|li|br|table|h[1-6]|details)\b/i.test(rawHtml);
-    const matches = rawText.match(/(?:^|[.!?]\s*)([A-Z][A-Z\s&/()'-]{2,}:)/g) || [];
+    const rawText = normalizeDescriptionText(root);
+    const hasStructuredMarkup = /<(p|ul|ol|li|table|h[1-6]|details)\b/i.test(rawHtml);
 
-    if (hasStructuredMarkup || matches.length < 2) return;
+    if (hasStructuredMarkup || !rawText) return null;
 
-    const normalized = rawText
-      .replace(/\s*([A-Z][A-Z\s&/()'-]{2,}:)/g, '|||$1')
-      .replace(/^\|\|\|/, '');
+    let workingText = rawText;
+    const descriptionIndex = workingText.search(/\bDescription:\s*/i);
 
-    const segments = normalized
-      .split('|||')
+    if (descriptionIndex > 40) {
+      workingText = workingText.slice(descriptionIndex + workingText.match(/\bDescription:\s*/i)[0].length).trim();
+    }
+
+    workingText = workingText.replace(/^[-–—•\s"']+/, '').trim();
+
+    const lineSegments = workingText
+      .split(/\n+/)
       .map((segment) => segment.trim())
       .filter(Boolean);
 
-    if (segments.length < 2) return;
+    const dashSegments = workingText
+      .split(/\s+-\s+/)
+      .map((segment) => segment.trim())
+      .filter(Boolean);
 
-    if (summary) {
-      const firstSegment = segments[0];
-      const colonIndex = firstSegment.indexOf(':');
-      if (colonIndex === -1) return;
+    const labelMatches = workingText.match(/(?:^|[.!?]\s*|\n+)([A-Z][A-Z\s&/()'-]{2,}:)/g) || [];
+    const labelSegments = splitLabelSegments(workingText);
 
-      const label = firstSegment.slice(0, colonIndex + 1).trim();
-      const body = firstSegment.slice(colonIndex + 1).trim();
-      root.innerHTML = `<p><strong>${label}</strong> ${body}</p>`;
-      root.classList.add('product-description-summary--formatted');
-      return;
+    let mode = null;
+    let segments = [];
+
+    if (lineSegments.length >= 3) {
+      mode = 'lines';
+      segments = lineSegments;
+    } else if (dashSegments.length >= 3) {
+      mode = 'dashes';
+      segments = dashSegments;
+    } else if (labelMatches.length >= 2 && labelSegments.length >= 2) {
+      mode = 'labels';
+      segments = labelSegments;
+    } else {
+      return null;
     }
 
-    root.innerHTML = segments
-      .map((segment) => {
-        const colonIndex = segment.indexOf(':');
-        if (colonIndex === -1) return `<p>${segment}</p>`;
+    if (segments.length < 2) return null;
 
-        const label = segment.slice(0, colonIndex + 1).trim();
-        const body = segment.slice(colonIndex + 1).trim();
-        return `<p><strong>${label}</strong> ${body}</p>`;
-      })
-      .join('');
+    if (summary) {
+      const previewSegments = segments.filter((segment, index) => !(index === 0 && isTitleLikeSegment(segment)));
+      const selectedSegments = (previewSegments.length > 0 ? previewSegments : segments).slice(0, 2);
 
-    root.classList.add('product-description-richtext--formatted');
+      if (selectedSegments.length === 1 && mode === 'labels') {
+        return {
+          html: formatSegment(selectedSegments[0], 'p'),
+          formattedClass: 'product-description-summary--formatted'
+        };
+      } else {
+        return {
+          html: `<ul>${selectedSegments.map((segment) => formatSegment(segment, 'li')).join('')}</ul>`,
+          formattedClass: 'product-description-summary--formatted'
+        };
+      }
+    }
+
+    if (mode === 'lines' || mode === 'dashes') {
+      return {
+        html: `<ul>${segments.map((segment) => formatSegment(segment, 'li')).join('')}</ul>`,
+        formattedClass: 'product-description-richtext--formatted'
+      };
+    } else {
+      return {
+        html: segments.map((segment) => formatSegment(segment, 'p')).join(''),
+        formattedClass: 'product-description-richtext--formatted'
+      };
+    }
   };
 
-  formatImportedDescription(document.querySelector('[data-product-description-summary]'), { summary: true });
+  const formatImportedDescription = (root, options = {}) => {
+    const formatted = buildImportedDescriptionMarkup(root, options);
+    if (!formatted) return false;
+
+    root.innerHTML = formatted.html;
+    root.classList.add(formatted.formattedClass);
+    return true;
+  };
+
+  const summaryRoot = document.querySelector('[data-product-description-summary]');
+  const summarySource = document.querySelector('[data-product-description-source]');
+  const summaryToggle = document.querySelector('[data-product-description-toggle]');
+  let summaryExpanded = false;
+  let summaryCollapsedHtml = '';
+  let summaryExpandedHtml = '';
+
+  if (summaryRoot && summarySource) {
+    const formattedSummary = buildImportedDescriptionMarkup(summarySource, { summary: true });
+    const formattedFull = buildImportedDescriptionMarkup(summarySource, { summary: false });
+    const fallbackText = normalizeDescriptionText(summarySource).replace(/\s+/g, ' ').trim();
+
+    if (formattedSummary) {
+      summaryCollapsedHtml = formattedSummary.html;
+      summaryRoot.classList.add(formattedSummary.formattedClass);
+    } else {
+      const shortened = fallbackText.split(/\s+/).slice(0, 28).join(' ');
+      summaryCollapsedHtml = `<p>${escapeHtml(shortened)}${shortened.length < fallbackText.length ? '...' : ''}</p>`;
+    }
+
+    if (formattedFull) {
+      summaryExpandedHtml = formattedFull.html;
+    } else {
+      summaryExpandedHtml = `<p>${escapeHtml(fallbackText)}</p>`;
+    }
+
+    summaryRoot.innerHTML = summaryCollapsedHtml;
+
+    if (summaryToggle && summaryCollapsedHtml !== summaryExpandedHtml) {
+      summaryToggle.classList.remove('is-hidden');
+      summaryToggle.addEventListener('click', () => {
+        summaryExpanded = !summaryExpanded;
+        summaryRoot.innerHTML = summaryExpanded ? summaryExpandedHtml : summaryCollapsedHtml;
+        summaryToggle.textContent = summaryExpanded ? 'Show less' : 'Read more';
+        summaryToggle.setAttribute('aria-expanded', String(summaryExpanded));
+      });
+    }
+  }
+
   formatImportedDescription(document.querySelector('[data-product-description-richtext]'));
 
   const menuToggle = document.querySelector('[data-menu-toggle]');
