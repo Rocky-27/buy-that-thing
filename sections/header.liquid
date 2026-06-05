@@ -47,7 +47,7 @@
         {% assign normalized_title = link.title | downcase %}
         <a href="{% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}{{ collections_index_url }}{% else %}{{ link.url }}{% endif %}">{{ link.title }}</a>
       {% endfor %}
-      <a class="site-nav__sale" href="{{ collections_index_url }}">Sale</a>
+      <a class="site-nav__sale" href="/collections/special-offer">Sale</a>
     </nav>
   </div>
 
