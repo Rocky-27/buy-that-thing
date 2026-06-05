@@ -119,11 +119,22 @@
             <span>Free delivery included on every order</span>
           </div>
           <div class="product-grid product-grid--listing">
+            {% assign rendered_product = false %}
             {% for product in collection.products %}
-              {% render 'product-card', product: product %}
-            {% else %}
-              <p class="collection-empty-state">Nothing matched those filters. Clear a few and the good stuff should reappear.</p>
+              {% if product.available %}
+                {% render 'product-card', product: product %}
+                {% assign rendered_product = true %}
+              {% endif %}
             {% endfor %}
+            {% for product in collection.products %}
+              {% unless product.available %}
+                {% render 'product-card', product: product %}
+                {% assign rendered_product = true %}
+              {% endunless %}
+            {% endfor %}
+            {% unless rendered_product %}
+              <p class="collection-empty-state">Nothing matched those filters. Clear a few and the good stuff should reappear.</p>
+            {% endunless %}
           </div>
         </div>
       </div>

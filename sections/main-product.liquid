@@ -92,16 +92,25 @@
 
           {% unless product.has_only_default_variant %}
             {% for option in product.options_with_values %}
+              {% assign option_index = option.position | minus: 1 %}
               <fieldset class="product-option">
                 <legend>{{ option.name }}</legend>
                 <div class="product-option__values">
                   {% for value in option.values %}
-                    <label>
+                    {% assign value_available = false %}
+                    {% for variant in product.variants %}
+                      {% if variant.available and variant.options[option_index] == value %}
+                        {% assign value_available = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    <label{% unless value_available %} class="is-disabled"{% endunless %}>
                       <input
                         type="radio"
                         name="options[{{ option.name | escape }}]"
                         value="{{ value | escape }}"
                         {% if option.selected_value == value %}checked{% endif %}
+                        {% unless value_available %}disabled{% endunless %}
                         data-option-input
                       >
                       <span>{{ value }}</span>

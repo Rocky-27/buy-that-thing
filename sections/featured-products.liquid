@@ -13,9 +13,27 @@
     {% assign display_collection = section.settings.collection | default: collections.all %}
     <div class="product-grid">
       {% if display_collection != blank %}
-        {% for product in display_collection.products limit: section.settings.products_to_show %}
-          {% render 'product-card', product: product %}
+        {% assign shown_products = 0 %}
+        {% for product in display_collection.products %}
+          {% if product.available %}
+            {% render 'product-card', product: product %}
+            {% assign shown_products = shown_products | plus: 1 %}
+            {% if shown_products >= section.settings.products_to_show %}
+              {% break %}
+            {% endif %}
+          {% endif %}
         {% endfor %}
+        {% if shown_products < section.settings.products_to_show %}
+          {% for product in display_collection.products %}
+            {% unless product.available %}
+              {% render 'product-card', product: product %}
+              {% assign shown_products = shown_products | plus: 1 %}
+              {% if shown_products >= section.settings.products_to_show %}
+                {% break %}
+              {% endif %}
+            {% endunless %}
+          {% endfor %}
+        {% endif %}
       {% endif %}
     </div>
 
