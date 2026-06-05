@@ -1,7 +1,8 @@
-{% assign collection_url = routes.all_products_collection_url %}
-{% assign collection_count = 0 %}
+{% assign collection_url = custom_url | default: routes.all_products_collection_url %}
+{% assign collection_count = custom_count | default: 0 %}
 {% assign card_title = custom_title %}
 {% assign card_text = custom_text %}
+{% assign card_cta = custom_cta | default: 'See the picks' %}
 {% if collection != blank %}
   {% assign collection_url = collection.url %}
   {% assign collection_count = collection.products_count %}
@@ -30,7 +31,7 @@
       {% if card_text != blank %}
         <p>{{ card_text }}</p>
       {% endif %}
-      <span>See the picks</span>
+      <span>{{ card_cta }}</span>
     </div>
   </a>
 </article>

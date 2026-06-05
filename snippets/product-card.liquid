@@ -2,6 +2,11 @@
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
 {% assign savings = product.compare_at_price_max | minus: product.price %}
+{% assign vendor_normalized = product.vendor | downcase | strip | replace: '-', '' | replace: '_', '' | replace: '.', '' | replace: ' ', '' %}
+{% assign hide_vendor = false %}
+{% if vendor_normalized == blank or vendor_normalized == 'unbranded' or vendor_normalized == 'na' or vendor_normalized == 'none' or vendor_normalized == 'unknown' or vendor_normalized == 'generic' or vendor_normalized == 'novendor' %}
+  {% assign hide_vendor = true %}
+{% endif %}
 
 <article class="product-card">
   <a class="product-card__image-link" href="{{ product.url }}">
@@ -31,9 +36,9 @@
     {% endunless %}
 
     <div class="product-card__header">
-      {% if product.vendor != blank %}
+      {% unless hide_vendor %}
         <p class="product-card__vendor">{{ product.vendor }}</p>
-      {% endif %}
+      {% endunless %}
       <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
     </div>
 

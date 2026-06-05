@@ -2,6 +2,11 @@
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
 {% assign savings = current_variant.compare_at_price | minus: current_variant.price %}
+{% assign vendor_normalized = product.vendor | downcase | strip | replace: '-', '' | replace: '_', '' | replace: '.', '' | replace: ' ', '' %}
+{% assign hide_vendor = false %}
+{% if vendor_normalized == blank or vendor_normalized == 'unbranded' or vendor_normalized == 'na' or vendor_normalized == 'none' or vendor_normalized == 'unknown' or vendor_normalized == 'generic' or vendor_normalized == 'novendor' %}
+  {% assign hide_vendor = true %}
+{% endif %}
 <section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
   <div class="page-width">
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -48,11 +53,11 @@
       </div>
 
       <div class="product-summary">
-        {% if product.vendor != blank %}
+        {% unless hide_vendor %}
           <p class="section-eyebrow">{{ product.vendor }}</p>
-        {% endif %}
+        {% endunless %}
         <h1>{{ product.title }}</h1>
-        {% if rating != blank or product.vendor != blank %}
+        {% if rating != blank or hide_vendor == false %}
           <div class="product-rating-row">
             {% if rating != blank %}
               <span class="rating-stars">{{ rating.rating | round: 1 }} / 5</span>
@@ -60,9 +65,9 @@
                 <span>{{ rating_count }} reviews</span>
               {% endif %}
             {% endif %}
-            {% if product.vendor != blank %}
+            {% unless hide_vendor %}
               <span class="verified-pill">Sold by {{ product.vendor }}</span>
-            {% endif %}
+            {% endunless %}
           </div>
         {% endif %}
         <div class="product-summary__price" data-product-price>
@@ -186,12 +191,12 @@
       {% if product.description != blank %}
         "description": {{ product.description | strip_html | strip_newlines | json }},
       {% endif %}
-      {% if product.vendor != blank %}
+      {% unless hide_vendor %}
         "brand": {
           "@type": "Brand",
           "name": {{ product.vendor | json }}
         },
-      {% endif %}
+      {% endunless %}
       "offers": [
         {% for variant in product.variants %}
           {

@@ -2,6 +2,9 @@
   <section class="collection-template">
     <div class="page-width">
       {% assign products_per_page = section.settings.products_per_page %}
+      {% if collection.handle == 'all' %}
+        {% assign products_per_page = 36 %}
+      {% endif %}
       {% assign total_products = collection.products_count %}
       {% assign current_page_number = current_page | default: 1 %}
       {% assign page_offset = current_page_number | minus: 1 | times: products_per_page %}

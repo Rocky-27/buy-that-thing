@@ -11,24 +11,32 @@
     </div>
 
     {% assign display_collection = section.settings.collection | default: collections.all %}
-    <div class="product-grid">
+    <div class="product-grid" data-randomized-listing data-visible-count="{{ section.settings.products_to_show }}">
       {% if display_collection != blank %}
         {% assign shown_products = 0 %}
+        {% assign rendered_candidates = 0 %}
+        {% assign candidate_limit = section.settings.products_to_show | plus: 8 %}
         {% for product in display_collection.products %}
           {% if product.available %}
-            {% render 'product-card', product: product %}
+            <div data-randomized-item {% if shown_products >= section.settings.products_to_show %}hidden{% endif %}>
+              {% render 'product-card', product: product %}
+            </div>
             {% assign shown_products = shown_products | plus: 1 %}
-            {% if shown_products >= section.settings.products_to_show %}
+            {% assign rendered_candidates = rendered_candidates | plus: 1 %}
+            {% if rendered_candidates >= candidate_limit %}
               {% break %}
             {% endif %}
           {% endif %}
         {% endfor %}
-        {% if shown_products < section.settings.products_to_show %}
+        {% if rendered_candidates < candidate_limit %}
           {% for product in display_collection.products %}
             {% unless product.available %}
-              {% render 'product-card', product: product %}
+              <div data-randomized-item {% if shown_products >= section.settings.products_to_show %}hidden{% endif %}>
+                {% render 'product-card', product: product %}
+              </div>
               {% assign shown_products = shown_products | plus: 1 %}
-              {% if shown_products >= section.settings.products_to_show %}
+              {% assign rendered_candidates = rendered_candidates | plus: 1 %}
+              {% if rendered_candidates >= candidate_limit %}
                 {% break %}
               {% endif %}
             {% endunless %}

@@ -143,6 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   };
 
+  const shuffleArray = (items) => {
+    const clone = [...items];
+
+    for (let index = clone.length - 1; index > 0; index -= 1) {
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [clone[index], clone[swapIndex]] = [clone[swapIndex], clone[index]];
+    }
+
+    return clone;
+  };
+
   const summaryRoot = document.querySelector('[data-product-description-summary]');
   const summarySource = document.querySelector('[data-product-description-source]');
   const summaryToggle = document.querySelector('[data-product-description-toggle]');
@@ -205,6 +216,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (filterClose && filterSidebar) {
     filterClose.addEventListener('click', () => filterSidebar.classList.remove('is-open'));
   }
+
+  document.querySelectorAll('[data-randomized-listing]').forEach((listing) => {
+    const visibleCount = Number(listing.dataset.visibleCount || 0);
+    const items = Array.from(listing.querySelectorAll('[data-randomized-item]'));
+
+    if (!visibleCount || items.length <= visibleCount) return;
+
+    const shuffledItems = shuffleArray(items);
+    shuffledItems.forEach((item) => listing.appendChild(item));
+    shuffledItems.forEach((item, index) => {
+      item.hidden = index >= visibleCount;
+    });
+  });
 
   const productRoot = document.querySelector('[data-product-root]');
   if (!productRoot) return;

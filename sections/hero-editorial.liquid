@@ -10,35 +10,39 @@
         {% endif %}
       </div>
 
-      <div class="retail-billboard__products" aria-label="Featured offer products">
+      <div class="retail-billboard__products" aria-label="Featured offer products" data-randomized-listing data-visible-count="3">
         {% assign offer_collection = section.settings.offer_collection | default: collections.all %}
         {% if offer_collection != blank and offer_collection.products.size > 0 %}
           {% assign billboard_products_shown = 0 %}
+          {% assign billboard_candidates_rendered = 0 %}
+          {% assign billboard_candidates_limit = 9 %}
           {% for product in offer_collection.products %}
             {% if product.available %}
-              <a class="billboard-product" href="{{ product.url }}">
+              <a class="billboard-product" href="{{ product.url }}" data-randomized-item {% if billboard_products_shown >= 3 %}hidden{% endif %}>
                 {% if product.featured_media %}
                   {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
                 {% endif %}
                 <span>{{ product.price | money }}</span>
               </a>
               {% assign billboard_products_shown = billboard_products_shown | plus: 1 %}
-              {% if billboard_products_shown >= 3 %}
+              {% assign billboard_candidates_rendered = billboard_candidates_rendered | plus: 1 %}
+              {% if billboard_candidates_rendered >= billboard_candidates_limit %}
                 {% break %}
               {% endif %}
             {% endif %}
           {% endfor %}
-          {% if billboard_products_shown < 3 %}
+          {% if billboard_candidates_rendered < billboard_candidates_limit %}
             {% for product in offer_collection.products %}
               {% unless product.available %}
-                <a class="billboard-product" href="{{ product.url }}">
+                <a class="billboard-product" href="{{ product.url }}" data-randomized-item {% if billboard_products_shown >= 3 %}hidden{% endif %}>
                   {% if product.featured_media %}
                     {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
                   {% endif %}
                   <span>{{ product.price | money }}</span>
                 </a>
                 {% assign billboard_products_shown = billboard_products_shown | plus: 1 %}
-                {% if billboard_products_shown >= 3 %}
+                {% assign billboard_candidates_rendered = billboard_candidates_rendered | plus: 1 %}
+                {% if billboard_candidates_rendered >= billboard_candidates_limit %}
                   {% break %}
                 {% endif %}
               {% endunless %}
