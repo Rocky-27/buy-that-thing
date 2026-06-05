@@ -13,12 +13,13 @@
         <div class="rte">
           {{ section.settings.text }}
         </div>
+        <p class="contact-note">Share an order number if you have one and we can get to the useful part faster.</p>
       </div>
 
       <div class="contact-panel">
         {% form 'contact', class: 'contact-form' %}
           {% if form.posted_successfully? %}
-            <p class="form-success">Thanks for getting in touch. We will reply as soon as possible.</p>
+            <p class="form-success">Message sent. We will be back in touch as quickly as possible.</p>
           {% endif %}
 
           {% if form.errors %}
@@ -62,19 +63,19 @@
       "type": "text",
       "id": "eyebrow",
       "label": "Eyebrow",
-      "default": "Customer support"
+      "default": "Need a hand?"
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Contact us"
+      "default": "Questions, delivery updates or product help?"
     },
     {
       "type": "richtext",
       "id": "text",
       "label": "Text",
-      "default": "<p>Questions about an order, delivery or a product? Send us a message and include your order number if you have one.</p>"
+      "default": "<p>Whether you are checking on an order, sizing up a product or sorting a delivery question, send us a message and we will point you in the right direction.</p>"
     }
   ]
 }

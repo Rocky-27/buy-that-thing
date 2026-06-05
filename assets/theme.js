@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const variantInput = productRoot.querySelector('[data-variant-id]');
   const addToCart = productRoot.querySelector('[data-add-to-cart]');
   const priceRoot = productRoot.querySelector('[data-product-price]');
+  const saleCallout = productRoot.querySelector('[data-product-sale-callout]');
+  const statusPill = productRoot.querySelector('[data-product-status-pill]');
   const variantsNode = productRoot.querySelector('[data-product-json]');
   const variants = variantsNode ? JSON.parse(variantsNode.textContent) : [];
 
@@ -66,12 +68,25 @@ document.addEventListener('DOMContentLoaded', () => {
         priceRoot.innerHTML = `<div class="price"><span class="price__current">${formatMoney(variant.price)}</span></div>`;
       }
     }
+    if (saleCallout) {
+      if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+        saleCallout.textContent = `Nice choice: save ${formatMoney(variant.compare_at_price - variant.price)} on this option.`;
+        saleCallout.classList.remove('is-hidden');
+      } else {
+        saleCallout.textContent = '';
+        saleCallout.classList.add('is-hidden');
+      }
+    }
     if (productImage && variant.featured_image && variant.featured_image.src) {
       productImage.src = variant.featured_image.src;
     }
     if (addToCart) {
       addToCart.disabled = !variant.available;
-      addToCart.textContent = variant.available ? 'Add to Basket' : 'Sold out';
+      addToCart.textContent = variant.available ? 'Add to basket' : 'Sold out';
+    }
+    if (statusPill) {
+      statusPill.textContent = variant.available ? 'Ready to order' : 'Currently unavailable';
+      statusPill.classList.toggle('product-status-pill--muted', !variant.available);
     }
   };
 

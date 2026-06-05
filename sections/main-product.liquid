@@ -1,6 +1,7 @@
 {% assign current_variant = product.selected_or_first_available_variant %}
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
+{% assign savings = current_variant.compare_at_price | minus: current_variant.price %}
 <section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
   <div class="page-width">
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -56,7 +57,7 @@
             {% if rating != blank %}
               <span class="rating-stars">{{ rating.rating | round: 1 }} / 5</span>
               {% if rating_count != blank %}
-                <a href="#reviews">{{ rating_count }} reviews</a>
+                <span>{{ rating_count }} reviews</span>
               {% endif %}
             {% endif %}
             {% if product.vendor != blank %}
@@ -66,6 +67,15 @@
         {% endif %}
         <div class="product-summary__price" data-product-price>
           {% render 'price', product: product, use_variant: true %}
+        </div>
+        <p class="sale-callout{% unless current_variant.compare_at_price > current_variant.price %} is-hidden{% endunless %}" data-product-sale-callout>
+          {% if current_variant.compare_at_price > current_variant.price %}Nice choice: save {{ savings | money }} on this option.{% endif %}
+        </p>
+        <div class="product-status-row">
+          <span class="product-status-pill{% unless current_variant.available %} product-status-pill--muted{% endunless %}" data-product-status-pill>
+            {% if current_variant.available %}Ready to order{% else %}Currently unavailable{% endif %}
+          </span>
+          <span>Free delivery included</span>
         </div>
         {% if product.description != blank %}
           <div class="rte product-summary__description">{{ product.description | strip_html | truncatewords: 42 }}</div>
@@ -98,48 +108,48 @@
 
           <div class="product-form__row">
             <label class="quantity-field" for="Quantity-{{ section.id }}">
-              <span>Qty</span>
+              <span>Quantity</span>
               <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1">
             </label>
             <button class="button button--primary button--block" type="submit" {% unless current_variant.available %}disabled{% endunless %} data-add-to-cart>
-              {% if current_variant.available %}Add to Basket{% else %}Sold out{% endif %}
+              {% if current_variant.available %}Add to basket{% else %}Sold out{% endif %}
             </button>
           </div>
         {% endform %}
 
         <div class="delivery-panel">
-          <strong>Delivery options</strong>
+          <strong>Why this is an easy yes</strong>
           <div>
-            <span class="delivery-badge">Free shipping</span>
-            <span>Included on every order, with no minimum spend.</span>
+            <span class="delivery-badge">Free delivery</span>
+            <span>Included on every order, with no minimum spend to unlock it.</span>
           </div>
           <div>
-            <span class="delivery-badge delivery-badge--soft">Secure payment</span>
-            <span>Card, accelerated checkout and Shopify payments</span>
+            <span class="delivery-badge delivery-badge--soft">Secure checkout</span>
+            <span>Pay by card or accelerated checkout with a smooth, familiar flow.</span>
           </div>
         </div>
 
         <div class="product-trust">
           <div>
             <strong>Order updates</strong>
-            <span>Receive order and delivery updates after checkout.</span>
+            <span>We keep you posted from order confirmation through delivery.</span>
           </div>
           <div>
-            <strong>Simple returns</strong>
-            <span>Return details are provided with your order confirmation.</span>
+            <strong>Support that makes sense</strong>
+            <span>If something needs attention, the next step is clear and easy to find.</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="product-detail-tabs" id="reviews">
+    <div class="product-detail-tabs" id="product-details">
       <details open>
         <summary>Product details</summary>
         <div class="rte">{{ product.description }}</div>
       </details>
       <details>
         <summary>Delivery and returns</summary>
-        <p>Free shipping is available on every order. Delivery and return timings can vary by supplier and are confirmed during checkout.</p>
+        <p>Free delivery is included on every order. Final delivery timing and any supplier-specific return details are confirmed during checkout so you know exactly what to expect.</p>
       </details>
     </div>
   </div>

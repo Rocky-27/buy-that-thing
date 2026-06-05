@@ -377,6 +377,24 @@ textarea {
   background: var(--surface-alt);
   border: 1px solid var(--line);
   border-left: 5px solid var(--orange);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.promo-quicklinks a:hover,
+.promo-quicklinks a:focus-visible,
+.collection-card:hover,
+.collection-card:focus-within,
+.product-card:hover .product-card__image-link,
+.product-card:focus-within .product-card__image-link {
+  transform: translateY(-2px);
+}
+
+.promo-quicklinks a:hover,
+.promo-quicklinks a:focus-visible,
+.collection-card:hover,
+.collection-card:focus-within {
+  box-shadow: 0 10px 24px rgba(32, 33, 36, 0.08);
+  border-color: #c9c9ce;
 }
 
 .promo-quicklinks strong {
@@ -591,6 +609,15 @@ textarea {
   color: #fff;
   font-size: 12px;
   font-weight: 800;
+}
+
+.product-card:hover .product-card__image,
+.product-card:focus-within .product-card__image {
+  transform: scale(1.03);
+}
+
+.product-card__image {
+  transition: transform 0.2s ease;
 }
 
 .product-card__content {
@@ -1071,6 +1098,42 @@ textarea {
   margin-bottom: 12px;
 }
 
+.sale-callout {
+  margin: -2px 0 10px;
+  color: var(--red);
+  font-weight: 800;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+.product-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.product-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.product-status-pill--muted {
+  background: #f2f3f5;
+  color: var(--muted);
+}
+
 .product-summary__description {
   color: var(--muted);
   line-height: 1.5;
@@ -1380,6 +1443,13 @@ textarea {
   color: var(--muted);
 }
 
+.contact-note {
+  max-width: 480px;
+  margin: 18px 0 0;
+  color: var(--ink);
+  font-weight: 800;
+}
+
 .contact-panel {
   padding: 20px;
   border: 1px solid var(--line);
@@ -1492,6 +1562,7 @@ textarea {
   height: 44px;
   border: 1px solid var(--line);
   background: #fff;
+  align-items: stretch;
 }
 
 .newsletter-form input {
@@ -1553,6 +1624,16 @@ textarea {
 .pagination a {
   color: var(--purple);
   text-decoration: underline;
+}
+
+.collection-empty-state {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: #fbfbfc;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .rte {
@@ -1742,6 +1823,10 @@ textarea {
   .newsletter-form,
   .newsletter-form input {
     width: 100%;
+  }
+
+  .product-status-row {
+    align-items: flex-start;
   }
 
   .newsletter-form {

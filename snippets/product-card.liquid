@@ -1,6 +1,7 @@
 {% assign card_variant = product.selected_or_first_available_variant %}
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
+{% assign savings = product.compare_at_price_max | minus: product.price %}
 
 <article class="product-card">
   <a class="product-card__image-link" href="{{ product.url }}">
@@ -8,7 +9,7 @@
       {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}
     {% endif %}
     {% if product.compare_at_price_max > product.price %}
-      <span class="product-badge">Save</span>
+      <span class="product-badge">Save {{ savings | money }}</span>
     {% endif %}
   </a>
 
@@ -52,14 +53,14 @@
     </div>
 
     <div class="delivery-lines">
-      <span>Free shipping</span>
-      <strong>Included on every order</strong>
+      <span>Free delivery</span>
+      <strong>No minimum spend, no nasty surprises</strong>
     </div>
 
     {% form 'product', product, class: 'product-card__form' %}
       {% if product.variants.size > 1 %}
         <label class="card-variant-select">
-          <span>Variant</span>
+          <span>Pick your option</span>
           <select name="id">
             {% for variant in product.variants %}
               <option
@@ -76,7 +77,7 @@
         <input type="hidden" name="id" value="{{ card_variant.id }}">
       {% endif %}
       <button class="product-card__basket" type="submit" {% unless product.available %}disabled{% endunless %}>
-        {% if product.available %}Add to Basket{% else %}Sold out{% endif %}
+        {% if product.available %}Add to basket{% else %}Sold out{% endif %}
       </button>
     {% endform %}
   </div>

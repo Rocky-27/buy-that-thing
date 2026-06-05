@@ -10,7 +10,7 @@
       <div class="collection-title-row">
         <div>
           <h1>{{ collection.title }}</h1>
-          <span>{{ collection.all_products_count }} items</span>
+          <span>{{ collection.all_products_count }} finds</span>
         </div>
         {% if collection.description != blank %}
           <div class="rte collection-title-row__description">{{ collection.description }}</div>
@@ -18,7 +18,7 @@
       </div>
 
       <div class="collection-toolbar">
-        <button type="button" class="filter-drawer-toggle" data-filter-toggle>Filter</button>
+        <button type="button" class="filter-drawer-toggle" data-filter-toggle>Filter and sort</button>
         <div class="active-filter-chips">
           {% for filter in collection.filters %}
             {% for active_value in filter.active_values %}
@@ -60,7 +60,7 @@
       <div class="collection-layout">
         <aside class="collection-filters" data-filter-sidebar>
           <div class="collection-filters__header">
-            <strong>Category</strong>
+            <strong>Refine this collection</strong>
             <button type="button" data-filter-close>Close</button>
           </div>
 
@@ -115,14 +115,14 @@
 
         <div class="collection-products">
           <div class="collection-products__meta">
-            <span>{{ paginate.items }} products</span>
-            <span>Free shipping available on every order</span>
+            <span>{{ paginate.items }} products shown</span>
+            <span>Free delivery included on every order</span>
           </div>
           <div class="product-grid product-grid--listing">
             {% for product in collection.products %}
               {% render 'product-card', product: product %}
             {% else %}
-              <p>No products found in this collection.</p>
+              <p class="collection-empty-state">Nothing matched those filters. Clear a few and the good stuff should reappear.</p>
             {% endfor %}
           </div>
         </div>

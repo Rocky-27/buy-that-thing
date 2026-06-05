@@ -15,31 +15,31 @@
         "stat_1": {
           "type": "stat",
           "settings": {
-            "value": "Furniture offers",
-            "label": "Sofas, storage and living room picks"
+            "value": "Home heroes",
+            "label": "Storage, seating and upgrades worth the floor space"
           }
         },
         "stat_2": {
           "type": "stat",
           "settings": {
-            "value": "Garden deals",
-            "label": "Outdoor furniture, BBQs and patio buys"
+            "value": "Garden wins",
+            "label": "Outdoor furniture, BBQs and patio crowd-pleasers"
           }
         },
         "stat_3": {
           "type": "stat",
           "settings": {
-            "value": "Free shipping",
-            "label": "Available on every order"
+            "value": "Free delivery",
+            "label": "Built into every order"
           }
         }
       },
       "block_order": ["stat_1", "stat_2", "stat_3"],
       "settings": {
-        "eyebrow": "Join to save | New offers daily",
-        "heading": "Big deals across home, garden and everyday essentials",
-        "text": "Shop useful finds across home, garden, tech and everyday essentials, with free shipping included on every order.",
-        "primary_label": "Shop deals"
+        "eyebrow": "Fresh bargains daily | Free delivery every time",
+        "heading": "Useful finds that make life better without rinsing your budget",
+        "text": "Shop clever home upgrades, garden wins, tech picks and everyday essentials with free delivery built into every order.",
+        "primary_label": "See today's best buys"
       }
     },
     "value_props": {
@@ -49,27 +49,27 @@
           "type": "item",
           "settings": {
             "icon": "✓",
-            "eyebrow": "Free shipping",
+            "eyebrow": "Free delivery",
             "heading": "Included on every order.",
-            "text": "No minimum spend required."
+            "text": "No minimum spend. No checkout sting in the tail."
           }
         },
         "value_2": {
           "type": "item",
           "settings": {
             "icon": "£",
-            "eyebrow": "Current offers",
-            "heading": "New savings added regularly.",
-            "text": "Find value buys across home, garden, tech and everyday essentials."
+            "eyebrow": "Deals worth opening",
+            "heading": "Fresh savings added regularly.",
+            "text": "Find home, garden, tech and everyday picks that feel like a proper win."
           }
         },
         "value_3": {
           "type": "item",
           "settings": {
             "icon": "↺",
-            "eyebrow": "Easy browsing",
-            "heading": "Compare products quickly.",
-            "text": "See prices, variants and delivery messaging while you shop."
+            "eyebrow": "Shop with confidence",
+            "heading": "Clear pricing, useful detail, easy support.",
+            "text": "Compare options fast and check out without second-guessing the basics."
           }
         }
       },
@@ -87,16 +87,16 @@
           "type": "tile",
           "settings": {
             "eyebrow": "Fresh picks",
-            "heading": "Useful finds for home and everyday living.",
-            "text": "Explore seasonal products, useful home upgrades and everyday essentials."
+            "heading": "Small upgrades, oddly satisfying payoff.",
+            "text": "Explore practical finds that solve a problem, lift a room or make everyday jobs easier."
           }
         },
         "promo_2": {
           "type": "tile",
           "settings": {
             "eyebrow": "Flash deals",
-            "heading": "Limited-time offers.",
-            "text": "Find current deals and value buys across the store."
+            "heading": "Prices with a little swagger.",
+            "text": "Find short-window offers and value buys that are worth grabbing while they are still here."
           }
         },
         "promo_3": {
@@ -104,7 +104,7 @@
           "settings": {
             "eyebrow": "Bundles and accessories",
             "heading": "Complete the setup.",
-            "text": "Discover accessories and related products that work well together."
+            "text": "Add the extras that make the main buy work harder from day one."
           }
         }
       },
@@ -114,9 +114,9 @@
     "newsletter": {
       "type": "newsletter-band",
       "settings": {
-        "eyebrow": "Offers and updates",
-        "heading": "Get the latest deals by email.",
-        "text": "Sign up for offers, restocks and new product alerts."
+        "eyebrow": "Inbox perks",
+        "heading": "Get the good stuff before everyone else.",
+        "text": "Sign up for deal drops, restock alerts and smart buys worth pouncing on."
       }
     }
   },

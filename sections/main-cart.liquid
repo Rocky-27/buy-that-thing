@@ -8,7 +8,7 @@
 
     <div class="cart-header">
       <h1>Basket</h1>
-      <p>Free shipping is included on every order.</p>
+      <p>Free delivery is already included on every order.</p>
     </div>
 
     {% if cart.item_count > 0 %}
@@ -60,16 +60,16 @@
             <span>Shipping</span>
             <strong>Free</strong>
           </div>
-          <p>Taxes and final delivery options are calculated at checkout.</p>
+          <p>No surprise shipping fee here. Taxes and any final delivery details are confirmed at checkout.</p>
           <button class="button button--primary button--block" type="submit" name="checkout">Checkout</button>
           <button class="button button--secondary button--block" type="submit">Update basket</button>
         </aside>
       </form>
     {% else %}
       <div class="empty-cart">
-        <h2>Your basket is empty</h2>
-        <p>Browse the latest products and offers across the store.</p>
-        <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Start shopping</a>
+        <h2>Your basket is ready for better decisions</h2>
+        <p>Start with the latest crowd-pleasers, clever home upgrades and useful finds that earn their spot.</p>
+        <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Shop the best bits</a>
       </div>
     {% endif %}
   </div>

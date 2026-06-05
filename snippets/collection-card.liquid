@@ -12,8 +12,8 @@
     {% assign card_text = collection.description | strip_html | truncatewords: 16 %}
   {% endif %}
 {% else %}
-  {% assign card_title = card_title | default: 'All products' %}
-  {% assign card_text = card_text | default: 'Browse the full range.' %}
+  {% assign card_title = card_title | default: 'Shop everything' %}
+  {% assign card_text = card_text | default: 'Jump straight into the full edit of useful finds and feel-good deals.' %}
 {% endif %}
 <article class="collection-card">
   <a class="collection-card__link" href="{{ collection_url }}">
@@ -25,12 +25,12 @@
       {% endif %}
     </div>
     <div class="collection-card__content">
-      <p class="section-eyebrow">{{ collection_count }} products</p>
-      <h3>{{ card_title | default: 'Featured collection' }}</h3>
+      <p class="section-eyebrow">{{ collection_count }} finds</p>
+      <h3>{{ card_title | default: 'Shop the spotlight' }}</h3>
       {% if card_text != blank %}
         <p>{{ card_text }}</p>
       {% endif %}
-      <span>Shop now</span>
+      <span>See the picks</span>
     </div>
   </a>
 </article>
