@@ -1,0 +1,86 @@
+{% paginate search.results by 24 %}
+  <section class="search-template">
+    <div class="page-width">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span>/</span>
+        <span>Search</span>
+      </nav>
+
+      <div class="search-header">
+        <div>
+          <p class="section-eyebrow">Search the store</p>
+          {% if search.performed %}
+            <h1>{{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %} for “{{ search.terms | escape }}”</h1>
+          {% else %}
+            <h1>Find the good stuff fast.</h1>
+          {% endif %}
+        </div>
+
+        <form class="search-template__form" action="{{ routes.search_url }}" method="get" role="search">
+          <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Try vase, storage, garden, lamp..." required>
+          <button class="button button--primary" type="submit">Search</button>
+        </form>
+      </div>
+
+      {% if search.performed %}
+        {% if search.results_count > 0 %}
+          <div class="search-results-grid">
+            {% for item in search.results %}
+              {% if item.object_type == 'product' %}
+                {% render 'product-card', product: item %}
+              {% else %}
+                <article class="search-result-card">
+                  <a class="search-result-card__link" href="{{ item.url }}">
+                    <p class="section-eyebrow">{{ item.object_type | capitalize }}</p>
+                    <h3>{{ item.title }}</h3>
+                    {% if item.image %}
+                      <div class="search-result-card__image">
+                        {{ item.image | image_url: width: 900 | image_tag: loading: 'lazy' }}
+                      </div>
+                    {% endif %}
+                    {% if item.content != blank %}
+                      <p>{{ item.content | strip_html | truncatewords: 26 }}</p>
+                    {% elsif item.excerpt != blank %}
+                      <p>{{ item.excerpt | strip_html | truncatewords: 26 }}</p>
+                    {% endif %}
+                    <span>Open result</span>
+                  </a>
+                </article>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="search-empty-state">
+            <h2>No matches for “{{ search.terms | escape }}”</h2>
+            <p>Try a broader search term, check the spelling, or browse the full range instead.</p>
+            <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Browse all products</a>
+          </div>
+        {% endif %}
+
+        {% if paginate.pages > 1 %}
+          <nav class="pagination" aria-label="Pagination">
+            {% if paginate.previous %}
+              <a href="{{ paginate.previous.url }}">Previous</a>
+            {% endif %}
+            <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+            {% if paginate.next %}
+              <a href="{{ paginate.next.url }}">Next</a>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% else %}
+        <div class="search-empty-state">
+          <h2>Search for a product, brand or category</h2>
+          <p>Start with something simple and we will do the digging.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Main search"
+}
+{% endschema %}
