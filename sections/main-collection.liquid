@@ -1,6 +1,11 @@
-{% paginate collection.products by section.settings.products_per_page %}
+{% paginate collection.products by 250 %}
   <section class="collection-template">
     <div class="page-width">
+      {% assign products_per_page = section.settings.products_per_page %}
+      {% assign total_products = collection.products_count %}
+      {% assign current_page_number = current_page | default: 1 %}
+      {% assign page_offset = current_page_number | minus: 1 | times: products_per_page %}
+      {% assign total_pages = total_products | times: 1.0 | divided_by: products_per_page | ceil %}
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="{{ routes.root_url }}">Home</a>
         <span>/</span>
@@ -115,21 +120,31 @@
 
         <div class="collection-products">
           <div class="collection-products__meta">
-            <span>{{ paginate.items }} products shown</span>
+            <span>{{ total_products }} products shown</span>
             <span>Free delivery included on every order</span>
           </div>
           <div class="product-grid product-grid--listing">
             {% assign rendered_product = false %}
+            {% assign ordered_index = 0 %}
+            {% assign shown_in_page = 0 %}
             {% for product in collection.products %}
               {% if product.available %}
-                {% render 'product-card', product: product %}
-                {% assign rendered_product = true %}
+                {% if ordered_index >= page_offset and shown_in_page < products_per_page %}
+                  {% render 'product-card', product: product %}
+                  {% assign rendered_product = true %}
+                  {% assign shown_in_page = shown_in_page | plus: 1 %}
+                {% endif %}
+                {% assign ordered_index = ordered_index | plus: 1 %}
               {% endif %}
             {% endfor %}
             {% for product in collection.products %}
               {% unless product.available %}
-                {% render 'product-card', product: product %}
-                {% assign rendered_product = true %}
+                {% if ordered_index >= page_offset and shown_in_page < products_per_page %}
+                  {% render 'product-card', product: product %}
+                  {% assign rendered_product = true %}
+                  {% assign shown_in_page = shown_in_page | plus: 1 %}
+                {% endif %}
+                {% assign ordered_index = ordered_index | plus: 1 %}
               {% endunless %}
             {% endfor %}
             {% unless rendered_product %}
@@ -139,14 +154,25 @@
         </div>
       </div>
 
-      {% if paginate.pages > 1 %}
-        <nav class="pagination" aria-label="Pagination">
-          {% if paginate.previous %}
-            <a href="{{ paginate.previous.url }}">Previous</a>
+      {% capture pagination_query %}
+        {% if sort_by != blank and sort_by != collection.default_sort_by %}sort_by={{ sort_by | url_encode }}&{% endif %}
+        {% for filter in collection.filters %}
+          {% for active_value in filter.active_values %}{{ active_value.param_name | url_encode }}={{ active_value.value | url_encode }}&{% endfor %}
+          {% if filter.type == 'price_range' %}
+            {% if filter.min_value.value != nil %}{{ filter.min_value.param_name | url_encode }}={{ filter.min_value.value | money_without_currency | replace: ',', '' | url_encode }}&{% endif %}
+            {% if filter.max_value.value != nil %}{{ filter.max_value.param_name | url_encode }}={{ filter.max_value.value | money_without_currency | replace: ',', '' | url_encode }}&{% endif %}
           {% endif %}
-          <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
-          {% if paginate.next %}
-            <a href="{{ paginate.next.url }}">Next</a>
+        {% endfor %}
+      {% endcapture %}
+      {% assign pagination_query = pagination_query | strip | strip_newlines %}
+      {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="Pagination">
+          {% if current_page_number > 1 %}
+            <a href="{{ collection.url }}?page={{ current_page_number | minus: 1 }}{% if pagination_query != blank %}&{{ pagination_query }}{% endif %}">Previous</a>
+          {% endif %}
+          <span>Page {{ current_page_number }} of {{ total_pages }}</span>
+          {% if current_page_number < total_pages %}
+            <a href="{{ collection.url }}?page={{ current_page_number | plus: 1 }}{% if pagination_query != blank %}&{{ pagination_query }}{% endif %}">Next</a>
           {% endif %}
         </nav>
       {% endif %}

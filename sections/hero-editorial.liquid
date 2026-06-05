@@ -13,14 +13,37 @@
       <div class="retail-billboard__products" aria-label="Featured offer products">
         {% assign offer_collection = section.settings.offer_collection | default: collections.all %}
         {% if offer_collection != blank and offer_collection.products.size > 0 %}
-          {% for product in offer_collection.products limit: 3 %}
-            <a class="billboard-product" href="{{ product.url }}">
-              {% if product.featured_media %}
-                {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
+          {% assign billboard_products_shown = 0 %}
+          {% for product in offer_collection.products %}
+            {% if product.available %}
+              <a class="billboard-product" href="{{ product.url }}">
+                {% if product.featured_media %}
+                  {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
+                {% endif %}
+                <span>{{ product.price | money }}</span>
+              </a>
+              {% assign billboard_products_shown = billboard_products_shown | plus: 1 %}
+              {% if billboard_products_shown >= 3 %}
+                {% break %}
               {% endif %}
-              <span>{{ product.price | money }}</span>
-            </a>
+            {% endif %}
           {% endfor %}
+          {% if billboard_products_shown < 3 %}
+            {% for product in offer_collection.products %}
+              {% unless product.available %}
+                <a class="billboard-product" href="{{ product.url }}">
+                  {% if product.featured_media %}
+                    {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
+                  {% endif %}
+                  <span>{{ product.price | money }}</span>
+                </a>
+                {% assign billboard_products_shown = billboard_products_shown | plus: 1 %}
+                {% if billboard_products_shown >= 3 %}
+                  {% break %}
+                {% endif %}
+              {% endunless %}
+            {% endfor %}
+          {% endif %}
         {% elsif section.settings.image != blank %}
           <div class="billboard-product billboard-product--wide">
             {{ section.settings.image | image_url: width: 1200 | image_tag: loading: 'eager' }}
