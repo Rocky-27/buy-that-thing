@@ -9,7 +9,9 @@
 
     <div class="collection-grid">
       {% for collection in collections %}
-        {% render 'collection-card', collection: collection %}
+        {% if collection.products_count > 0 %}
+          {% render 'collection-card', collection: collection %}
+        {% endif %}
       {% endfor %}
     </div>
   </div>
