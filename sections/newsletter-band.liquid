@@ -1,0 +1,45 @@
+<section class="newsletter-band">
+  <div class="page-width newsletter-band__inner">
+    <div>
+      <p class="section-eyebrow">{{ section.settings.eyebrow }}</p>
+      <h2>{{ section.settings.heading }}</h2>
+      <p>{{ section.settings.text }}</p>
+    </div>
+    {% form 'customer', class: 'newsletter-form' %}
+      <input type="hidden" name="contact[tags]" value="newsletter">
+      <input type="email" name="contact[email]" placeholder="Enter your email address" required>
+      <button type="submit" class="button button--primary">Join</button>
+    {% endform %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter band",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Retention layer"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Capture interest before shoppers drift."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Text",
+      "default": "Collect emails for offers, restocks, and curated product drops."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Newsletter band"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,24 @@
+<article class="product-card">
+  <a class="product-card__image-link" href="{{ product.url }}">
+    {% if product.featured_media %}
+      {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}
+    {% else %}
+      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg product-card__image' }}
+    {% endif %}
+    {% if product.compare_at_price_max > product.price %}
+      <span class="product-badge">Save</span>
+    {% endif %}
+  </a>
+
+  <div class="product-card__content">
+    <div class="product-card__header">
+      {% if product.vendor != blank %}
+        <p class="product-card__vendor">{{ product.vendor }}</p>
+      {% endif %}
+      <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
+    </div>
+    <div class="product-card__price">
+      {% render 'price', product: product %}
+    </div>
+  </div>
+</article>

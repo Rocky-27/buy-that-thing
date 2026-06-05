@@ -1,0 +1,34 @@
+{% assign collection_url = routes.all_products_collection_url %}
+{% assign collection_count = 0 %}
+{% assign card_title = custom_title %}
+{% assign card_text = custom_text %}
+{% if collection != blank %}
+  {% assign collection_url = collection.url %}
+  {% assign collection_count = collection.products_count %}
+  {% if card_title == blank %}
+    {% assign card_title = collection.title %}
+  {% endif %}
+  {% if card_text == blank %}
+    {% assign card_text = collection.description | strip_html | truncatewords: 16 %}
+  {% endif %}
+{% endif %}
+<article class="collection-card">
+  <a class="collection-card__link" href="{{ collection_url }}">
+    <div class="collection-card__media">
+      {% if collection != blank and collection.featured_image %}
+        {{ collection.featured_image | image_url: width: 1200 | image_tag: class: 'collection-card__image', loading: 'lazy' }}
+      {% elsif collection != blank and collection.products.first.featured_media %}
+        {{ collection.products.first.featured_media | image_url: width: 1200 | image_tag: class: 'collection-card__image', loading: 'lazy' }}
+      {% else %}
+        {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg collection-card__image' }}
+      {% endif %}
+    </div>
+    <div class="collection-card__content">
+      <p class="section-eyebrow">{{ collection_count }} products</p>
+      <h3>{{ card_title | default: 'Featured collection' }}</h3>
+      {% if card_text != blank %}
+        <p>{{ card_text }}</p>
+      {% endif %}
+    </div>
+  </a>
+</article>

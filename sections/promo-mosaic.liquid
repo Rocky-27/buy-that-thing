@@ -1,0 +1,78 @@
+<section class="promo-mosaic">
+  <div class="page-width promo-mosaic__grid">
+    {% for block in section.blocks %}
+      <article class="promo-tile promo-tile--{{ forloop.index }}" {{ block.shopify_attributes }}>
+        <div class="promo-tile__content">
+          <p class="section-eyebrow">{{ block.settings.eyebrow }}</p>
+          <h3>{{ block.settings.heading }}</h3>
+          <p>{{ block.settings.text }}</p>
+          {% if block.settings.link_label != blank and block.settings.link != blank %}
+            <a class="button button--dark" href="{{ block.settings.link }}">{{ block.settings.link_label }}</a>
+          {% endif %}
+        </div>
+        {% if block.settings.image != blank %}
+          {{ block.settings.image | image_url: width: 1200 | image_tag: class: 'promo-tile__image', loading: 'lazy' }}
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Promo mosaic",
+  "max_blocks": 3,
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Tile",
+      "settings": [
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "Limited-time offer"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Run sharp promotional moments without losing polish."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Use this space for flash deals, bundles, supplier closeouts, or seasonal launches."
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label",
+          "default": "Shop offer"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo mosaic",
+      "blocks": [
+        { "type": "tile" },
+        { "type": "tile", "settings": { "eyebrow": "High-margin bundle", "heading": "Package products to increase AOV.", "text": "Pair accessories and impulse items into stronger offer stacks.", "link_label": "Build the bundle" } },
+        { "type": "tile", "settings": { "eyebrow": "Category spotlight", "heading": "Feature a collection like a campaign.", "text": "Give each top category enough editorial treatment to feel premium.", "link_label": "Explore category" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

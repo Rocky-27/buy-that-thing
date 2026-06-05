@@ -1,0 +1,70 @@
+{% paginate collection.products by section.settings.products_per_page %}
+  <section class="collection-template">
+    <div class="page-width">
+      <div class="collection-hero">
+        <div>
+          <p class="section-eyebrow">{{ collection.all_products_count }} products</p>
+          <h1>{{ collection.title }}</h1>
+          {% if collection.description != blank %}
+            <div class="rte collection-hero__description">{{ collection.description }}</div>
+          {% endif %}
+        </div>
+        <div class="collection-hero__meta">
+          <p>Built for broad catalogs with clean sorting, visual consistency, and strong product discovery.</p>
+        </div>
+      </div>
+
+      <div class="collection-toolbar">
+        <div class="collection-toolbar__count">{{ paginate.items }} items</div>
+        <form class="collection-toolbar__sort" method="get">
+          <label for="SortBy">Sort by</label>
+          <select name="sort_by" id="SortBy" onchange="this.form.submit()">
+            {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
+            {% for option in collection.sort_options %}
+              <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                {{ option.name }}
+              </option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+
+      <div class="product-grid">
+        {% for product in collection.products %}
+          {% render 'product-card', product: product %}
+        {% else %}
+          <p>No products found in this collection.</p>
+        {% endfor %}
+      </div>
+
+      {% if paginate.pages > 1 %}
+        <nav class="pagination" aria-label="Pagination">
+          {% if paginate.previous %}
+            <a href="{{ paginate.previous.url }}">Previous</a>
+          {% endif %}
+          <span>Page {{ paginate.current_page }} of {{ paginate.pages }}</span>
+          {% if paginate.next %}
+            <a href="{{ paginate.next.url }}">Next</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </div>
+  </section>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Main collection",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 12,
+      "max": 36,
+      "step": 4,
+      "label": "Products per page",
+      "default": 16
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,45 @@
+<footer class="site-footer">
+  <div class="page-width site-footer__grid">
+    <div>
+      <p class="footer-kicker">Buy That Thing</p>
+      <h2>Fast-moving products, premium storefront presentation.</h2>
+      <p class="footer-copy">Built to support broad product catalogs, daily promos, and conversion-focused merchandising.</p>
+    </div>
+
+    <div>
+      <p class="footer-heading">Shop</p>
+      <ul class="footer-links">
+        {% for link in section.settings.menu.links %}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div>
+      <p class="footer-heading">Support</p>
+      <ul class="footer-links">
+        <li><a href="{{ routes.search_url }}">Search</a></li>
+        <li><a href="{{ routes.account_url }}">Account</a></li>
+        <li><a href="{{ routes.cart_url }}">Cart</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="page-width site-footer__meta">
+    <p>&copy; {{ 'now' | date: '%Y' }} {{ shop.name }}</p>
+    <p>Secure checkout. Professional fulfilment. UK-ready catalog presentation.</p>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Footer menu"
+    }
+  ]
+}
+{% endschema %}

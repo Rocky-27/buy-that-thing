@@ -1,0 +1,22 @@
+<section class="list-collections-template">
+  <div class="page-width">
+    <div class="section-heading">
+      <div>
+        <p class="section-eyebrow">All collections</p>
+        <h1>Browse the catalog by category.</h1>
+      </div>
+    </div>
+
+    <div class="collection-grid">
+      {% for collection in collections %}
+        {% render 'collection-card', collection: collection %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main list collections"
+}
+{% endschema %}

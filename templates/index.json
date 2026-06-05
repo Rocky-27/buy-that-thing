@@ -1,0 +1,107 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-editorial",
+      "blocks": {
+        "stat_1": {
+          "type": "stat",
+          "settings": {
+            "value": "1,000+",
+            "label": "Products ready to merchandise"
+          }
+        },
+        "stat_2": {
+          "type": "stat",
+          "settings": {
+            "value": "24/7",
+            "label": "Always-on offer presentation"
+          }
+        },
+        "stat_3": {
+          "type": "stat",
+          "settings": {
+            "value": "Premium",
+            "label": "Visual language across every page"
+          }
+        }
+      },
+      "block_order": ["stat_1", "stat_2", "stat_3"],
+      "settings": {}
+    },
+    "value_props": {
+      "type": "value-props",
+      "blocks": {
+        "value_1": {
+          "type": "item",
+          "settings": {
+            "eyebrow": "Pro storefront",
+            "heading": "Designed to make a broad catalog look intentional.",
+            "text": "Large product counts are easier to trust when the UI feels editorial and controlled."
+          }
+        },
+        "value_2": {
+          "type": "item",
+          "settings": {
+            "eyebrow": "Supplier flexibility",
+            "heading": "Works for trending gadgets, home products, and seasonal offers.",
+            "text": "The layout supports mixed categories without feeling like a random import dump."
+          }
+        },
+        "value_3": {
+          "type": "item",
+          "settings": {
+            "eyebrow": "Offer-ready",
+            "heading": "Promotional blocks are built into the homepage structure.",
+            "text": "Use homepage real estate for flash discounts, bundles, and category spotlights."
+          }
+        }
+      },
+      "block_order": ["value_1", "value_2", "value_3"],
+      "settings": {}
+    },
+    "collections": {
+      "type": "featured-collections",
+      "settings": {}
+    },
+    "products": {
+      "type": "featured-products",
+      "settings": {}
+    },
+    "promo": {
+      "type": "promo-mosaic",
+      "blocks": {
+        "promo_1": {
+          "type": "tile",
+          "settings": {
+            "eyebrow": "Category campaign",
+            "heading": "Give hero treatment to the collections that are converting.",
+            "text": "Use large-format imagery and tight copy to turn generic imported products into a coherent campaign."
+          }
+        },
+        "promo_2": {
+          "type": "tile",
+          "settings": {
+            "eyebrow": "Flash deals",
+            "heading": "Push urgency without damaging brand perception.",
+            "text": "Premium layout, controlled typography, and clean spacing keep offers credible."
+          }
+        },
+        "promo_3": {
+          "type": "tile",
+          "settings": {
+            "eyebrow": "Bundles and accessories",
+            "heading": "Increase basket size with sharper supporting offers.",
+            "text": "Cross-sell product families in a way that feels curated rather than aggressive."
+          }
+        }
+      },
+      "block_order": ["promo_1", "promo_2", "promo_3"],
+      "settings": {}
+    },
+    "newsletter": {
+      "type": "newsletter-band",
+      "settings": {}
+    }
+  },
+  "order": ["hero", "value_props", "collections", "products", "promo", "newsletter"]
+}

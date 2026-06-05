@@ -1,0 +1,54 @@
+<section class="value-props">
+  <div class="page-width value-props__grid">
+    {% for block in section.blocks %}
+      <article class="value-prop-card" {{ block.shopify_attributes }}>
+        <p class="value-prop-card__eyebrow">{{ block.settings.eyebrow }}</p>
+        <h3>{{ block.settings.heading }}</h3>
+        <p>{{ block.settings.text }}</p>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Value props",
+  "max_blocks": 4,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Value prop",
+      "settings": [
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "Fast shipping"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Conversion-first trust layer"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Reassure customers with delivery, returns, and support messaging directly in the shopping flow."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Value props",
+      "blocks": [
+        { "type": "item" },
+        { "type": "item", "settings": { "eyebrow": "Broad catalog", "heading": "Built for many categories", "text": "Keep browsing intuitive even with a large imported assortment from multiple suppliers." } },
+        { "type": "item", "settings": { "eyebrow": "Offers", "heading": "Promo space that feels premium", "text": "Run bundle pushes and urgency promos without making the storefront look cheap." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,112 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+<section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
+  <div class="page-width">
+    <div class="product-template__grid">
+      <div class="product-gallery">
+        <div class="product-gallery__main">
+          {% if current_variant.featured_media %}
+            <img
+              class="product-gallery__image"
+              src="{{ current_variant.featured_media.preview_image | image_url: width: 1400 }}"
+              alt="{{ current_variant.featured_media.alt | escape }}"
+              loading="eager"
+              data-product-image
+            >
+          {% elsif product.featured_media %}
+            <img
+              class="product-gallery__image"
+              src="{{ product.featured_media.preview_image | image_url: width: 1400 }}"
+              alt="{{ product.featured_media.alt | escape }}"
+              loading="eager"
+              data-product-image
+            >
+          {% endif %}
+        </div>
+
+        {% if product.media.size > 1 %}
+          <div class="product-gallery__thumbs">
+            {% for media in product.media %}
+              <button class="product-thumb{% if forloop.first %} is-active{% endif %}" type="button" data-product-thumb data-image="{{ media.preview_image | image_url: width: 1400 }}">
+                {{ media.preview_image | image_url: width: 320 | image_tag: loading: 'lazy' }}
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="product-summary">
+        {% if product.vendor != blank %}
+          <p class="section-eyebrow">{{ product.vendor }}</p>
+        {% endif %}
+        <h1>{{ product.title }}</h1>
+        <div class="product-summary__price" data-product-price>
+          {% render 'price', product: product, use_variant: true %}
+        </div>
+        {% if product.description != blank %}
+          <div class="rte product-summary__description">{{ product.description }}</div>
+        {% endif %}
+
+        {% form 'product', product, class: 'product-form' %}
+          <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id>
+
+          {% unless product.has_only_default_variant %}
+            {% for option in product.options_with_values %}
+              <fieldset class="product-option">
+                <legend>{{ option.name }}</legend>
+                <div class="product-option__values">
+                  {% for value in option.values %}
+                    <label>
+                      <input
+                        type="radio"
+                        name="options[{{ option.name | escape }}]"
+                        value="{{ value | escape }}"
+                        {% if option.selected_value == value %}checked{% endif %}
+                        data-option-input
+                      >
+                      <span>{{ value }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+              </fieldset>
+            {% endfor %}
+          {% endunless %}
+
+          <div class="product-form__row">
+            <label class="quantity-field" for="Quantity-{{ section.id }}">
+              <span>Qty</span>
+              <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1">
+            </label>
+            <button class="button button--primary button--block" type="submit" {% unless current_variant.available %}disabled{% endunless %} data-add-to-cart>
+              {% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}
+            </button>
+          </div>
+        {% endform %}
+
+        <div class="product-trust">
+          <div>
+            <strong>Dispatch updates</strong>
+            <span>Clear order communication and tracking reassurance.</span>
+          </div>
+          <div>
+            <strong>Returns positioning</strong>
+            <span>Prominent support language for higher-conviction purchases.</span>
+          </div>
+          <div>
+            <strong>Broad catalog fit</strong>
+            <span>Works cleanly whether the product is branded, generic, or seasonal.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" data-product-json>
+    {{ product.variants | json }}
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "Main product"
+}
+{% endschema %}
