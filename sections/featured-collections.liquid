@@ -10,7 +10,7 @@
       {% endif %}
     </div>
 
-    <div class="collection-grid">
+    <div class="department-grid">
       {% for block in section.blocks %}
         {% assign collection = block.settings.collection %}
         {% render 'collection-card', collection: collection, custom_title: block.settings.title, custom_text: block.settings.text %}
@@ -28,13 +28,13 @@
       "type": "text",
       "id": "eyebrow",
       "label": "Eyebrow",
-      "default": "Shop by demand pattern"
+      "default": "Shop by department"
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Collections that keep a large catalog easy to shop."
+      "default": "Departments built for broad range browsing."
     },
     {
       "type": "text",

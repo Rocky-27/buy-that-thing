@@ -6,27 +6,32 @@
         "stat_1": {
           "type": "stat",
           "settings": {
-            "value": "1,000+",
-            "label": "Products ready to merchandise"
+            "value": "Furniture offers",
+            "label": "Sofas, storage and living room picks"
           }
         },
         "stat_2": {
           "type": "stat",
           "settings": {
-            "value": "24/7",
-            "label": "Always-on offer presentation"
+            "value": "Garden deals",
+            "label": "Outdoor furniture, BBQs and patio buys"
           }
         },
         "stat_3": {
           "type": "stat",
           "settings": {
-            "value": "Premium",
-            "label": "Visual language across every page"
+            "value": "Fast dispatch",
+            "label": "Selected products ready to move"
           }
         }
       },
       "block_order": ["stat_1", "stat_2", "stat_3"],
-      "settings": {}
+      "settings": {
+        "eyebrow": "Join to save | New offers daily",
+        "heading": "Big deals across home, garden and everyday essentials",
+        "text": "A direct, retail-first storefront for a large dropship catalog: searchable, offer-led and built around comparison shopping.",
+        "primary_label": "Shop deals"
+      }
     },
     "value_props": {
       "type": "value-props",
@@ -34,25 +39,28 @@
         "value_1": {
           "type": "item",
           "settings": {
-            "eyebrow": "Pro storefront",
-            "heading": "Designed to make a broad catalog look intentional.",
-            "text": "Large product counts are easier to trust when the UI feels editorial and controlled."
+            "icon": "✓",
+            "eyebrow": "Fast delivery",
+            "heading": "Delivery cues near every buy decision.",
+            "text": "Use clear labels to make shipping expectations visible before checkout."
           }
         },
         "value_2": {
           "type": "item",
           "settings": {
-            "eyebrow": "Supplier flexibility",
-            "heading": "Works for trending gadgets, home products, and seasonal offers.",
-            "text": "The layout supports mixed categories without feeling like a random import dump."
+            "icon": "£",
+            "eyebrow": "Offer-led",
+            "heading": "Promos feel like retail campaigns.",
+            "text": "Hero banners, quick links and product grids are tuned for frequent deal changes."
           }
         },
         "value_3": {
           "type": "item",
           "settings": {
-            "eyebrow": "Offer-ready",
-            "heading": "Promotional blocks are built into the homepage structure.",
-            "text": "Use homepage real estate for flash discounts, bundles, and category spotlights."
+            "icon": "↺",
+            "eyebrow": "Comparison shopping",
+            "heading": "Dense cards for big catalogs.",
+            "text": "Ratings, swatches, delivery badges and pricing help customers scan quickly."
           }
         }
       },

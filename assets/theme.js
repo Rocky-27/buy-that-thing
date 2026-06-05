@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.querySelector('[data-menu-toggle]');
   const mobileMenu = document.querySelector('[data-mobile-menu]');
+  const filterToggle = document.querySelector('[data-filter-toggle]');
+  const filterClose = document.querySelector('[data-filter-close]');
+  const filterSidebar = document.querySelector('[data-filter-sidebar]');
 
   if (menuToggle && mobileMenu) {
     menuToggle.addEventListener('click', () => {
@@ -8,6 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
       menuToggle.setAttribute('aria-expanded', String(!expanded));
       mobileMenu.hidden = expanded;
     });
+  }
+
+  if (filterToggle && filterSidebar) {
+    filterToggle.addEventListener('click', () => filterSidebar.classList.add('is-open'));
+  }
+
+  if (filterClose && filterSidebar) {
+    filterClose.addEventListener('click', () => filterSidebar.classList.remove('is-open'));
   }
 
   const productRoot = document.querySelector('[data-product-root]');
@@ -60,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (addToCart) {
       addToCart.disabled = !variant.available;
-      addToCart.textContent = variant.available ? 'Add to cart' : 'Sold out';
+      addToCart.textContent = variant.available ? 'Add to Basket' : 'Sold out';
     }
   };
 

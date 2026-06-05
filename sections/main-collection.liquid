@@ -1,23 +1,51 @@
 {% paginate collection.products by section.settings.products_per_page %}
   <section class="collection-template">
     <div class="page-width">
-      <div class="collection-hero">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ routes.root_url }}">Home</a>
+        <span>/</span>
+        <span>{{ collection.title }}</span>
+      </nav>
+
+      <div class="collection-title-row">
         <div>
-          <p class="section-eyebrow">{{ collection.all_products_count }} products</p>
           <h1>{{ collection.title }}</h1>
-          {% if collection.description != blank %}
-            <div class="rte collection-hero__description">{{ collection.description }}</div>
-          {% endif %}
+          <span>{{ collection.all_products_count }} items</span>
         </div>
-        <div class="collection-hero__meta">
-          <p>Built for broad catalogs with clean sorting, visual consistency, and strong product discovery.</p>
-        </div>
+        {% if collection.description != blank %}
+          <div class="rte collection-title-row__description">{{ collection.description }}</div>
+        {% endif %}
       </div>
 
       <div class="collection-toolbar">
-        <div class="collection-toolbar__count">{{ paginate.items }} items</div>
-        <form class="collection-toolbar__sort" method="get">
+        <button type="button" class="filter-drawer-toggle" data-filter-toggle>Filter</button>
+        <div class="active-filter-chips">
+          {% for filter in collection.filters %}
+            {% for active_value in filter.active_values %}
+              <a href="{{ active_value.url_to_remove }}">{{ active_value.label }} ×</a>
+            {% endfor %}
+            {% if filter.type == 'price_range' %}
+              {% if filter.min_value.value != nil or filter.max_value.value != nil %}
+                <a href="{{ filter.url_to_remove }}">Price filter ×</a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+        <form class="collection-toolbar__sort" method="get" data-sort-form>
           <label for="SortBy">Sort by</label>
+          {% for filter in collection.filters %}
+            {% for active_value in filter.active_values %}
+              <input type="hidden" name="{{ active_value.param_name }}" value="{{ active_value.value }}">
+            {% endfor %}
+            {% if filter.type == 'price_range' %}
+              {% if filter.min_value.value != nil %}
+                <input type="hidden" name="{{ filter.min_value.param_name }}" value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}">
+              {% endif %}
+              {% if filter.max_value.value != nil %}
+                <input type="hidden" name="{{ filter.max_value.param_name }}" value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}">
+              {% endif %}
+            {% endif %}
+          {% endfor %}
           <select name="sort_by" id="SortBy" onchange="this.form.submit()">
             {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
             {% for option in collection.sort_options %}
@@ -29,12 +57,75 @@
         </form>
       </div>
 
-      <div class="product-grid">
-        {% for product in collection.products %}
-          {% render 'product-card', product: product %}
-        {% else %}
-          <p>No products found in this collection.</p>
-        {% endfor %}
+      <div class="collection-layout">
+        <aside class="collection-filters" data-filter-sidebar>
+          <div class="collection-filters__header">
+            <strong>Category</strong>
+            <button type="button" data-filter-close>Close</button>
+          </div>
+
+          {% if collection.all_products_count > 0 %}
+            <a class="filter-category-link" href="{{ collection.url }}">{{ collection.title }}</a>
+          {% endif %}
+
+          {% for filter in collection.filters %}
+            <details class="filter-group" open>
+              <summary>{{ filter.label }}</summary>
+              <div class="filter-group__body">
+                {% case filter.type %}
+                  {% when 'boolean', 'list' %}
+                    {% for value in filter.values limit: 12 %}
+                      <label class="filter-checkbox{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                        <input
+                          type="checkbox"
+                          name="{{ value.param_name }}"
+                          value="{{ value.value }}"
+                          {% if value.active %}checked{% endif %}
+                          {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                          form="CollectionFilters"
+                        >
+                        <span>{{ value.label }}</span>
+                        <em>{{ value.count }}</em>
+                      </label>
+                    {% endfor %}
+                  {% when 'price_range' %}
+                    <div class="price-filter">
+                      <label>
+                        Min
+                        <input form="CollectionFilters" name="{{ filter.min_value.param_name }}" type="number" min="0" placeholder="0">
+                      </label>
+                      <label>
+                        Max
+                        <input form="CollectionFilters" name="{{ filter.max_value.param_name }}" type="number" min="0" placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}">
+                      </label>
+                    </div>
+                {% endcase %}
+              </div>
+            </details>
+          {% endfor %}
+
+          <form id="CollectionFilters" class="filter-actions" method="get">
+            {% if sort_by != blank %}
+              <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            {% endif %}
+            <button class="button button--primary" type="submit">Apply filters</button>
+            <a href="{{ collection.url }}">Clear all</a>
+          </form>
+        </aside>
+
+        <div class="collection-products">
+          <div class="collection-products__meta">
+            <span>{{ paginate.items }} products</span>
+            <span>Delivery and offer labels shown on selected products</span>
+          </div>
+          <div class="product-grid product-grid--listing">
+            {% for product in collection.products %}
+              {% render 'product-card', product: product %}
+            {% else %}
+              <p>No products found in this collection.</p>
+            {% endfor %}
+          </div>
+        </div>
       </div>
 
       {% if paginate.pages > 1 %}
@@ -63,7 +154,7 @@
       "max": 36,
       "step": 4,
       "label": "Products per page",
-      "default": 16
+      "default": 24
     }
   ]
 }

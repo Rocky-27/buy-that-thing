@@ -1,37 +1,65 @@
 <header class="site-header" data-header>
-  <div class="page-width site-header__inner">
-    <a class="brand-mark" href="{{ routes.root_url }}">
-      <span class="brand-mark__badge">BTT</span>
-      <span class="brand-mark__text">{{ shop.name }}</span>
+  <div class="page-width header-main">
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+      <span></span>
+      <span></span>
+      <span></span>
+      Menu
+    </button>
+
+    <a class="brand-mark" href="{{ routes.root_url }}" aria-label="{{ shop.name }}">
+      <span class="brand-mark__badge">B</span>
+      <span class="brand-mark__text">buy that thing</span>
     </a>
 
-    <nav class="site-nav" aria-label="Primary">
+    <form class="site-search" action="{{ routes.search_url }}" method="get" role="search">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}">
+      <button type="submit" aria-label="Search">Search</button>
+    </form>
+
+    <div class="site-header__actions">
+      <a href="{{ routes.account_url }}" aria-label="Account">
+        <span class="header-action__icon">◎</span>
+        <span>Sign in</span>
+      </a>
+      <a class="cart-pill" href="{{ routes.cart_url }}" aria-label="Basket">
+        <span class="header-action__icon">▱</span>
+        <span>Basket</span>
+        <strong>{{ cart.item_count }}</strong>
+      </a>
+    </div>
+  </div>
+
+  <div class="header-services">
+    <div class="page-width header-services__inner">
+      <span>Free delivery over £59*</span>
+      <span>Fast dispatch on selected items</span>
+      <span>Simple returns</span>
+      <span>Secure checkout</span>
+    </div>
+  </div>
+
+  <div class="header-nav-wrap">
+    <nav class="page-width site-nav" aria-label="Primary">
+      <a class="site-nav__all" href="{{ routes.all_products_collection_url }}">Shop by category</a>
       {% for link in section.settings.menu.links %}
         <a href="{{ link.url }}">{{ link.title }}</a>
       {% endfor %}
+      <a class="site-nav__sale" href="{{ routes.all_products_collection_url }}">Sale</a>
     </nav>
-
-    <div class="site-header__actions">
-      <a href="{{ routes.search_url }}" aria-label="Search">Search</a>
-      <a href="{{ routes.account_url }}" aria-label="Account">Account</a>
-      <a class="cart-pill" href="{{ routes.cart_url }}" aria-label="Cart">
-        Cart
-        <span>{{ cart.item_count }}</span>
-      </a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
-        Menu
-      </button>
-    </div>
   </div>
 
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
     <div class="page-width mobile-menu__inner">
+      <form class="site-search site-search--mobile" action="{{ routes.search_url }}" method="get" role="search">
+        <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}">
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
       {% for link in section.settings.menu.links %}
         <a href="{{ link.url }}">{{ link.title }}</a>
       {% endfor %}
-      <a href="{{ routes.search_url }}">Search</a>
       <a href="{{ routes.account_url }}">Account</a>
-      <a href="{{ routes.cart_url }}">Cart ({{ cart.item_count }})</a>
+      <a href="{{ routes.cart_url }}">Basket ({{ cart.item_count }})</a>
     </div>
   </div>
 </header>
@@ -44,6 +72,12 @@
       "type": "link_list",
       "id": "menu",
       "label": "Menu"
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Search placeholder",
+      "default": "Find anything for home, garden, gadgets..."
     }
   ]
 }

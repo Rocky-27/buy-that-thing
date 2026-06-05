@@ -1,6 +1,16 @@
 {% assign current_variant = product.selected_or_first_available_variant %}
 <section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
   <div class="page-width">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span>/</span>
+      {% if product.collections.first %}
+        <a href="{{ product.collections.first.url }}">{{ product.collections.first.title }}</a>
+        <span>/</span>
+      {% endif %}
+      <span>{{ product.title }}</span>
+    </nav>
+
     <div class="product-template__grid">
       <div class="product-gallery">
         <div class="product-gallery__main">
@@ -39,11 +49,16 @@
           <p class="section-eyebrow">{{ product.vendor }}</p>
         {% endif %}
         <h1>{{ product.title }}</h1>
+        <div class="product-rating-row">
+          <span class="rating-stars">★★★★☆</span>
+          <a href="#reviews">Customer reviews</a>
+          <span class="verified-pill">Verified supplier</span>
+        </div>
         <div class="product-summary__price" data-product-price>
           {% render 'price', product: product, use_variant: true %}
         </div>
         {% if product.description != blank %}
-          <div class="rte product-summary__description">{{ product.description }}</div>
+          <div class="rte product-summary__description">{{ product.description | strip_html | truncatewords: 42 }}</div>
         {% endif %}
 
         {% form 'product', product, class: 'product-form' %}
@@ -77,10 +92,22 @@
               <input id="Quantity-{{ section.id }}" type="number" name="quantity" value="1" min="1">
             </label>
             <button class="button button--primary button--block" type="submit" {% unless current_variant.available %}disabled{% endunless %} data-add-to-cart>
-              {% if current_variant.available %}Add to cart{% else %}Sold out{% endif %}
+              {% if current_variant.available %}Add to Basket{% else %}Sold out{% endif %}
             </button>
           </div>
         {% endform %}
+
+        <div class="delivery-panel">
+          <strong>Delivery options</strong>
+          <div>
+            <span class="delivery-badge">Fast Delivery</span>
+            <span>Estimated dispatch shown at checkout</span>
+          </div>
+          <div>
+            <span class="delivery-badge delivery-badge--soft">Secure payment</span>
+            <span>Card, accelerated checkout and Shopify payments</span>
+          </div>
+        </div>
 
         <div class="product-trust">
           <div>
@@ -91,12 +118,19 @@
             <strong>Returns positioning</strong>
             <span>Prominent support language for higher-conviction purchases.</span>
           </div>
-          <div>
-            <strong>Broad catalog fit</strong>
-            <span>Works cleanly whether the product is branded, generic, or seasonal.</span>
-          </div>
         </div>
       </div>
+    </div>
+
+    <div class="product-detail-tabs" id="reviews">
+      <details open>
+        <summary>Product details</summary>
+        <div class="rte">{{ product.description }}</div>
+      </details>
+      <details>
+        <summary>Delivery and returns</summary>
+        <p>Delivery and return timings can vary by supplier and are confirmed during checkout.</p>
+      </details>
     </div>
   </div>
 

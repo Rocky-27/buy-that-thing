@@ -9,16 +9,32 @@
       <span class="product-badge">Save</span>
     {% endif %}
   </a>
+  <button class="wishlist-button" type="button" aria-label="Add {{ product.title | escape }} to wishlist">♡</button>
 
   <div class="product-card__content">
+    <div class="swatch-row" aria-hidden="true">
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
     <div class="product-card__header">
       {% if product.vendor != blank %}
         <p class="product-card__vendor">{{ product.vendor }}</p>
       {% endif %}
       <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
     </div>
+    <div class="product-card__rating">
+      <span>★★★★☆</span>
+      <small>({{ product.id | modulo: 900 | plus: 34 }})</small>
+    </div>
     <div class="product-card__price">
       {% render 'price', product: product %}
     </div>
+    <div class="delivery-lines">
+      <span>Fast Delivery</span>
+      <strong>Get it soon</strong>
+    </div>
+    <a class="product-card__basket" href="{{ product.url }}">Add to Basket</a>
   </div>
 </article>

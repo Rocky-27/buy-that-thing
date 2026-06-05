@@ -1,75 +1,80 @@
 <section class="hero-editorial">
   <div class="page-width">
-    <div class="hero-editorial__panel">
-      <div class="hero-editorial__copy">
-        {% if section.settings.eyebrow != blank %}
-          <p class="section-eyebrow">{{ section.settings.eyebrow }}</p>
-        {% endif %}
+    <div class="retail-billboard">
+      <div class="retail-billboard__copy">
+        <p class="sale-strip">{{ section.settings.eyebrow }}</p>
         <h1>{{ section.settings.heading }}</h1>
-        <p class="hero-editorial__text">{{ section.settings.text }}</p>
-        <div class="hero-editorial__actions">
-          {% if section.settings.primary_label != blank and section.settings.primary_link != blank %}
-            <a class="button button--primary" href="{{ section.settings.primary_link }}">{{ section.settings.primary_label }}</a>
-          {% endif %}
-          {% if section.settings.secondary_label != blank and section.settings.secondary_link != blank %}
-            <a class="button button--ghost" href="{{ section.settings.secondary_link }}">{{ section.settings.secondary_label }}</a>
-          {% endif %}
-        </div>
+        <p>{{ section.settings.text }}</p>
+        {% if section.settings.primary_label != blank %}
+          <a class="button button--sale" href="{{ section.settings.primary_link | default: routes.all_products_collection_url }}">{{ section.settings.primary_label }}</a>
+        {% endif %}
+      </div>
 
-        <div class="hero-editorial__stats">
-          {% for block in section.blocks %}
-            <div class="hero-stat" {{ block.shopify_attributes }}>
-              <strong>{{ block.settings.value }}</strong>
-              <span>{{ block.settings.label }}</span>
+      <div class="retail-billboard__products" aria-label="Featured offer products">
+        {% assign offer_collection = section.settings.offer_collection %}
+        {% if offer_collection != blank and offer_collection.products.size > 0 %}
+          {% for product in offer_collection.products limit: 3 %}
+            <a class="billboard-product" href="{{ product.url }}">
+              {% if product.featured_media %}
+                {{ product.featured_media | image_url: width: 520 | image_tag: loading: 'eager' }}
+              {% endif %}
+              <span>{{ product.price | money }}</span>
+            </a>
+          {% endfor %}
+        {% elsif section.settings.image != blank %}
+          <div class="billboard-product billboard-product--wide">
+            {{ section.settings.image | image_url: width: 1200 | image_tag: loading: 'eager' }}
+          </div>
+        {% else %}
+          {% for i in (1..3) %}
+            <div class="billboard-product">
+              {{ 'product-' | append: i | placeholder_svg_tag: 'placeholder-svg' }}
+              <span>Deal price</span>
             </div>
           {% endfor %}
-        </div>
-      </div>
-
-      <div class="hero-editorial__media">
-        {% if section.settings.image != blank %}
-          {{ section.settings.image | image_url: width: 1400 | image_tag: class: 'hero-editorial__image', loading: 'eager' }}
-        {% else %}
-          {{ 'lifestyle-2' | placeholder_svg_tag: 'placeholder-svg hero-editorial__image' }}
         {% endif %}
-        <div class="hero-floating-card">
-          <p>Daily offer engine</p>
-          <strong>{{ section.settings.floating_heading }}</strong>
-          <span>{{ section.settings.floating_text }}</span>
-        </div>
       </div>
+    </div>
+
+    <div class="promo-quicklinks">
+      {% for block in section.blocks %}
+        <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" {{ block.shopify_attributes }}>
+          <strong>{{ block.settings.value }}</strong>
+          <span>{{ block.settings.label }}</span>
+        </a>
+      {% endfor %}
     </div>
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "Hero editorial",
-  "max_blocks": 3,
+  "name": "Retail billboard",
+  "max_blocks": 4,
   "settings": [
     {
       "type": "text",
       "id": "eyebrow",
-      "label": "Eyebrow",
-      "default": "A modern general store"
+      "label": "Sale strip",
+      "default": "Hundreds of new offers added"
     },
     {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "A professional storefront for high-volume winning products."
+      "default": "Home, garden, tech and everyday deals"
     },
     {
       "type": "textarea",
       "id": "text",
       "label": "Text",
-      "default": "Merchandise trending products, move fast on promotions, and keep the shopping experience polished across every category."
+      "default": "Big-category shopping with clear pricing, fast delivery messaging, and product discovery built for a large dropship catalog."
     },
     {
       "type": "text",
       "id": "primary_label",
       "label": "Primary button label",
-      "default": "Shop latest products"
+      "default": "Shop latest deals"
     },
     {
       "type": "url",
@@ -77,61 +82,49 @@
       "label": "Primary button link"
     },
     {
-      "type": "text",
-      "id": "secondary_label",
-      "label": "Secondary button label",
-      "default": "Browse collections"
-    },
-    {
-      "type": "url",
-      "id": "secondary_link",
-      "label": "Secondary button link"
+      "type": "collection",
+      "id": "offer_collection",
+      "label": "Products shown in billboard"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Hero image"
-    },
-    {
-      "type": "text",
-      "id": "floating_heading",
-      "label": "Floating card heading",
-      "default": "Fresh deals every week"
-    },
-    {
-      "type": "text",
-      "id": "floating_text",
-      "label": "Floating card text",
-      "default": "Highlight bundles, limited-time offers, and top-margin categories."
+      "label": "Fallback billboard image"
     }
   ],
   "blocks": [
     {
       "type": "stat",
-      "name": "Stat",
+      "name": "Quick offer",
       "settings": [
         {
           "type": "text",
           "id": "value",
-          "label": "Value",
-          "default": "1,000+"
+          "label": "Title",
+          "default": "Furniture offers"
         },
         {
           "type": "text",
           "id": "label",
-          "label": "Label",
-          "default": "Products ready to scale"
+          "label": "Subtitle",
+          "default": "Sofas, storage and home essentials"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Hero editorial",
+      "name": "Retail billboard",
       "blocks": [
         { "type": "stat" },
-        { "type": "stat", "settings": { "value": "48h", "label": "Merchandising refresh cadence" } },
-        { "type": "stat", "settings": { "value": "4.9/5", "label": "Customer trust presentation" } }
+        { "type": "stat", "settings": { "value": "Garden deals", "label": "Outdoor living and summer picks" } },
+        { "type": "stat", "settings": { "value": "Next-day edit", "label": "Products with faster dispatch" } },
+        { "type": "stat", "settings": { "value": "Clearance", "label": "Margin-friendly promos" } }
       ]
     }
   ]
