@@ -78,7 +78,7 @@
           <span>Free delivery included</span>
         </div>
         {% if product.description != blank %}
-          <div class="rte product-summary__description">{{ product.description | strip_html | truncatewords: 42 }}</div>
+          <div class="rte product-summary__description" data-product-description-summary>{{ product.description | strip_html | truncatewords: 42 }}</div>
         {% endif %}
 
         {% form 'product', product, class: 'product-form' %}
@@ -145,7 +145,7 @@
     <div class="product-detail-tabs" id="product-details">
       <details open>
         <summary>Product details</summary>
-        <div class="rte">{{ product.description }}</div>
+        <div class="rte product-description-richtext" data-product-description-richtext>{{ product.description }}</div>
       </details>
       <details>
         <summary>Delivery and returns</summary>

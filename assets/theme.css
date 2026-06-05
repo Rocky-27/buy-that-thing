@@ -1143,6 +1143,31 @@ textarea {
   line-height: 1.5;
 }
 
+.product-description-summary--formatted p,
+.product-description-richtext--formatted p {
+  margin: 0 0 14px;
+}
+
+.product-description-summary--formatted p:last-child,
+.product-description-richtext--formatted p:last-child {
+  margin-bottom: 0;
+}
+
+.product-description-summary--formatted strong,
+.product-description-richtext--formatted strong {
+  color: var(--ink);
+}
+
+.product-description-richtext--formatted {
+  display: grid;
+  gap: 12px;
+}
+
+.product-description-richtext--formatted p {
+  padding-left: 14px;
+  border-left: 3px solid #ece4f5;
+}
+
 .product-form {
   display: grid;
   gap: 14px;

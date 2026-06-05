@@ -1,4 +1,54 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const formatImportedDescription = (root, { summary = false } = {}) => {
+    if (!root) return;
+
+    const rawHtml = root.innerHTML.trim();
+    const rawText = root.textContent.replace(/\s+/g, ' ').trim();
+    const hasStructuredMarkup = /<(p|ul|ol|li|br|table|h[1-6]|details)\b/i.test(rawHtml);
+    const matches = rawText.match(/(?:^|[.!?]\s*)([A-Z][A-Z\s&/()'-]{2,}:)/g) || [];
+
+    if (hasStructuredMarkup || matches.length < 2) return;
+
+    const normalized = rawText
+      .replace(/\s*([A-Z][A-Z\s&/()'-]{2,}:)/g, '|||$1')
+      .replace(/^\|\|\|/, '');
+
+    const segments = normalized
+      .split('|||')
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+
+    if (segments.length < 2) return;
+
+    if (summary) {
+      const firstSegment = segments[0];
+      const colonIndex = firstSegment.indexOf(':');
+      if (colonIndex === -1) return;
+
+      const label = firstSegment.slice(0, colonIndex + 1).trim();
+      const body = firstSegment.slice(colonIndex + 1).trim();
+      root.innerHTML = `<p><strong>${label}</strong> ${body}</p>`;
+      root.classList.add('product-description-summary--formatted');
+      return;
+    }
+
+    root.innerHTML = segments
+      .map((segment) => {
+        const colonIndex = segment.indexOf(':');
+        if (colonIndex === -1) return `<p>${segment}</p>`;
+
+        const label = segment.slice(0, colonIndex + 1).trim();
+        const body = segment.slice(colonIndex + 1).trim();
+        return `<p><strong>${label}</strong> ${body}</p>`;
+      })
+      .join('');
+
+    root.classList.add('product-description-richtext--formatted');
+  };
+
+  formatImportedDescription(document.querySelector('[data-product-description-summary]'), { summary: true });
+  formatImportedDescription(document.querySelector('[data-product-description-richtext]'));
+
   const menuToggle = document.querySelector('[data-menu-toggle]');
   const mobileMenu = document.querySelector('[data-mobile-menu]');
   const filterToggle = document.querySelector('[data-filter-toggle]');
