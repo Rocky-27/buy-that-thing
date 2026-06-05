@@ -20,7 +20,7 @@
           <span>{{ preview_option.name }}</span>
           <div>
             {% for value in preview_option.values limit: 4 %}
-              <a href="{{ product.url }}" title="{{ value | escape }}">{{ value }}</a>
+              <a href="{{ product.url }}" title="{{ value | escape }}" data-label="{{ value | escape }}">{{ value }}</a>
             {% endfor %}
           </div>
         </div>

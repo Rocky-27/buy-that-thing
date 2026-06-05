@@ -18,6 +18,51 @@
         {% endfor %}
       {% endif %}
     </div>
+
+    {% if display_collection != blank and display_collection.products.size > 0 %}
+      <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": {{ section.settings.heading | json }},
+          "itemListElement": [
+            {% for product in display_collection.products limit: section.settings.products_to_show %}
+              {
+                "@type": "ListItem",
+                "position": {{ forloop.index }},
+                "url": {{ shop.url | append: product.url | json }},
+                "item": {
+                  "@type": "Product",
+                  "name": {{ product.title | json }},
+                  "url": {{ shop.url | append: product.url | json }}
+                  {% if product.featured_media %}
+                    , "image": {{ product.featured_media.preview_image | image_url: width: 900 | prepend: 'https:' | json }}
+                  {% endif %}
+                  , "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": {{ shop.currency | json }},
+                    "price": {{ product.price | divided_by: 100.0 | json }},
+                    "availability": "https://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}",
+                    "shippingDetails": {
+                      "@type": "OfferShippingDetails",
+                      "shippingDestination": {
+                        "@type": "DefinedRegion",
+                        "addressCountry": "GB"
+                      },
+                      "shippingRate": {
+                        "@type": "MonetaryAmount",
+                        "value": 0,
+                        "currency": {{ shop.currency | json }}
+                      }
+                    }
+                  }
+                }
+              }{% unless forloop.last %},{% endunless %}
+            {% endfor %}
+          ]
+        }
+      </script>
+    {% endif %}
   </div>
 </section>
 

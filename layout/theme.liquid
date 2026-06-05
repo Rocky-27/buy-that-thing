@@ -5,6 +5,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="theme-color" content="#102038">
+    <link rel="icon" href="{{ 'favicon.svg' | asset_url }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -17,6 +18,7 @@
     {% if page_description %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
+    {% render 'structured-data-site' %}
     {{ content_for_header }}
     {{ 'theme.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>

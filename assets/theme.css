@@ -622,12 +622,18 @@ textarea {
 
 .variant-preview > div {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px 2px 7px;
+  scrollbar-width: thin;
 }
 
 .variant-preview a {
-  max-width: 96px;
+  position: relative;
+  flex: 0 0 auto;
+  max-width: 150px;
   min-height: 30px;
   display: inline-flex;
   align-items: center;
@@ -644,6 +650,14 @@ textarea {
 .variant-preview a:first-child {
   border-color: var(--purple);
   box-shadow: inset 0 0 0 1px var(--purple);
+}
+
+.variant-preview a:hover,
+.variant-preview a:focus-visible {
+  max-width: 260px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(32, 33, 36, 0.16);
+  z-index: 3;
 }
 
 .product-card__form {
@@ -1343,6 +1357,75 @@ textarea {
   gap: 14px;
 }
 
+.contact-template {
+  padding-bottom: 46px;
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(360px, 1fr);
+  gap: 34px;
+  align-items: start;
+}
+
+.contact-copy h1 {
+  margin: 0 0 14px;
+  font-family: "Space Grotesk", Manrope, sans-serif;
+  font-size: 36px;
+  line-height: 1.12;
+}
+
+.contact-copy .rte {
+  max-width: 560px;
+  color: var(--muted);
+}
+
+.contact-panel {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.contact-form {
+  display: grid;
+  gap: 14px;
+}
+
+.contact-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 11px 12px;
+  background: #fff;
+}
+
+.contact-form textarea {
+  resize: vertical;
+}
+
+.form-success {
+  margin: 0;
+  padding: 10px 12px;
+  background: #e8f5e9;
+  color: var(--green);
+  font-weight: 800;
+}
+
+.form-errors {
+  padding: 10px 12px;
+  background: #fff0f0;
+  color: var(--red);
+}
+
 .promo-mosaic__grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -1677,7 +1760,8 @@ textarea {
   .product-form__row,
   .product-trust,
   .cart-layout,
-  .cart-header {
+  .cart-header,
+  .contact-layout {
     grid-template-columns: 1fr;
   }
 

@@ -1,0 +1,81 @@
+<section class="contact-template">
+  <div class="page-width">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span>/</span>
+      <span>{{ page.title | default: 'Contact' }}</span>
+    </nav>
+
+    <div class="contact-layout">
+      <div class="contact-copy">
+        <p class="section-eyebrow">{{ section.settings.eyebrow }}</p>
+        <h1>{{ section.settings.heading }}</h1>
+        <div class="rte">
+          {{ section.settings.text }}
+        </div>
+      </div>
+
+      <div class="contact-panel">
+        {% form 'contact', class: 'contact-form' %}
+          {% if form.posted_successfully? %}
+            <p class="form-success">Thanks for getting in touch. We will reply as soon as possible.</p>
+          {% endif %}
+
+          {% if form.errors %}
+            <div class="form-errors">
+              {{ form.errors | default_errors }}
+            </div>
+          {% endif %}
+
+          <label>
+            Name
+            <input type="text" name="contact[name]" value="{% if form.name %}{{ form.name }}{% elsif customer %}{{ customer.name }}{% endif %}" autocomplete="name">
+          </label>
+
+          <label>
+            Email
+            <input type="email" name="contact[email]" value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" autocomplete="email" required>
+          </label>
+
+          <label>
+            Order number
+            <input type="text" name="contact[order_number]" autocomplete="off">
+          </label>
+
+          <label>
+            Message
+            <textarea name="contact[body]" rows="7" required>{% if form.body %}{{ form.body }}{% endif %}</textarea>
+          </label>
+
+          <button class="button button--primary" type="submit">Send message</button>
+        {% endform %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main contact",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Customer support"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Contact us"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Questions about an order, delivery or a product? Send us a message and include your order number if you have one.</p>"
+    }
+  ]
+}
+{% endschema %}

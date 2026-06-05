@@ -113,7 +113,11 @@
     },
     "newsletter": {
       "type": "newsletter-band",
-      "settings": {}
+      "settings": {
+        "eyebrow": "Offers and updates",
+        "heading": "Get the latest deals by email.",
+        "text": "Sign up for offers, restocks and new product alerts."
+      }
     }
   },
   "order": ["hero", "value_props", "products", "promo", "newsletter"]
