@@ -15,26 +15,33 @@
         "stat_1": {
           "type": "stat",
           "settings": {
-            "value": "Home heroes",
-            "label": "Storage, seating and upgrades worth the floor space"
+            "value": "House glow-ups",
+            "label": "Storage, lighting and fixes that earn their keep"
           }
         },
         "stat_2": {
           "type": "stat",
           "settings": {
-            "value": "Garden wins",
-            "label": "Outdoor furniture, BBQs and patio crowd-pleasers"
+            "value": "Garden goodies",
+            "label": "Patio picks, BBQ bits and sunny-day upgrades"
           }
         },
         "stat_3": {
           "type": "stat",
           "settings": {
-            "value": "Free delivery",
-            "label": "Built into every order"
+            "value": "Giftable bits",
+            "label": "Easy wins for birthdays, thank-yous and just because"
+          }
+        },
+        "stat_4": {
+          "type": "stat",
+          "settings": {
+            "value": "Bargain braggers",
+            "label": "The deals you will be smug about finding"
           }
         }
       },
-      "block_order": ["stat_1", "stat_2", "stat_3"],
+      "block_order": ["stat_1", "stat_2", "stat_3", "stat_4"],
       "settings": {
         "eyebrow": "Fresh bargains daily | Free delivery every time",
         "heading": "Useful finds that make life better without rinsing your budget",
@@ -86,25 +93,25 @@
         "promo_1": {
           "type": "tile",
           "settings": {
-            "eyebrow": "Fresh picks",
-            "heading": "Small upgrades, oddly satisfying payoff.",
-            "text": "Explore practical finds that solve a problem, lift a room or make everyday jobs easier."
+            "eyebrow": "Start here",
+            "heading": "The useful stuff people end up telling friends about.",
+            "text": "Browse clever buys that make a room nicer, a job easier or a routine less annoying."
           }
         },
         "promo_2": {
           "type": "tile",
           "settings": {
-            "eyebrow": "Flash deals",
-            "heading": "Prices with a little swagger.",
-            "text": "Find short-window offers and value buys that are worth grabbing while they are still here."
+            "eyebrow": "Worth a peek",
+            "heading": "Good prices on things you will actually use.",
+            "text": "Skip the filler and head straight for the practical wins with surprisingly decent price tags."
           }
         },
         "promo_3": {
           "type": "tile",
           "settings": {
-            "eyebrow": "Bundles and accessories",
-            "heading": "Complete the setup.",
-            "text": "Add the extras that make the main buy work harder from day one."
+            "eyebrow": "Finish the job",
+            "heading": "The extras that make the main buy feel properly sorted.",
+            "text": "Find the add-ons, accessories and finishing touches that stop a good idea being half-done."
           }
         }
       },
