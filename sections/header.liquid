@@ -42,22 +42,7 @@
 
   <div class="header-nav-wrap">
     <nav class="page-width site-nav" aria-label="Primary">
-      <details class="site-nav__categories">
-        <summary class="site-nav__all">Shop by category</summary>
-        <div class="site-nav__dropdown">
-          <div class="site-nav__dropdown-grid">
-            {% for collection in collections %}
-              {% if collection.products_count > 0 %}
-                <a href="{{ collection.url }}">
-                  <strong>{{ collection.title }}</strong>
-                  <span>{{ collection.products_count }} products</span>
-                </a>
-              {% endif %}
-            {% endfor %}
-          </div>
-          <a class="site-nav__dropdown-link" href="{{ collections_index_url }}">Browse all categories</a>
-        </div>
-      </details>
+      <a class="site-nav__all" href="{{ collections_index_url }}">Shop by category</a>
       {% for link in section.settings.menu.links %}
         {% assign normalized_title = link.title | downcase %}
         <a href="{% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}{{ collections_index_url }}{% else %}{{ link.url }}{% endif %}">{{ link.title }}</a>
@@ -72,17 +57,7 @@
         <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}">
         <button type="submit" aria-label="Search">Search</button>
       </form>
-      <details class="mobile-menu__categories">
-        <summary>Shop by category</summary>
-        <div class="mobile-menu__category-links">
-          {% for collection in collections %}
-            {% if collection.products_count > 0 %}
-              <a href="{{ collection.url }}">{{ collection.title }}</a>
-            {% endif %}
-          {% endfor %}
-          <a href="{{ collections_index_url }}">Browse all categories</a>
-        </div>
-      </details>
+      <a href="{{ collections_index_url }}">Shop by category</a>
       {% for link in section.settings.menu.links %}
         {% assign normalized_title = link.title | downcase %}
         <a href="{% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}{{ collections_index_url }}{% else %}{{ link.url }}{% endif %}">{{ link.title }}</a>
