@@ -1,4 +1,6 @@
 {% assign current_variant = product.selected_or_first_available_variant %}
+{% assign rating = product.metafields.reviews.rating.value %}
+{% assign rating_count = product.metafields.reviews.rating_count.value %}
 <section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
   <div class="page-width">
     <nav class="breadcrumb" aria-label="Breadcrumb">
@@ -49,11 +51,19 @@
           <p class="section-eyebrow">{{ product.vendor }}</p>
         {% endif %}
         <h1>{{ product.title }}</h1>
-        <div class="product-rating-row">
-          <span class="rating-stars">★★★★☆</span>
-          <a href="#reviews">Customer reviews</a>
-          <span class="verified-pill">Verified supplier</span>
-        </div>
+        {% if rating != blank or product.vendor != blank %}
+          <div class="product-rating-row">
+            {% if rating != blank %}
+              <span class="rating-stars">{{ rating.rating | round: 1 }} / 5</span>
+              {% if rating_count != blank %}
+                <a href="#reviews">{{ rating_count }} reviews</a>
+              {% endif %}
+            {% endif %}
+            {% if product.vendor != blank %}
+              <span class="verified-pill">Sold by {{ product.vendor }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
         <div class="product-summary__price" data-product-price>
           {% render 'price', product: product, use_variant: true %}
         </div>
@@ -100,8 +110,8 @@
         <div class="delivery-panel">
           <strong>Delivery options</strong>
           <div>
-            <span class="delivery-badge">Fast Delivery</span>
-            <span>Estimated dispatch shown at checkout</span>
+            <span class="delivery-badge">Free shipping</span>
+            <span>Included on every order, with no minimum spend.</span>
           </div>
           <div>
             <span class="delivery-badge delivery-badge--soft">Secure payment</span>
@@ -111,12 +121,12 @@
 
         <div class="product-trust">
           <div>
-            <strong>Dispatch updates</strong>
-            <span>Clear order communication and tracking reassurance.</span>
+            <strong>Order updates</strong>
+            <span>Receive order and delivery updates after checkout.</span>
           </div>
           <div>
-            <strong>Returns positioning</strong>
-            <span>Prominent support language for higher-conviction purchases.</span>
+            <strong>Simple returns</strong>
+            <span>Return details are provided with your order confirmation.</span>
           </div>
         </div>
       </div>
@@ -129,7 +139,7 @@
       </details>
       <details>
         <summary>Delivery and returns</summary>
-        <p>Delivery and return timings can vary by supplier and are confirmed during checkout.</p>
+        <p>Free shipping is available on every order. Delivery and return timings can vary by supplier and are confirmed during checkout.</p>
       </details>
     </div>
   </div>

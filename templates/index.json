@@ -20,8 +20,8 @@
         "stat_3": {
           "type": "stat",
           "settings": {
-            "value": "Fast dispatch",
-            "label": "Selected products ready to move"
+            "value": "Free shipping",
+            "label": "Available on every order"
           }
         }
       },
@@ -29,7 +29,7 @@
       "settings": {
         "eyebrow": "Join to save | New offers daily",
         "heading": "Big deals across home, garden and everyday essentials",
-        "text": "A direct, retail-first storefront for a large dropship catalog: searchable, offer-led and built around comparison shopping.",
+        "text": "Shop useful finds across home, garden, tech and everyday essentials, with free shipping included on every order.",
         "primary_label": "Shop deals"
       }
     },
@@ -40,9 +40,9 @@
           "type": "item",
           "settings": {
             "icon": "✓",
-            "eyebrow": "Fast delivery",
-            "heading": "Delivery cues near every buy decision.",
-            "text": "Use clear labels to make shipping expectations visible before checkout."
+            "eyebrow": "Free shipping",
+            "heading": "Included on every order.",
+            "text": "No minimum spend required."
           }
         },
         "value_2": {
@@ -58,9 +58,9 @@
           "type": "item",
           "settings": {
             "icon": "↺",
-            "eyebrow": "Comparison shopping",
-            "heading": "Dense cards for big catalogs.",
-            "text": "Ratings, swatches, delivery badges and pricing help customers scan quickly."
+            "eyebrow": "Easy browsing",
+            "heading": "Compare products quickly.",
+            "text": "See prices, variants and delivery messaging while you shop."
           }
         }
       },
@@ -82,24 +82,24 @@
           "type": "tile",
           "settings": {
             "eyebrow": "Category campaign",
-            "heading": "Give hero treatment to the collections that are converting.",
-            "text": "Use large-format imagery and tight copy to turn generic imported products into a coherent campaign."
+            "heading": "Fresh picks across popular departments.",
+            "text": "Explore seasonal products, useful home upgrades and everyday essentials."
           }
         },
         "promo_2": {
           "type": "tile",
           "settings": {
             "eyebrow": "Flash deals",
-            "heading": "Push urgency without damaging brand perception.",
-            "text": "Premium layout, controlled typography, and clean spacing keep offers credible."
+            "heading": "Limited-time offers.",
+            "text": "Find current deals and value buys across the store."
           }
         },
         "promo_3": {
           "type": "tile",
           "settings": {
             "eyebrow": "Bundles and accessories",
-            "heading": "Increase basket size with sharper supporting offers.",
-            "text": "Cross-sell product families in a way that feels curated rather than aggressive."
+            "heading": "Complete the setup.",
+            "text": "Discover accessories and related products that work well together."
           }
         }
       },

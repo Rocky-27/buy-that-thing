@@ -1,0 +1,82 @@
+<section class="cart-template">
+  <div class="page-width">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="{{ routes.root_url }}">Home</a>
+      <span>/</span>
+      <span>Basket</span>
+    </nav>
+
+    <div class="cart-header">
+      <h1>Basket</h1>
+      <p>Free shipping is included on every order.</p>
+    </div>
+
+    {% if cart.item_count > 0 %}
+      <form action="{{ routes.cart_url }}" method="post" class="cart-layout">
+        <div class="cart-items">
+          {% for item in cart.items %}
+            <article class="cart-item">
+              <a class="cart-item__image" href="{{ item.url }}">
+                {% if item.image %}
+                  {{ item.image | image_url: width: 280 | image_tag: loading: 'lazy' }}
+                {% endif %}
+              </a>
+
+              <div class="cart-item__details">
+                <a class="cart-item__title" href="{{ item.url }}">{{ item.product.title }}</a>
+                {% unless item.product.has_only_default_variant %}
+                  <p>{{ item.variant.title }}</p>
+                {% endunless %}
+                {% if item.selling_plan_allocation %}
+                  <p>{{ item.selling_plan_allocation.selling_plan.name }}</p>
+                {% endif %}
+                <a class="cart-item__remove" href="{{ item.url_to_remove }}">Remove</a>
+              </div>
+
+              <label class="cart-item__quantity">
+                Qty
+                <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" aria-label="Quantity for {{ item.product.title | escape }}">
+              </label>
+
+              <div class="cart-item__price">
+                {% if item.original_line_price > item.final_line_price %}
+                  <span>{{ item.final_line_price | money }}</span>
+                  <s>{{ item.original_line_price | money }}</s>
+                {% else %}
+                  <span>{{ item.final_line_price | money }}</span>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        <aside class="cart-summary">
+          <h2>Order summary</h2>
+          <div class="cart-summary__row">
+            <span>Subtotal</span>
+            <strong>{{ cart.total_price | money }}</strong>
+          </div>
+          <div class="cart-summary__row">
+            <span>Shipping</span>
+            <strong>Free</strong>
+          </div>
+          <p>Taxes and final delivery options are calculated at checkout.</p>
+          <button class="button button--primary button--block" type="submit" name="checkout">Checkout</button>
+          <button class="button button--secondary button--block" type="submit">Update basket</button>
+        </aside>
+      </form>
+    {% else %}
+      <div class="empty-cart">
+        <h2>Your basket is empty</h2>
+        <p>Browse the latest products and offers across the store.</p>
+        <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Start shopping</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main cart"
+}
+{% endschema %}

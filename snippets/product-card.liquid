@@ -1,9 +1,11 @@
+{% assign card_variant = product.selected_or_first_available_variant %}
+{% assign rating = product.metafields.reviews.rating.value %}
+{% assign rating_count = product.metafields.reviews.rating_count.value %}
+
 <article class="product-card">
   <a class="product-card__image-link" href="{{ product.url }}">
     {% if product.featured_media %}
       {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}
-    {% else %}
-      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg product-card__image' }}
     {% endif %}
     {% if product.compare_at_price_max > product.price %}
       <span class="product-badge">Save</span>
@@ -12,29 +14,67 @@
   <button class="wishlist-button" type="button" aria-label="Add {{ product.title | escape }} to wishlist">♡</button>
 
   <div class="product-card__content">
-    <div class="swatch-row" aria-hidden="true">
-      <span></span>
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+    {% unless product.has_only_default_variant %}
+      {% assign preview_option = product.options_with_values.first %}
+      {% if preview_option.values.size > 0 %}
+        <div class="variant-preview" aria-label="{{ preview_option.name }}">
+          <span>{{ preview_option.name }}</span>
+          <div>
+            {% for value in preview_option.values limit: 4 %}
+              <a href="{{ product.url }}" title="{{ value | escape }}">{{ value }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endunless %}
+
     <div class="product-card__header">
       {% if product.vendor != blank %}
         <p class="product-card__vendor">{{ product.vendor }}</p>
       {% endif %}
       <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
     </div>
-    <div class="product-card__rating">
-      <span>★★★★☆</span>
-      <small>({{ product.id | modulo: 900 | plus: 34 }})</small>
-    </div>
+
+    {% if rating != blank %}
+      <div class="product-card__rating">
+        <span>{{ rating.rating | round: 1 }} / 5</span>
+        {% if rating_count != blank %}
+          <small>({{ rating_count }})</small>
+        {% endif %}
+      </div>
+    {% endif %}
+
     <div class="product-card__price">
       {% render 'price', product: product %}
     </div>
+
     <div class="delivery-lines">
-      <span>Fast Delivery</span>
-      <strong>Get it soon</strong>
+      <span>Free shipping</span>
+      <strong>Included on every order</strong>
     </div>
-    <a class="product-card__basket" href="{{ product.url }}">Add to Basket</a>
+
+    {% form 'product', product, class: 'product-card__form' %}
+      {% if product.variants.size > 1 %}
+        <label class="card-variant-select">
+          <span>Variant</span>
+          <select name="id">
+            {% for variant in product.variants %}
+              <option
+                value="{{ variant.id }}"
+                {% if variant.id == card_variant.id %}selected{% endif %}
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                {{ variant.title }}{% unless variant.available %} - Sold out{% endunless %}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+      {% else %}
+        <input type="hidden" name="id" value="{{ card_variant.id }}">
+      {% endif %}
+      <button class="product-card__basket" type="submit" {% unless product.available %}disabled{% endunless %}>
+        {% if product.available %}Add to Basket{% else %}Sold out{% endif %}
+      </button>
+    {% endform %}
   </div>
 </article>

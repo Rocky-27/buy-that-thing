@@ -10,17 +10,11 @@
       {% endif %}
     </div>
 
-    {% assign display_collection = section.settings.collection %}
+    {% assign display_collection = section.settings.collection | default: collections.all %}
     <div class="product-grid">
       {% if display_collection != blank %}
         {% for product in display_collection.products limit: section.settings.products_to_show %}
           {% render 'product-card', product: product %}
-        {% endfor %}
-      {% else %}
-        {% for i in (1..4) %}
-          <article class="product-card product-card--placeholder">
-            {{ 'product-' | append: i | placeholder_svg_tag: 'placeholder-svg product-card__image' }}
-          </article>
         {% endfor %}
       {% endif %}
     </div>
@@ -41,7 +35,7 @@
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Products shoppers can compare quickly."
+      "default": "Popular products with clear pricing and free shipping."
     },
     {
       "type": "collection",

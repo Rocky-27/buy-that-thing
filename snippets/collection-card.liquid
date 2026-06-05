@@ -11,6 +11,9 @@
   {% if card_text == blank %}
     {% assign card_text = collection.description | strip_html | truncatewords: 16 %}
   {% endif %}
+{% else %}
+  {% assign card_title = card_title | default: 'All products' %}
+  {% assign card_text = card_text | default: 'Browse the full range.' %}
 {% endif %}
 <article class="collection-card">
   <a class="collection-card__link" href="{{ collection_url }}">
@@ -19,8 +22,6 @@
         {{ collection.featured_image | image_url: width: 1200 | image_tag: class: 'collection-card__image', loading: 'lazy' }}
       {% elsif collection != blank and collection.products.first.featured_media %}
         {{ collection.products.first.featured_media | image_url: width: 1200 | image_tag: class: 'collection-card__image', loading: 'lazy' }}
-      {% else %}
-        {{ 'collection-1' | placeholder_svg_tag: 'placeholder-svg collection-card__image' }}
       {% endif %}
     </div>
     <div class="collection-card__content">
