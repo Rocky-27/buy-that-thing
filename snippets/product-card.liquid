@@ -11,7 +11,6 @@
       <span class="product-badge">Save</span>
     {% endif %}
   </a>
-  <button class="wishlist-button" type="button" aria-label="Add {{ product.title | escape }} to wishlist">♡</button>
 
   <div class="product-card__content">
     {% unless product.has_only_default_variant %}
@@ -26,6 +25,8 @@
           </div>
         </div>
       {% endif %}
+    {% else %}
+      <div class="variant-preview variant-preview--empty" aria-hidden="true"></div>
     {% endunless %}
 
     <div class="product-card__header">
@@ -42,6 +43,8 @@
           <small>({{ rating_count }})</small>
         {% endif %}
       </div>
+    {% else %}
+      <div class="product-card__rating product-card__rating--empty" aria-hidden="true"></div>
     {% endif %}
 
     <div class="product-card__price">

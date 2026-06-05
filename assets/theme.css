@@ -549,16 +549,21 @@ textarea {
 .product-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 28px 18px;
+  gap: 40px 26px;
+  align-items: stretch;
 }
 
 .product-grid--listing {
   grid-template-columns: repeat(3, 1fr);
+  gap: 42px 26px;
 }
 
 .product-card {
   position: relative;
   min-width: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
 }
 
 .product-card__image-link {
@@ -588,30 +593,24 @@ textarea {
   font-weight: 800;
 }
 
-.wishlist-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--line);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--muted);
-  font-size: 22px;
-  cursor: pointer;
-}
-
 .product-card__content {
+  min-height: 360px;
+  display: grid;
+  grid-template-rows: 62px auto minmax(24px, auto) auto auto 1fr;
+  align-content: start;
+  gap: 8px;
   padding-top: 10px;
 }
 
 .variant-preview {
   display: grid;
   gap: 6px;
-  margin-bottom: 9px;
+  min-height: 54px;
+  align-content: start;
+}
+
+.variant-preview--empty {
+  visibility: hidden;
 }
 
 .variant-preview > span,
@@ -650,7 +649,8 @@ textarea {
 .product-card__form {
   display: grid;
   gap: 8px;
-  margin-top: 10px;
+  align-self: end;
+  margin-top: 6px;
 }
 
 .card-variant-select {
@@ -672,6 +672,11 @@ textarea {
   font-size: 15px;
   line-height: 1.28;
   font-weight: 700;
+  min-height: 39px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .product-card__vendor {
@@ -684,13 +689,17 @@ textarea {
   display: flex;
   gap: 5px;
   align-items: center;
-  margin-top: 8px;
   color: #111;
   font-size: 14px;
+  min-height: 20px;
 }
 
 .product-card__rating small {
   color: var(--muted);
+}
+
+.product-card__rating--empty {
+  visibility: hidden;
 }
 
 .price {
@@ -698,7 +707,7 @@ textarea {
   flex-wrap: wrap;
   gap: 7px;
   align-items: baseline;
-  margin-top: 7px;
+  min-height: 29px;
 }
 
 .price__current {
@@ -715,7 +724,6 @@ textarea {
 .delivery-lines {
   display: grid;
   gap: 4px;
-  margin-top: 8px;
   font-size: 13px;
 }
 

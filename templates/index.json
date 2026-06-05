@@ -49,9 +49,9 @@
           "type": "item",
           "settings": {
             "icon": "£",
-            "eyebrow": "Offer-led",
-            "heading": "Promos feel like retail campaigns.",
-            "text": "Hero banners, quick links and product grids are tuned for frequent deal changes."
+            "eyebrow": "Current offers",
+            "heading": "New savings added regularly.",
+            "text": "Find value buys across home, garden, tech and everyday essentials."
           }
         },
         "value_3": {
@@ -67,10 +67,6 @@
       "block_order": ["value_1", "value_2", "value_3"],
       "settings": {}
     },
-    "collections": {
-      "type": "featured-collections",
-      "settings": {}
-    },
     "products": {
       "type": "featured-products",
       "settings": {}
@@ -81,8 +77,8 @@
         "promo_1": {
           "type": "tile",
           "settings": {
-            "eyebrow": "Category campaign",
-            "heading": "Fresh picks across popular departments.",
+            "eyebrow": "Fresh picks",
+            "heading": "Useful finds for home and everyday living.",
             "text": "Explore seasonal products, useful home upgrades and everyday essentials."
           }
         },
@@ -111,5 +107,5 @@
       "settings": {}
     }
   },
-  "order": ["hero", "value_props", "collections", "products", "promo", "newsletter"]
+  "order": ["hero", "value_props", "products", "promo", "newsletter"]
 }
