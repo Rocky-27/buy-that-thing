@@ -71,29 +71,6 @@ textarea {
   margin: 0 auto;
 }
 
-.announcement-bar {
-  background: var(--ink);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-}
-
-.announcement-bar__inner {
-  min-height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.announcement-bar p {
-  margin: 0;
-}
-
-.announcement-bar a {
-  text-decoration: underline;
-}
-
 .site-header {
   position: sticky;
   top: 0;
@@ -260,13 +237,13 @@ textarea {
 }
 
 .hero-editorial {
-  padding: 18px 0 0;
+  padding: 12px 0 0;
 }
 
 .retail-billboard {
-  min-height: 360px;
+  min-height: 300px;
   display: grid;
-  grid-template-columns: 430px 1fr;
+  grid-template-columns: 380px 1fr;
   align-items: stretch;
   overflow: hidden;
   background: linear-gradient(135deg, #ff5a24 0%, #ff4b20 58%, #e63f18 100%);
@@ -274,7 +251,7 @@ textarea {
 }
 
 .retail-billboard__copy {
-  padding: 34px 36px;
+  padding: 24px 28px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -283,25 +260,27 @@ textarea {
 .sale-strip {
   display: inline-flex;
   width: fit-content;
-  margin: 0 0 14px;
-  padding: 6px 10px;
+  margin: 0 0 10px;
+  padding: 5px 9px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.35);
+  font-size: 12px;
   font-weight: 800;
 }
 
 .retail-billboard h1 {
-  margin: 0 0 14px;
-  max-width: 420px;
+  margin: 0 0 10px;
+  max-width: 360px;
   font-family: "Space Grotesk", Manrope, sans-serif;
-  font-size: 48px;
-  line-height: 1.02;
+  font-size: 38px;
+  line-height: 1.04;
 }
 
 .retail-billboard p {
-  margin: 0 0 22px;
-  max-width: 390px;
-  line-height: 1.5;
+  margin: 0 0 16px;
+  max-width: 340px;
+  font-size: 15px;
+  line-height: 1.45;
 }
 
 .button {
@@ -346,14 +325,14 @@ textarea {
 .retail-billboard__products {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  padding: 26px;
+  gap: 10px;
+  padding: 18px;
   align-items: center;
 }
 
 .billboard-product {
   position: relative;
-  min-height: 260px;
+  min-height: 205px;
   background: #fff;
   color: var(--ink);
   overflow: hidden;
@@ -374,33 +353,15 @@ textarea {
 
 .billboard-product span {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
-  padding: 6px 9px;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 8px;
   background: #fff;
   color: var(--orange);
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
 }
 
-.promo-quicklinks {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.promo-quicklinks a {
-  min-height: 92px;
-  padding: 16px;
-  background: var(--surface-alt);
-  border: 1px solid var(--line);
-  border-left: 5px solid var(--orange);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-}
-
-.promo-quicklinks a:hover,
-.promo-quicklinks a:focus-visible,
 .collection-card:hover,
 .collection-card:focus-within,
 .product-card:hover .product-card__image-link,
@@ -408,23 +369,10 @@ textarea {
   transform: translateY(-2px);
 }
 
-.promo-quicklinks a:hover,
-.promo-quicklinks a:focus-visible,
 .collection-card:hover,
 .collection-card:focus-within {
   box-shadow: 0 10px 24px rgba(32, 33, 36, 0.08);
   border-color: var(--line-strong);
-}
-
-.promo-quicklinks strong {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 18px;
-}
-
-.promo-quicklinks span {
-  color: var(--muted);
-  font-size: 14px;
 }
 
 .value-props {
@@ -2065,11 +2013,6 @@ textarea {
     width: min(calc(100% - 20px), var(--max-width));
   }
 
-  .announcement-bar__inner {
-    min-height: 40px;
-    font-size: 13px;
-  }
-
   .header-main {
     min-height: 64px;
     grid-template-columns: auto 1fr auto;
@@ -2140,15 +2083,14 @@ textarea {
   }
 
   .retail-billboard__copy {
-    padding: 24px 18px;
+    padding: 20px 16px;
   }
 
   .retail-billboard h1 {
-    font-size: 34px;
+    font-size: 30px;
   }
 
   .retail-billboard__products,
-  .promo-quicklinks,
   .value-props__grid,
   .department-grid,
   .browse-hub__search,
@@ -2163,7 +2105,7 @@ textarea {
   }
 
   .billboard-product {
-    min-height: 210px;
+    min-height: 180px;
   }
 
   .browse-hub {

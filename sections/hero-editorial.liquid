@@ -55,15 +55,6 @@
         {% endif %}
       </div>
     </div>
-
-    <div class="promo-quicklinks">
-      {% for block in section.blocks %}
-        <a href="{{ block.settings.link | default: routes.all_products_collection_url }}" {{ block.shopify_attributes }}>
-          <strong>{{ block.settings.value }}</strong>
-          <span>{{ block.settings.label }}</span>
-        </a>
-      {% endfor %}
-    </div>
   </div>
 </section>
 
