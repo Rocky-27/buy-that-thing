@@ -1189,7 +1189,7 @@ textarea {
   justify-content: space-between;
   gap: 28px;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .collection-title-row > div:first-child {
@@ -1213,61 +1213,6 @@ textarea {
   margin: 0;
 }
 
-.collection-children {
-  margin: 20px 0 28px;
-}
-
-.collection-children__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: end;
-  margin-bottom: 12px;
-}
-
-.collection-children__header h2 {
-  margin: 0;
-}
-
-.collection-children__rail {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  scrollbar-width: thin;
-}
-
-.collection-children__item {
-  flex: 0 0 auto;
-  min-width: 180px;
-  display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: #fff;
-  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
-}
-
-.collection-children__item strong {
-  font-size: 14px;
-  line-height: 1.2;
-}
-
-.collection-children__item span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.collection-children__item:hover,
-.collection-children__item:focus-visible {
-  border-color: var(--primary);
-  background: var(--accent-wash);
-  transform: translateY(-1px);
-  outline: none;
-}
-
 .collection-title-row__description {
   max-width: 620px;
   color: var(--muted);
@@ -1276,10 +1221,43 @@ textarea {
 
 .collection-toolbar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
   gap: 14px;
+  margin-bottom: 22px;
+}
+
+.collection-toolbar__primary,
+.collection-toolbar__status {
+  display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.collection-toolbar__status {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fbfd 0%, #ffffff 100%);
+}
+
+.collection-toolbar__summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.collection-toolbar__summary strong {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.collection-toolbar__note {
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .filter-drawer-toggle {
@@ -1296,6 +1274,7 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  flex: 1 1 240px;
 }
 
 .active-filter-chips a {
@@ -1312,10 +1291,12 @@ textarea {
   align-items: center;
   gap: 8px;
   color: var(--muted);
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .collection-toolbar__sort select {
-  min-width: 220px;
+  min-width: 150px;
   height: 38px;
   border: 1px solid var(--line-strong);
   border-radius: var(--radius);
@@ -1325,8 +1306,8 @@ textarea {
 
 .collection-layout {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 26px;
+  grid-template-columns: 300px 1fr;
+  gap: 30px;
 }
 
 .collection-layout--simple {
@@ -1335,32 +1316,32 @@ textarea {
 
 .collection-filters {
   align-self: start;
-  border-right: 1px solid var(--line);
-  padding-right: 18px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  position: sticky;
+  top: 164px;
 }
 
 .collection-filters__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
 }
 
 .collection-filters__header button {
   display: none;
 }
 
-.filter-category-link {
-  display: block;
-  margin-bottom: 14px;
-  color: var(--orange);
-  font-weight: 800;
-  text-decoration: underline;
-}
-
 .filter-group {
   border-top: 1px solid var(--line);
-  padding: 12px 0;
+  padding-top: 14px;
 }
 
 .filter-group summary {
@@ -1417,6 +1398,60 @@ textarea {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0 8px;
+}
+
+.filter-browse {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.filter-browse__heading {
+  display: grid;
+  gap: 4px;
+}
+
+.filter-browse__heading span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.filter-browse__links {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-browse__link {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.filter-browse__link span {
+  font-weight: 800;
+}
+
+.filter-browse__link em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.filter-browse__link:hover,
+.filter-browse__link:focus-visible {
+  border-color: var(--primary);
+  background: var(--accent-wash);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .filter-actions {
@@ -2397,6 +2432,8 @@ textarea {
 .pagination {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   margin-top: 30px;
   font-weight: 800;
@@ -2405,6 +2442,10 @@ textarea {
 .pagination a {
   color: var(--orange);
   text-decoration: underline;
+}
+
+.pagination span[aria-current="page"] {
+  color: var(--ink);
 }
 
 .collection-empty-state {
@@ -2493,9 +2534,12 @@ textarea {
     overflow: auto;
     padding: 18px;
     background: #fff;
+    border: 0;
     border-right: 1px solid var(--line);
+    border-radius: 0;
     transform: translateX(-100%);
     transition: transform 0.2s ease;
+    top: 0;
   }
 
   .collection-filters.is-open {
@@ -2669,7 +2713,8 @@ textarea {
 
   .collection-toolbar,
   .collection-title-row,
-  .collection-products__meta,
+  .collection-toolbar__primary,
+  .collection-toolbar__status,
   .site-footer__meta,
   .search-header {
     display: grid;
@@ -2680,17 +2725,9 @@ textarea {
     display: block;
   }
 
-  .collection-children__header {
-    display: block;
-  }
-
-  .collection-children__item {
-    min-width: 150px;
-  }
-
   .collection-toolbar__sort {
     align-items: flex-start;
-    flex-direction: column;
+    justify-content: flex-start;
   }
 
   .collection-toolbar__sort select,
