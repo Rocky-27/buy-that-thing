@@ -284,10 +284,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterSidebar = document.querySelector('[data-filter-sidebar]');
 
   if (menuToggle && mobileMenu) {
+    let hideMenuTimer = null;
+
     menuToggle.addEventListener('click', () => {
       const expanded = menuToggle.getAttribute('aria-expanded') === 'true';
-      menuToggle.setAttribute('aria-expanded', String(!expanded));
-      mobileMenu.hidden = expanded;
+
+      if (hideMenuTimer) {
+        window.clearTimeout(hideMenuTimer);
+        hideMenuTimer = null;
+      }
+
+      if (expanded) {
+        menuToggle.setAttribute('aria-expanded', 'false');
+        mobileMenu.classList.remove('is-open');
+        hideMenuTimer = window.setTimeout(() => {
+          mobileMenu.hidden = true;
+          hideMenuTimer = null;
+        }, 220);
+      } else {
+        mobileMenu.hidden = false;
+        window.requestAnimationFrame(() => {
+          menuToggle.setAttribute('aria-expanded', 'true');
+          mobileMenu.classList.add('is-open');
+        });
+      }
     });
   }
 

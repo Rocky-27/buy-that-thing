@@ -2136,12 +2136,28 @@ textarea {
     background: transparent;
     font-size: 11px;
     font-weight: 800;
+    color: var(--ink);
+    transition: color 180ms ease;
   }
 
   .menu-toggle span {
     width: 24px;
     height: 2px;
     background: var(--ink);
+    transform-origin: center;
+    transition: transform 220ms ease, opacity 180ms ease, background-color 180ms ease;
+  }
+
+  .menu-toggle[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(5px) rotate(45deg);
+  }
+
+  .menu-toggle[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-toggle[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-5px) rotate(-45deg);
   }
 
   .header-main > .site-search {
@@ -2171,6 +2187,15 @@ textarea {
     display: block;
     border-top: 1px solid var(--line);
     background: #fff;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .mobile-menu.is-open {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .mobile-menu__inner {
