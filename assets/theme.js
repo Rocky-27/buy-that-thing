@@ -435,11 +435,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!productHandle) return;
 
         if (listingSourceType === 'search') {
+          event.preventDefault();
           const destinationUrl = new URL(link.href, window.location.origin);
           destinationUrl.searchParams.set('bt_source', 'search');
           destinationUrl.searchParams.set('bt_return', `${window.location.pathname}${window.location.search}`);
           destinationUrl.searchParams.set('bt_handle', productHandle);
-          link.href = `${destinationUrl.pathname}${destinationUrl.search}${destinationUrl.hash}`;
+
+          writeSessionJson(listingContextKey, {
+            sourceType: listingSourceType,
+            url: `${window.location.pathname}${window.location.search}`,
+            productHandle,
+            timestamp: Date.now()
+          });
+
+          window.location.href = `${destinationUrl.pathname}${destinationUrl.search}${destinationUrl.hash}`;
+          return;
         }
 
         writeSessionJson(listingContextKey, {
