@@ -13,9 +13,10 @@
       <span class="brand-mark__text">buy that thing</span>
     </a>
 
-    <form class="site-search" action="{{ routes.search_url }}" method="get" role="search">
-      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}">
+    <form class="site-search" action="{{ routes.search_url }}" method="get" role="search" data-predictive-search-form data-predictive-search-url="{{ routes.predictive_search_url }}">
+      <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="predictive-search-desktop" data-predictive-search-input>
       <button type="submit" aria-label="Search">Search</button>
+      <div class="site-search__results" id="predictive-search-desktop" data-predictive-search-results hidden></div>
     </form>
 
     <div class="site-header__actions">
@@ -63,9 +64,10 @@
 
   <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
     <div class="page-width mobile-menu__inner">
-      <form class="site-search site-search--mobile" action="{{ routes.search_url }}" method="get" role="search">
-        <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}">
+      <form class="site-search site-search--mobile" action="{{ routes.search_url }}" method="get" role="search" data-predictive-search-form data-predictive-search-url="{{ routes.predictive_search_url }}">
+        <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.search_placeholder }}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false" aria-controls="predictive-search-mobile" data-predictive-search-input>
         <button type="submit" aria-label="Search">Search</button>
+        <div class="site-search__results" id="predictive-search-mobile" data-predictive-search-results hidden></div>
       </form>
       <a href="{{ collections_index_url }}">Shop by category</a>
       {% for link in section.settings.menu.links %}

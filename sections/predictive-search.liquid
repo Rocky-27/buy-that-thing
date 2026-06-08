@@ -1,0 +1,87 @@
+{%- assign has_query_suggestions = predictive_search.resources.queries.size > 0 -%}
+{%- assign has_collection_results = predictive_search.resources.collections.size > 0 -%}
+{%- assign has_product_results = predictive_search.resources.products.size > 0 -%}
+{%- assign has_results = has_query_suggestions or has_collection_results or has_product_results -%}
+
+<div class="predictive-search" data-predictive-search-panel>
+  {% if predictive_search.performed and has_results %}
+    <div class="predictive-search__groups">
+      {% if has_query_suggestions %}
+        <section class="predictive-search__group" aria-label="Suggested searches">
+          <p class="predictive-search__heading">Suggested searches</p>
+          <div class="predictive-search__list predictive-search__list--compact">
+            {% for query in predictive_search.resources.queries %}
+              <a class="predictive-search__item predictive-search__item--query" href="{{ query.url }}" data-predictive-search-link>
+                <span class="predictive-search__query-text">{{ query.styled_text }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {% if has_collection_results %}
+        <section class="predictive-search__group" aria-label="Collections">
+          <p class="predictive-search__heading">Collections</p>
+          <div class="predictive-search__list predictive-search__list--compact">
+            {% for collection in predictive_search.resources.collections %}
+              <a class="predictive-search__item predictive-search__item--collection" href="{{ collection.url }}" data-predictive-search-link>
+                <span class="predictive-search__item-title">{{ collection.title }}</span>
+                <span class="predictive-search__item-meta">Browse collection</span>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      {% if has_product_results %}
+        <section class="predictive-search__group" aria-label="Products">
+          <p class="predictive-search__heading">Products</p>
+          <div class="predictive-search__list">
+            {% for product in predictive_search.resources.products %}
+              <a class="predictive-search__item predictive-search__item--product" href="{{ product.url }}" data-predictive-search-link>
+                <span class="predictive-search__thumb">
+                  {% if product.featured_image %}
+                    {{ product.featured_image | image_url: width: 88 | image_tag: alt: product.title, loading: 'lazy', widths: '44, 88', sizes: '44px' }}
+                  {% else %}
+                    <span class="predictive-search__thumb-placeholder" aria-hidden="true"></span>
+                  {% endif %}
+                </span>
+                <span class="predictive-search__copy">
+                  <span class="predictive-search__item-title">{{ product.title }}</span>
+                  <span class="predictive-search__item-meta">
+                    {% if product.vendor != blank %}{{ product.vendor }}{% endif %}
+                    {% if product.vendor != blank and product.price %}
+                      <span aria-hidden="true">·</span>
+                    {% endif %}
+                    {% if product.price %}
+                      {{ product.price | money }}
+                    {% endif %}
+                  </span>
+                </span>
+              </a>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+    </div>
+
+    <div class="predictive-search__footer">
+      <a class="predictive-search__all" href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}">
+        View all results for “{{ predictive_search.terms }}”
+      </a>
+    </div>
+  {% elsif predictive_search.performed %}
+    <div class="predictive-search__empty">
+      <p>No close matches for “{{ predictive_search.terms }}” yet.</p>
+      <a class="predictive-search__all" href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}">
+        Search the full store instead
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Predictive search"
+}
+{% endschema %}

@@ -8,6 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
 
+  const debounce = (callback, delay) => {
+    let timeoutId = null;
+
+    return (...args) => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => callback(...args), delay);
+    };
+  };
+
   const normalizeDescriptionText = (root) => {
     const clone = root.cloneNode(true);
 
@@ -282,6 +291,170 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterToggle = document.querySelector('[data-filter-toggle]');
   const filterClose = document.querySelector('[data-filter-close]');
   const filterSidebar = document.querySelector('[data-filter-sidebar]');
+
+  const predictiveSearchForms = Array.from(document.querySelectorAll('[data-predictive-search-form]'));
+
+  predictiveSearchForms.forEach((form) => {
+    const input = form.querySelector('[data-predictive-search-input]');
+    const results = form.querySelector('[data-predictive-search-results]');
+    const predictiveSearchUrl = form.dataset.predictiveSearchUrl;
+
+    if (!input || !results || !predictiveSearchUrl) return;
+
+    let activeIndex = -1;
+    let activeLinks = [];
+    let abortController = null;
+
+    const closeResults = () => {
+      if (abortController) {
+        abortController.abort();
+        abortController = null;
+      }
+
+      activeIndex = -1;
+      activeLinks = [];
+      results.hidden = true;
+      results.innerHTML = '';
+      input.setAttribute('aria-expanded', 'false');
+    };
+
+    const setActiveLink = (nextIndex) => {
+      activeLinks.forEach((link, index) => {
+        link.classList.toggle('is-active', index === nextIndex);
+      });
+      activeIndex = nextIndex;
+    };
+
+    const renderResults = (markup) => {
+      results.innerHTML = markup.trim();
+      activeLinks = Array.from(results.querySelectorAll('[data-predictive-search-link]'));
+      activeIndex = -1;
+      results.hidden = activeLinks.length === 0 && !results.textContent.trim();
+      input.setAttribute('aria-expanded', String(!results.hidden));
+    };
+
+    const fetchResults = debounce(async () => {
+      const query = input.value.trim();
+
+      if (query.length < 2) {
+        closeResults();
+        return;
+      }
+
+      if (abortController) abortController.abort();
+      abortController = new AbortController();
+
+      try {
+        const url = new URL(predictiveSearchUrl, window.location.origin);
+        url.searchParams.set('q', query);
+        url.searchParams.set('resources[type]', 'product,collection,query');
+        url.searchParams.set('resources[limit]', '4');
+        url.searchParams.set('resources[limit_scope]', 'each');
+        url.searchParams.set('resources[options][unavailable_products]', 'hide');
+        url.searchParams.set('section_id', 'predictive-search');
+
+        const response = await fetch(url.toString(), {
+          signal: abortController.signal,
+          headers: {
+            Accept: 'text/html'
+          }
+        });
+
+        if (!response.ok) throw new Error(`Predictive search failed: ${response.status}`);
+
+        const markup = await response.text();
+        renderResults(markup);
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+        closeResults();
+      } finally {
+        abortController = null;
+      }
+    }, 180);
+
+    input.addEventListener('input', () => {
+      fetchResults();
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value.trim().length >= 2 && results.innerHTML.trim()) {
+        results.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (results.hidden || activeLinks.length === 0) {
+        if (event.key === 'Escape') closeResults();
+        return;
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        setActiveLink((activeIndex + 1) % activeLinks.length);
+        activeLinks[activeIndex].focus();
+        return;
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        const nextIndex = activeIndex <= 0 ? activeLinks.length - 1 : activeIndex - 1;
+        setActiveLink(nextIndex);
+        activeLinks[activeIndex].focus();
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        closeResults();
+      }
+    });
+
+    results.addEventListener('keydown', (event) => {
+      if (activeLinks.length === 0) return;
+
+      const currentIndex = activeLinks.indexOf(document.activeElement);
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        const nextIndex = (currentIndex + 1) % activeLinks.length;
+        setActiveLink(nextIndex);
+        activeLinks[nextIndex].focus();
+        return;
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (currentIndex <= 0) {
+          setActiveLink(-1);
+          input.focus();
+        } else {
+          const nextIndex = currentIndex - 1;
+          setActiveLink(nextIndex);
+          activeLinks[nextIndex].focus();
+        }
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        closeResults();
+        input.focus();
+      }
+    });
+
+    form.addEventListener('focusout', () => {
+      window.setTimeout(() => {
+        if (!form.contains(document.activeElement)) {
+          closeResults();
+        }
+      }, 120);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!form.contains(event.target)) {
+        closeResults();
+      }
+    });
+  });
 
   if (menuToggle && mobileMenu) {
     let hideMenuTimer = null;
