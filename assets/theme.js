@@ -17,6 +17,124 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   };
 
+  const getSearchMoneyFormat = () => {
+    return document.querySelector('[data-recently-viewed]')?.dataset.moneyFormat || '${{amount}}';
+  };
+
+  const buildPredictiveSearchMarkup = ({ query, queries = [], collections = [], products = [] }) => {
+    const moneyFormat = getSearchMoneyFormat();
+    const hasResults = queries.length > 0 || collections.length > 0 || products.length > 0;
+
+    if (!hasResults) {
+      return `
+        <div class="predictive-search">
+          <div class="predictive-search__empty">
+            <p>No close matches for “${escapeHtml(query)}” yet.</p>
+            <a class="predictive-search__all" href="/search?q=${encodeURIComponent(query)}">Search the full store instead</a>
+          </div>
+        </div>
+      `;
+    }
+
+    const queryMarkup =
+      queries.length > 0
+        ? `
+          <section class="predictive-search__group" aria-label="Suggested searches">
+            <p class="predictive-search__heading">Suggested searches</p>
+            <div class="predictive-search__list predictive-search__list--compact">
+              ${queries
+                .map((item) => {
+                  const queryUrl = item.url || `/search?q=${encodeURIComponent(item.text || query)}`;
+                  const queryText = item.styled_text || escapeHtml(item.text || '');
+                  return `
+                    <a class="predictive-search__item predictive-search__item--query" href="${escapeHtml(queryUrl)}" data-predictive-search-link>
+                      <span class="predictive-search__query-text">${queryText}</span>
+                    </a>
+                  `;
+                })
+                .join('')}
+            </div>
+          </section>
+        `
+        : '';
+
+    const collectionMarkup =
+      collections.length > 0
+        ? `
+          <section class="predictive-search__group" aria-label="Collections">
+            <p class="predictive-search__heading">Collections</p>
+            <div class="predictive-search__list predictive-search__list--compact">
+              ${collections
+                .map(
+                  (collection) => `
+                    <a class="predictive-search__item predictive-search__item--collection" href="${escapeHtml(collection.url || '#')}" data-predictive-search-link>
+                      <span class="predictive-search__item-title">${escapeHtml(collection.title || '')}</span>
+                      <span class="predictive-search__item-meta">Browse collection</span>
+                    </a>
+                  `
+                )
+                .join('')}
+            </div>
+          </section>
+        `
+        : '';
+
+    const productMarkup =
+      products.length > 0
+        ? `
+          <section class="predictive-search__group" aria-label="Products">
+            <p class="predictive-search__heading">Products</p>
+            <div class="predictive-search__list">
+              ${products
+                .map((product) => {
+                  const imageUrl = product.featured_image?.url || product.image || '';
+                  const vendor = product.vendor ? escapeHtml(product.vendor) : '';
+                  const price =
+                    typeof product.price === 'number' ? formatMoneyValue(product.price, moneyFormat) : '';
+                  const metaParts = [vendor, price].filter(Boolean);
+
+                  return `
+                    <a class="predictive-search__item predictive-search__item--product" href="${escapeHtml(product.url || '#')}" data-predictive-search-link>
+                      <span class="predictive-search__thumb">
+                        ${
+                          imageUrl
+                            ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(product.title || '')}" loading="lazy">`
+                            : '<span class="predictive-search__thumb-placeholder" aria-hidden="true"></span>'
+                        }
+                      </span>
+                      <span class="predictive-search__copy">
+                        <span class="predictive-search__item-title">${escapeHtml(product.title || '')}</span>
+                        ${
+                          metaParts.length > 0
+                            ? `<span class="predictive-search__item-meta">${metaParts.join('<span aria-hidden="true">·</span>')}</span>`
+                            : ''
+                        }
+                      </span>
+                    </a>
+                  `;
+                })
+                .join('')}
+            </div>
+          </section>
+        `
+        : '';
+
+    return `
+      <div class="predictive-search">
+        <div class="predictive-search__groups">
+          ${queryMarkup}
+          ${collectionMarkup}
+          ${productMarkup}
+        </div>
+        <div class="predictive-search__footer">
+          <a class="predictive-search__all" href="/search?q=${encodeURIComponent(query)}">
+            View all results for “${escapeHtml(query)}”
+          </a>
+        </div>
+      </div>
+    `;
+  };
+
   const normalizeDescriptionText = (root) => {
     const clone = root.cloneNode(true);
 
@@ -297,9 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
   predictiveSearchForms.forEach((form) => {
     const input = form.querySelector('[data-predictive-search-input]');
     const results = form.querySelector('[data-predictive-search-results]');
-    const predictiveSearchUrl = form.dataset.predictiveSearchUrl;
 
-    if (!input || !results || !predictiveSearchUrl) return;
+    if (!input || !results) return;
 
     let activeIndex = -1;
     let activeLinks = [];
@@ -345,25 +462,34 @@ document.addEventListener('DOMContentLoaded', () => {
       abortController = new AbortController();
 
       try {
-        const url = new URL(predictiveSearchUrl, window.location.origin);
+        const root = window.Shopify?.routes?.root || '/';
+        const url = new URL(`${root}search/suggest.json`, window.location.origin);
         url.searchParams.set('q', query);
         url.searchParams.set('resources[type]', 'product,collection,query');
         url.searchParams.set('resources[limit]', '4');
         url.searchParams.set('resources[limit_scope]', 'each');
         url.searchParams.set('resources[options][unavailable_products]', 'hide');
-        url.searchParams.set('section_id', 'predictive-search');
+        url.searchParams.set('resources[options][fields]', 'title,product_type,variants.title,vendor');
 
         const response = await fetch(url.toString(), {
           signal: abortController.signal,
           headers: {
-            Accept: 'text/html'
+            Accept: 'application/json'
           }
         });
 
         if (!response.ok) throw new Error(`Predictive search failed: ${response.status}`);
 
-        const markup = await response.text();
-        renderResults(markup);
+        const payload = await response.json();
+        const resources = payload.resources?.results || {};
+        renderResults(
+          buildPredictiveSearchMarkup({
+            query,
+            queries: Array.isArray(resources.queries) ? resources.queries : [],
+            collections: Array.isArray(resources.collections) ? resources.collections : [],
+            products: Array.isArray(resources.products) ? resources.products : []
+          })
+        );
       } catch (error) {
         if (error.name === 'AbortError') return;
         closeResults();
