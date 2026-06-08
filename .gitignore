@@ -1,5 +1,7 @@
-local-scripts/
 .env.enrich.local
 .env.enrich
 enrichment-output/
 enrichment-backups/
+catalog-cache/
+taxonomy-plans/
+taxonomy-apply-output/

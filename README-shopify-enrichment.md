@@ -6,15 +6,16 @@ These files are intentionally ignored by git:
 
 - `.env.enrich`
 - `.env.enrich.local`
-- `local-scripts/`
 - `enrichment-output/`
 - `enrichment-backups/`
 
 ## Files
 
-- [local-scripts/shopify-enrich-products.mjs](/home/james/freelance/buy-that-thing/local-scripts/shopify-enrich-products.mjs)
-- [local-scripts/shopify-restore-product-from-backup.mjs](/home/james/freelance/buy-that-thing/local-scripts/shopify-restore-product-from-backup.mjs)
-- [.env.enrich](/home/james/freelance/buy-that-thing/.env.enrich)
+- [scripts/enrichment/enrich-products.mjs](scripts/enrichment/enrich-products.mjs)
+- [scripts/enrichment/restore-product-from-backup.mjs](scripts/enrichment/restore-product-from-backup.mjs)
+- [scripts/enrichment/enrich-products.md](scripts/enrichment/enrich-products.md)
+- [scripts/enrichment/restore-product-from-backup.md](scripts/enrichment/restore-product-from-backup.md)
+- [.env.enrich](.env.enrich)
 
 ## What it does
 
@@ -88,14 +89,14 @@ If you want to push the tone, update `ENRICHMENT_STYLE_BRIEF` in `.env.enrich` a
 Start with a dry run:
 
 ```bash
-node local-scripts/shopify-enrich-products.mjs --limit 5
+node scripts/enrichment/enrich-products.mjs --limit 5
 ```
 
 Useful flags:
 
 ```bash
-node local-scripts/shopify-enrich-products.mjs --ids 1234567890,2345678901
-node local-scripts/shopify-enrich-products.mjs --query "status:active"
+node scripts/enrichment/enrich-products.mjs --ids 1234567890,2345678901
+node scripts/enrichment/enrich-products.mjs --query "status:active"
 ```
 
 Tag handling:
@@ -109,7 +110,7 @@ Tag handling:
 Only use `--write` once you are happy with the dry-run output:
 
 ```bash
-node local-scripts/shopify-enrich-products.mjs --write --limit 5
+node scripts/enrichment/enrich-products.mjs --write --limit 5
 ```
 
 ## Output and backups
@@ -141,13 +142,13 @@ Each backup contains:
 Dry-run restore:
 
 ```bash
-node local-scripts/shopify-restore-product-from-backup.mjs enrichment-backups/1234567890123/2026-06-05T21-10-44-123Z.json
+node scripts/enrichment/restore-product-from-backup.mjs enrichment-backups/1234567890123/2026-06-05T21-10-44-123Z.json
 ```
 
 Write restore:
 
 ```bash
-node local-scripts/shopify-restore-product-from-backup.mjs enrichment-backups/1234567890123/2026-06-05T21-10-44-123Z.json --write
+node scripts/enrichment/restore-product-from-backup.mjs enrichment-backups/1234567890123/2026-06-05T21-10-44-123Z.json --write
 ```
 
 ## Recommended workflow

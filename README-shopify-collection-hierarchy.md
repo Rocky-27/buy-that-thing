@@ -47,8 +47,8 @@ On collection pages, the theme now:
 
 Files:
 
-- [sections/main-collection.liquid](/home/james/freelance/buy-that-thing/sections/main-collection.liquid)
-- [assets/theme.css](/home/james/freelance/buy-that-thing/assets/theme.css)
+- [sections/main-collection.liquid](sections/main-collection.liquid)
+- [assets/theme.css](assets/theme.css)
 
 ## Depth
 
