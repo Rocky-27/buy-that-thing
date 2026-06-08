@@ -54,6 +54,7 @@ Notes:
 - Existing shell environment variables still win if already set.
 - `ENRICHMENT_MARKER_TAG` is optional but recommended. Products with that tag are skipped on future runs.
 - `ENRICHMENT_STYLE_BRIEF` is optional. Use it if you want to push the copy slightly more deadpan, more playful, or more restrained without editing the script.
+- Quoted values in `.env.enrich` are supported, so `ENRICHMENT_STYLE_BRIEF="..."` is fine.
 - Use your `*.myshopify.com` domain, not the public storefront domain.
 - For Dev Dashboard apps, the scripts can exchange `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` for an Admin API token automatically.
 - If you already have a valid `SHOPIFY_ADMIN_ACCESS_TOKEN`, the scripts will use that directly.
@@ -63,9 +64,9 @@ Notes:
 The enrichment prompt is designed to be:
 
 - strictly factual
-- lightly tongue-in-cheek
+- led primarily by `ENRICHMENT_STYLE_BRIEF`
 - plain English rather than corporate
-- dry and characterful, without turning into novelty copy
+- concise and commercially usable
 - varied in sentence rhythm, without leaning on the same gag repeatedly
 
 Target vibe:
@@ -80,7 +81,7 @@ Not the vibe:
 - repeated filler like `does what it says on the tin`
 - every paragraph starting with `It is` or `It’s`
 
-If you want to push the tone, update `ENRICHMENT_STYLE_BRIEF` in `.env.enrich` and rerun a dry run first.
+If you want to push the tone, update `ENRICHMENT_STYLE_BRIEF` in `.env.enrich` and rerun a dry run first. The script now treats that env var as the primary style instruction rather than a light suggestion layered under a fixed tone.
 
 ## Dry run
 
@@ -95,8 +96,13 @@ Useful flags:
 ```bash
 node local-scripts/shopify-enrich-products.mjs --ids 1234567890,2345678901
 node local-scripts/shopify-enrich-products.mjs --query "status:active"
-node local-scripts/shopify-enrich-products.mjs --limit 20 --replace-tags
 ```
+
+Tag handling:
+
+- Existing product tags are always preserved.
+- New AI-suggested tags are merged in and deduplicated.
+- `--replace-tags` is now deprecated and kept only for backwards compatibility.
 
 ## Write changes to Shopify
 

@@ -159,7 +159,14 @@ textarea {
   height: 26px;
   border: 1px solid #999;
   border-radius: 50%;
-  font-weight: 800;
+  color: var(--ink);
+  flex: 0 0 26px;
+}
+
+.header-action__icon svg {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 
 .cart-pill strong {
