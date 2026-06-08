@@ -2,6 +2,29 @@
   <section class="collection-template">
     <div class="page-width">
       {% assign products_per_page = section.settings.products_per_page %}
+      {% assign parent_collection = collection.metafields.custom.parent_collection.value %}
+      {% assign child_collections = collection.metafields.custom.child_collections.value %}
+      {% assign ancestor_1 = parent_collection %}
+      {% assign ancestor_2 = blank %}
+      {% assign ancestor_3 = blank %}
+      {% assign ancestor_4 = blank %}
+      {% assign ancestor_5 = blank %}
+      {% assign ancestor_6 = blank %}
+      {% if ancestor_1 != blank %}
+        {% assign ancestor_2 = ancestor_1.metafields.custom.parent_collection.value %}
+      {% endif %}
+      {% if ancestor_2 != blank %}
+        {% assign ancestor_3 = ancestor_2.metafields.custom.parent_collection.value %}
+      {% endif %}
+      {% if ancestor_3 != blank %}
+        {% assign ancestor_4 = ancestor_3.metafields.custom.parent_collection.value %}
+      {% endif %}
+      {% if ancestor_4 != blank %}
+        {% assign ancestor_5 = ancestor_4.metafields.custom.parent_collection.value %}
+      {% endif %}
+      {% if ancestor_5 != blank %}
+        {% assign ancestor_6 = ancestor_5.metafields.custom.parent_collection.value %}
+      {% endif %}
       {% if collection.handle == 'all' %}
         {% assign products_per_page = 36 %}
       {% endif %}
@@ -28,11 +51,38 @@
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="{{ routes.root_url }}">Home</a>
         <span>/</span>
+        {% if ancestor_6 != blank %}
+          <a href="{{ ancestor_6.url }}">{{ ancestor_6.title }}</a>
+          <span>/</span>
+        {% endif %}
+        {% if ancestor_5 != blank %}
+          <a href="{{ ancestor_5.url }}">{{ ancestor_5.title }}</a>
+          <span>/</span>
+        {% endif %}
+        {% if ancestor_4 != blank %}
+          <a href="{{ ancestor_4.url }}">{{ ancestor_4.title }}</a>
+          <span>/</span>
+        {% endif %}
+        {% if ancestor_3 != blank %}
+          <a href="{{ ancestor_3.url }}">{{ ancestor_3.title }}</a>
+          <span>/</span>
+        {% endif %}
+        {% if ancestor_2 != blank %}
+          <a href="{{ ancestor_2.url }}">{{ ancestor_2.title }}</a>
+          <span>/</span>
+        {% endif %}
+        {% if ancestor_1 != blank %}
+          <a href="{{ ancestor_1.url }}">{{ ancestor_1.title }}</a>
+          <span>/</span>
+        {% endif %}
         <span>{{ collection.title }}</span>
       </nav>
 
       <div class="collection-title-row">
         <div>
+          {% if parent_collection != blank %}
+            <a class="collection-parent-link" href="{{ parent_collection.url }}">Back to {{ parent_collection.title }}</a>
+          {% endif %}
           <h1>{{ collection.title }}</h1>
           <span>{{ collection.all_products_count }} finds</span>
         </div>
@@ -40,6 +90,24 @@
           <div class="rte collection-title-row__description">{{ collection.description }}</div>
         {% endif %}
       </div>
+
+      {% if child_collections != blank %}
+        <section class="collection-children" aria-label="Subcategories">
+          <div class="section-heading section-heading--compact">
+            <div>
+              <p class="section-eyebrow">Browse deeper</p>
+              <h2>Explore within {{ collection.title }}</h2>
+            </div>
+          </div>
+          <div class="collection-children__grid">
+            {% for child_collection in child_collections %}
+              {% render 'collection-card',
+                collection: child_collection,
+                custom_cta: 'Open category' %}
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
 
       <div class="collection-toolbar">
         {% if has_filter_options %}

@@ -1008,14 +1008,34 @@ textarea {
 }
 
 .collection-title-row > div:first-child {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.collection-parent-link {
+  width: fit-content;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .collection-title-row span {
   color: var(--muted);
   font-weight: 700;
+}
+
+.collection-title-row h1 {
+  margin: 0;
+}
+
+.collection-children {
+  margin: 20px 0 28px;
+}
+
+.collection-children__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
 }
 
 .collection-title-row__description {
@@ -2191,6 +2211,7 @@ textarea {
   .department-grid,
   .collection-grid,
   .product-grid,
+  .collection-children__grid,
   .recently-viewed__grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -2360,6 +2381,7 @@ textarea {
   .department-grid,
   .browse-hub__search,
   .collection-grid,
+  .collection-children__grid,
   .product-grid,
   .product-grid--listing,
   .recently-viewed__grid,
