@@ -158,16 +158,11 @@
         {% endif %}
 
         <div class="collection-products">
-          <div class="collection-quick-search">
-            <label for="CollectionQuickSearch">Search this collection</label>
-            <input id="CollectionQuickSearch" type="search" placeholder="Try a keyword, brand or product type" data-collection-search-input>
-            <p class="collection-quick-search__hint">Useful when the product data is light and the sidebar filters do not narrow things down much.</p>
-          </div>
           <div class="collection-products__meta">
             <span>{{ total_products }} products shown</span>
             <span>Free delivery included on every order</span>
           </div>
-          <div class="product-grid product-grid--listing" data-collection-search-grid>
+          <div class="product-grid product-grid--listing">
             {% assign rendered_product = false %}
             {% assign ordered_index = 0 %}
             {% assign shown_in_page = 0 %}
@@ -195,7 +190,6 @@
               <p class="collection-empty-state">Nothing matched those filters. Clear a few and the good stuff should reappear.</p>
             {% endunless %}
           </div>
-          <p class="collection-empty-state collection-empty-state--search is-hidden" data-collection-search-empty>No products in this collection matched that search. Try a broader keyword.</p>
         </div>
       </div>
 

@@ -218,6 +218,92 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   };
 
+  const initCardCarousel = (root) => {
+    if (!root || root.dataset.carouselReady === 'true') return;
+
+    const track = root.querySelector('[data-carousel-track]');
+    const controls = root.querySelector('[data-carousel-controls]');
+    const prevButton = root.querySelector('[data-carousel-prev]');
+    const nextButton = root.querySelector('[data-carousel-next]');
+    const dotsRoot = root.querySelector('[data-carousel-dots]');
+
+    if (!track || !controls || !prevButton || !nextButton || !dotsRoot) return;
+
+    const getItems = () => Array.from(track.children).filter((item) => !item.hidden);
+    const getStepSize = () => {
+      const items = getItems();
+      if (items.length < 2) return items[0]?.getBoundingClientRect().width || track.clientWidth;
+
+      const firstRect = items[0].getBoundingClientRect();
+      const secondRect = items[1].getBoundingClientRect();
+      return Math.max(secondRect.left - firstRect.left, firstRect.width);
+    };
+
+    const buildDots = () => {
+      const items = getItems();
+      dotsRoot.innerHTML = '';
+
+      items.forEach((_, index) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'card-carousel__dot';
+        dot.setAttribute('aria-label', `Go to item ${index + 1}`);
+        dot.addEventListener('click', () => {
+          track.scrollTo({ left: getStepSize() * index, behavior: 'smooth' });
+        });
+        dotsRoot.appendChild(dot);
+      });
+    };
+
+    const updateState = () => {
+      const items = getItems();
+      const shouldEnable = items.length > 1;
+
+      controls.hidden = !shouldEnable;
+      if (!shouldEnable) return;
+
+      const stepSize = getStepSize();
+      const maxScroll = Math.max(track.scrollWidth - track.clientWidth, 0);
+      const activeIndex = Math.min(
+        items.length - 1,
+        Math.max(0, Math.round(track.scrollLeft / Math.max(stepSize, 1)))
+      );
+
+      prevButton.disabled = track.scrollLeft <= 8;
+      nextButton.disabled = track.scrollLeft >= maxScroll - 8;
+
+      Array.from(dotsRoot.children).forEach((dot, index) => {
+        dot.classList.toggle('is-active', index === activeIndex);
+        dot.setAttribute('aria-current', index === activeIndex ? 'true' : 'false');
+      });
+    };
+
+    buildDots();
+    updateState();
+
+    prevButton.addEventListener('click', () => {
+      track.scrollBy({ left: -getStepSize(), behavior: 'smooth' });
+    });
+
+    nextButton.addEventListener('click', () => {
+      track.scrollBy({ left: getStepSize(), behavior: 'smooth' });
+    });
+
+    let scrollTimer = null;
+    track.addEventListener('scroll', () => {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(updateState, 50);
+    }, { passive: true });
+
+    window.addEventListener('resize', updateState);
+
+    root.dataset.carouselReady = 'true';
+  };
+
+  const initAllCardCarousels = () => {
+    document.querySelectorAll('[data-card-carousel]').forEach(initCardCarousel);
+  };
+
   const recentlyViewedRoot = document.querySelector('[data-recently-viewed]');
   if (recentlyViewedRoot) {
     const recentlyViewedGrid = recentlyViewedRoot.querySelector('[data-recently-viewed-grid]');
@@ -233,8 +319,11 @@ document.addEventListener('DOMContentLoaded', () => {
         .map((item) => buildRecentlyViewedCard(item, moneyFormat))
         .join('');
       recentlyViewedRoot.hidden = false;
+      initCardCarousel(recentlyViewedRoot.querySelector('[data-card-carousel]'));
     }
   }
+
+  initAllCardCarousels();
 
   const summaryRoot = document.querySelector('[data-product-description-summary]');
   const summarySource = document.querySelector('[data-product-description-source]');
@@ -297,30 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (filterClose && filterSidebar) {
     filterClose.addEventListener('click', () => filterSidebar.classList.remove('is-open'));
-  }
-
-  const collectionSearchInput = document.querySelector('[data-collection-search-input]');
-  const collectionSearchGrid = document.querySelector('[data-collection-search-grid]');
-  const collectionSearchEmpty = document.querySelector('[data-collection-search-empty]');
-
-  if (collectionSearchInput && collectionSearchGrid) {
-    const searchItems = Array.from(collectionSearchGrid.querySelectorAll('[data-collection-search-item]'));
-
-    collectionSearchInput.addEventListener('input', () => {
-      const query = collectionSearchInput.value.trim().toLowerCase();
-      let visibleCount = 0;
-
-      searchItems.forEach((item) => {
-        const haystack = item.dataset.searchText || '';
-        const matches = !query || haystack.includes(query);
-        item.hidden = !matches;
-        if (matches) visibleCount += 1;
-      });
-
-      if (collectionSearchEmpty) {
-        collectionSearchEmpty.classList.toggle('is-hidden', visibleCount > 0 || !query);
-      }
-    });
   }
 
   document.querySelectorAll('[data-randomized-listing]').forEach((listing) => {

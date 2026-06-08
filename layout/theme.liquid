@@ -117,7 +117,14 @@
             <h2>Your last few finds</h2>
           </div>
         </div>
-        <div class="recently-viewed__grid" data-recently-viewed-grid></div>
+        <div class="card-carousel" data-card-carousel>
+          <div class="card-carousel__controls" data-carousel-controls hidden>
+            <button class="card-carousel__button" type="button" aria-label="Previous items" data-carousel-prev>‹</button>
+            <div class="card-carousel__dots" data-carousel-dots></div>
+            <button class="card-carousel__button" type="button" aria-label="Next items" data-carousel-next>›</button>
+          </div>
+          <div class="recently-viewed__grid" data-carousel-track data-recently-viewed-grid></div>
+        </div>
       </div>
     </section>
     {% sections 'footer-group' %}
