@@ -6,22 +6,22 @@
   --surface: #ffffff;
   --surface-alt: #f8fafc;
   --surface-muted: #f1f5f9;
-  --primary: #ff4b20;
-  --primary-strong: #d63d17;
-  --primary-soft: #ffe3db;
-  --accent: #ff4b20;
-  --accent-strong: #d63d17;
-  --accent-soft: #ffe3db;
-  --accent-wash: #fff7f2;
+  --primary: #1c7391;
+  --primary-strong: #155d75;
+  --primary-soft: #d8edf4;
+  --accent: #1c7391;
+  --accent-strong: #155d75;
+  --accent-soft: #d8edf4;
+  --accent-wash: #f1f9fc;
   --danger: #e30613;
   --danger-soft: #ffe1e4;
   --warning: #b45309;
   --warning-soft: #ffedd5;
   --info: #245cbd;
   --info-soft: #e7f0ff;
-  --purple: #ff4b20;
-  --purple-dark: #d63d17;
-  --orange: #ff4b20;
+  --purple: #1c7391;
+  --purple-dark: #155d75;
+  --orange: #1c7391;
   --red: #e30613;
   --green: #16833a;
   --blue: #245cbd;
@@ -188,10 +188,22 @@ textarea {
 
 .header-services span {
   display: grid;
-  place-items: center;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
   padding: 8px 12px;
   text-align: center;
   border-left: 1px solid var(--line);
+}
+
+.header-services strong {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--orange);
+  font-size: 14px;
+  line-height: 1;
 }
 
 .header-services span:last-child {
@@ -246,7 +258,7 @@ textarea {
   grid-template-columns: 380px 1fr;
   align-items: stretch;
   overflow: hidden;
-  background: linear-gradient(135deg, #ff5a24 0%, #ff4b20 58%, #e63f18 100%);
+  background: linear-gradient(135deg, #2788aa 0%, #1c7391 58%, #155d75 100%);
   color: #fff;
 }
 
@@ -485,7 +497,7 @@ textarea {
   margin: 0 0 24px;
   padding: 18px 20px;
   border: 1px solid var(--line);
-  background: linear-gradient(135deg, #fff7f2 0%, #ffffff 52%, #fff0e8 100%);
+  background: linear-gradient(135deg, #f1f9fc 0%, #ffffff 52%, #eef8fb 100%);
 }
 
 .browse-hub__copy strong {
@@ -1646,7 +1658,7 @@ textarea {
   padding: 34px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: linear-gradient(180deg, #fff7f2 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #f1f9fc 0%, #ffffff 100%);
 }
 
 .not-found-panel h1 {
@@ -1808,7 +1820,7 @@ textarea {
   gap: 22px;
   align-items: center;
   padding: 24px;
-  background: linear-gradient(135deg, var(--surface-muted) 0%, #fff7f2 100%);
+  background: linear-gradient(135deg, var(--surface-muted) 0%, #f1f9fc 100%);
   border-top: 4px solid var(--orange);
 }
 
@@ -1883,7 +1895,7 @@ textarea {
 
 .footer-kicker,
 .footer-heading {
-  color: #ffb39f;
+  color: #93d3e8;
 }
 
 .footer-links {
