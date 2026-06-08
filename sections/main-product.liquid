@@ -178,6 +178,19 @@
     {{ product.variants | json }}
   </script>
 
+  <script type="application/json" data-product-card-json>
+    {
+      "handle": {{ product.handle | json }},
+      "title": {{ product.title | json }},
+      "url": {{ product.url | json }},
+      "vendor": {% if hide_vendor %}""{% else %}{{ product.vendor | json }}{% endif %},
+      "image": {% if product.featured_media %}{{ product.featured_media.preview_image | image_url: width: 900 | json }}{% else %}""{% endif %},
+      "price": {{ current_variant.price | json }},
+      "compareAtPrice": {{ current_variant.compare_at_price | default: 0 | json }},
+      "available": {{ current_variant.available | json }}
+    }
+  </script>
+
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",

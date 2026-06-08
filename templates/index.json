@@ -43,10 +43,10 @@
       },
       "block_order": ["stat_1", "stat_2", "stat_3", "stat_4"],
       "settings": {
-        "eyebrow": "Fresh bargains daily | Free delivery every time",
-        "heading": "Useful finds that make life better without rinsing your budget",
-        "text": "Shop clever home upgrades, garden wins, tech picks and everyday essentials with free delivery built into every order.",
-        "primary_label": "See today's best buys"
+        "eyebrow": "Interesting finds | Useful upgrades | Free delivery every time",
+        "heading": "We find the useful stuff, the clever stuff and the occasionally ridiculous stuff",
+        "text": "Shop problem-solvers, home upgrades, giftable bits and odd little winners with free delivery built into every order.",
+        "primary_label": "Browse the latest finds"
       }
     },
     "value_props": {
@@ -67,7 +67,7 @@
             "icon": "£",
             "eyebrow": "Deals worth opening",
             "heading": "Fresh savings added regularly.",
-            "text": "Find home, garden, tech and everyday picks that feel like a proper win."
+            "text": "Find home, garden, tech and everyday picks that feel handy, surprising or both."
           }
         },
         "value_3": {
@@ -94,16 +94,16 @@
           "type": "tile",
           "settings": {
             "eyebrow": "Start here",
-            "heading": "The useful stuff people end up telling friends about.",
-            "text": "Browse clever buys that make a room nicer, a job easier or a routine less annoying."
+            "heading": "Useful things, smart upgrades and the occasional why-not find.",
+            "text": "Browse buys that make life easier, homes better or gift ideas a bit less predictable."
           }
         },
         "promo_2": {
           "type": "tile",
           "settings": {
             "eyebrow": "Worth a peek",
-            "heading": "Good prices on things you will actually use.",
-            "text": "Skip the filler and head straight for the practical wins with surprisingly decent price tags."
+            "heading": "Interesting finds without the endless scrolling.",
+            "text": "Skip the filler and head straight for the products that feel handy, surprising or weirdly perfect."
           }
         },
         "promo_3": {
@@ -122,8 +122,8 @@
       "type": "newsletter-band",
       "settings": {
         "eyebrow": "Inbox perks",
-        "heading": "Get the good stuff before everyone else.",
-        "text": "Sign up for deal drops, restock alerts and smart buys worth pouncing on."
+        "heading": "Get the good finds before everyone else.",
+        "text": "Sign up for deal drops, restock alerts and useful or gloriously unnecessary finds worth seeing first."
       }
     }
   },

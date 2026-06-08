@@ -103,6 +103,23 @@
     <main id="MainContent" class="main-content">
       {{ content_for_layout }}
     </main>
+    <section
+      class="recently-viewed"
+      data-recently-viewed
+      data-current-product-handle="{% if request.page_type == 'product' %}{{ product.handle }}{% endif %}"
+      data-money-format="{{ shop.money_format | escape }}"
+      hidden
+    >
+      <div class="page-width">
+        <div class="section-heading section-heading--compact">
+          <div>
+            <p class="section-eyebrow">Recently viewed</p>
+            <h2>Your last few finds</h2>
+          </div>
+        </div>
+        <div class="recently-viewed__grid" data-recently-viewed-grid></div>
+      </div>
+    </section>
     {% sections 'footer-group' %}
   </body>
 </html>

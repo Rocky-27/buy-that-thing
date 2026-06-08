@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const recentStorageKey = 'buy-that-thing:recently-viewed';
   const escapeHtml = (value) =>
     value
       .replace(/&/g, '&amp;')
@@ -154,6 +155,87 @@ document.addEventListener('DOMContentLoaded', () => {
     return clone;
   };
 
+  const readRecentlyViewed = () => {
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(recentStorageKey) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const writeRecentlyViewed = (items) => {
+    try {
+      window.localStorage.setItem(recentStorageKey, JSON.stringify(items));
+    } catch (error) {
+      return;
+    }
+  };
+
+  const formatMoneyValue = (cents, moneyFormat = '${{amount}}') => {
+    const value = (Number(cents) / 100).toFixed(2);
+    return moneyFormat.replace(/\{\{\s*amount\s*\}\}/, value);
+  };
+
+  const buildRecentlyViewedCard = (product, moneyFormat) => {
+    const compareAtHtml =
+      product.compareAtPrice && product.compareAtPrice > product.price
+        ? `<span class="price__compare">${formatMoneyValue(product.compareAtPrice, moneyFormat)}</span>`
+        : '';
+    const vendorHtml = product.vendor
+      ? `<p class="product-card__vendor">${escapeHtml(product.vendor)}</p>`
+      : '';
+    const imageHtml = product.image
+      ? `<img class="product-card__image" src="${escapeHtml(product.image)}" alt="${escapeHtml(product.title)}" loading="lazy">`
+      : '';
+    const availabilityLabel = product.available ? 'View product' : 'Currently unavailable';
+
+    return `
+      <article class="product-card product-card--compact">
+        <a class="product-card__image-link" href="${escapeHtml(product.url)}">
+          ${imageHtml}
+        </a>
+        <div class="product-card__content">
+          <div class="variant-preview variant-preview--empty" aria-hidden="true"></div>
+          <div class="product-card__header">
+            ${vendorHtml}
+            <h3><a href="${escapeHtml(product.url)}">${escapeHtml(product.title)}</a></h3>
+          </div>
+          <div class="product-card__rating product-card__rating--empty" aria-hidden="true"></div>
+          <div class="product-card__price">
+            <div class="price">
+              <span class="price__current">${formatMoneyValue(product.price, moneyFormat)}</span>
+              ${compareAtHtml}
+            </div>
+          </div>
+          <div class="delivery-lines">
+            <span>Recently viewed</span>
+            <strong>${availabilityLabel}</strong>
+          </div>
+          <a class="product-card__basket" href="${escapeHtml(product.url)}">View item</a>
+        </div>
+      </article>
+    `;
+  };
+
+  const recentlyViewedRoot = document.querySelector('[data-recently-viewed]');
+  if (recentlyViewedRoot) {
+    const recentlyViewedGrid = recentlyViewedRoot.querySelector('[data-recently-viewed-grid]');
+    const currentProductHandle = recentlyViewedRoot.dataset.currentProductHandle;
+    const moneyFormat = recentlyViewedRoot.dataset.moneyFormat || '${{amount}}';
+    const recentItems = readRecentlyViewed()
+      .filter((item) => item && item.handle && item.url && item.title)
+      .filter((item) => item.handle !== currentProductHandle)
+      .slice(0, 4);
+
+    if (recentlyViewedGrid && recentItems.length > 0) {
+      recentlyViewedGrid.innerHTML = recentItems
+        .map((item) => buildRecentlyViewedCard(item, moneyFormat))
+        .join('');
+      recentlyViewedRoot.hidden = false;
+    }
+  }
+
   const summaryRoot = document.querySelector('[data-product-description-summary]');
   const summarySource = document.querySelector('[data-product-description-source]');
   const summaryToggle = document.querySelector('[data-product-description-toggle]');
@@ -243,12 +325,19 @@ document.addEventListener('DOMContentLoaded', () => {
   const saleCallout = productRoot.querySelector('[data-product-sale-callout]');
   const statusPill = productRoot.querySelector('[data-product-status-pill]');
   const variantsNode = productRoot.querySelector('[data-product-json]');
+  const productCardNode = productRoot.querySelector('[data-product-card-json]');
   const variants = variantsNode ? JSON.parse(variantsNode.textContent) : [];
+  const productCardData = productCardNode ? JSON.parse(productCardNode.textContent) : null;
 
   const formatMoney = (cents) => {
-    const value = (Number(cents) / 100).toFixed(2);
-    return moneyFormat.replace(/\{\{\s*amount\s*\}\}/, value);
+    return formatMoneyValue(cents, moneyFormat);
   };
+
+  if (productCardData && productCardData.handle) {
+    const recentItems = readRecentlyViewed().filter((item) => item.handle !== productCardData.handle);
+    recentItems.unshift(productCardData);
+    writeRecentlyViewed(recentItems.slice(0, 8));
+  }
 
   thumbs.forEach((thumb) => {
     thumb.addEventListener('click', () => {
