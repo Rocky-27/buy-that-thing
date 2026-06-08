@@ -1,4 +1,5 @@
 {% assign collections_index_url = '/collections' %}
+{% assign mega_nav_collections = section.settings.mega_menu_collections %}
 <header class="site-header" data-header>
   <div class="page-width header-main">
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
@@ -54,68 +55,121 @@
   <div class="header-nav-wrap">
     <nav class="page-width site-nav" aria-label="Primary">
       <a class="site-nav__all" href="{{ collections_index_url }}">Shop by category</a>
-      {% for link in section.settings.menu.links %}
-        {% assign normalized_title = link.title | downcase %}
-        {% assign nav_url = link.url %}
-        {% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}
-          {% assign nav_url = collections_index_url %}
-        {% endif %}
-        {% assign linked_collection = blank %}
-        {% if link.type == 'collection_link' %}
-          {% assign linked_collection = link.object %}
-        {% endif %}
-        {% assign linked_children = blank %}
-        {% if linked_collection != blank %}
+      {% if mega_nav_collections != blank %}
+        {% for linked_collection in mega_nav_collections %}
           {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
-        {% endif %}
-        <div class="site-nav__item{% if linked_children != blank %} site-nav__item--has-children{% endif %}">
-          <a href="{{ nav_url }}">{{ link.title }}</a>
-          {% if linked_children != blank %}
-            <div class="site-nav__mega" aria-label="{{ link.title }}">
-              <div class="site-nav__mega-grid">
-                <div class="site-nav__mega-intro">
-                  <p class="site-nav__mega-eyebrow">{{ linked_collection.title }}</p>
-                  <h3>Browse {{ linked_collection.title }}</h3>
-                  {% if linked_collection.description != blank %}
-                    <p>{{ linked_collection.description | strip_html | truncatewords: 18 }}</p>
-                  {% endif %}
-                  <a href="{{ linked_collection.url }}">Shop all {{ linked_collection.title }}</a>
-                </div>
-                <div class="site-nav__mega-columns">
-                  {% for child_collection in linked_children %}
-                    {% assign grand_children = child_collection.metafields.custom.child_collections.value %}
-                    <div class="site-nav__mega-column">
-                      <a class="site-nav__mega-parent" href="{{ child_collection.url }}">
-                        <span class="site-nav__mega-card-media">
-                          {% if child_collection.featured_image %}
-                            {{ child_collection.featured_image | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
-                          {% elsif child_collection.products.first.featured_media %}
-                            {{ child_collection.products.first.featured_media | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
-                          {% endif %}
-                        </span>
-                        <span class="site-nav__mega-card-copy">
-                          <strong>{{ child_collection.title }}</strong>
-                          <small>{{ child_collection.products_count }} finds</small>
-                        </span>
-                      </a>
-                      {% if grand_children != blank %}
-                        <div class="site-nav__mega-links">
-                          {% for grand_child in grand_children %}
-                            <a href="{{ grand_child.url }}">
-                              <span>{{ grand_child.title }}</span>
-                              <small>{{ grand_child.products_count }} finds</small>
-                            </a>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    </div>
-                  {% endfor %}
+          <div class="site-nav__item{% if linked_children != blank %} site-nav__item--has-children{% endif %}">
+            <a href="{{ linked_collection.url }}">{{ linked_collection.title }}</a>
+            {% if linked_children != blank %}
+              <div class="site-nav__mega" aria-label="{{ linked_collection.title }}">
+                <div class="site-nav__mega-grid">
+                  <div class="site-nav__mega-intro">
+                    <p class="site-nav__mega-eyebrow">{{ linked_collection.title }}</p>
+                    <h3>Browse {{ linked_collection.title }}</h3>
+                    {% if linked_collection.description != blank %}
+                      <p>{{ linked_collection.description | strip_html | truncatewords: 18 }}</p>
+                    {% endif %}
+                    <a href="{{ linked_collection.url }}">Shop all {{ linked_collection.title }}</a>
+                  </div>
+                  <div class="site-nav__mega-columns">
+                    {% for child_collection in linked_children %}
+                      {% assign grand_children = child_collection.metafields.custom.child_collections.value %}
+                      <div class="site-nav__mega-column">
+                        <a class="site-nav__mega-parent" href="{{ child_collection.url }}">
+                          <span class="site-nav__mega-card-media">
+                            {% if child_collection.featured_image %}
+                              {{ child_collection.featured_image | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                            {% elsif child_collection.products.first.featured_media %}
+                              {{ child_collection.products.first.featured_media | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                            {% endif %}
+                          </span>
+                          <span class="site-nav__mega-card-copy">
+                            <strong>{{ child_collection.title }}</strong>
+                            <small>{{ child_collection.products_count }} finds</small>
+                          </span>
+                        </a>
+                        {% if grand_children != blank %}
+                          <div class="site-nav__mega-links">
+                            {% for grand_child in grand_children %}
+                              <a href="{{ grand_child.url }}">
+                                <span>{{ grand_child.title }}</span>
+                                <small>{{ grand_child.products_count }} finds</small>
+                              </a>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
               </div>
-            </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        {% for link in section.settings.menu.links %}
+          {% assign normalized_title = link.title | downcase %}
+          {% assign nav_url = link.url %}
+          {% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}
+            {% assign nav_url = collections_index_url %}
           {% endif %}
-        </div>
-      {% endfor %}
+          {% assign linked_collection = blank %}
+          {% if link.type == 'collection_link' %}
+            {% assign linked_collection = link.object %}
+          {% endif %}
+          {% assign linked_children = blank %}
+          {% if linked_collection != blank %}
+            {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
+          {% endif %}
+          <div class="site-nav__item{% if linked_children != blank %} site-nav__item--has-children{% endif %}">
+            <a href="{{ nav_url }}">{{ link.title }}</a>
+            {% if linked_children != blank %}
+              <div class="site-nav__mega" aria-label="{{ link.title }}">
+                <div class="site-nav__mega-grid">
+                  <div class="site-nav__mega-intro">
+                    <p class="site-nav__mega-eyebrow">{{ linked_collection.title }}</p>
+                    <h3>Browse {{ linked_collection.title }}</h3>
+                    {% if linked_collection.description != blank %}
+                      <p>{{ linked_collection.description | strip_html | truncatewords: 18 }}</p>
+                    {% endif %}
+                    <a href="{{ linked_collection.url }}">Shop all {{ linked_collection.title }}</a>
+                  </div>
+                  <div class="site-nav__mega-columns">
+                    {% for child_collection in linked_children %}
+                      {% assign grand_children = child_collection.metafields.custom.child_collections.value %}
+                      <div class="site-nav__mega-column">
+                        <a class="site-nav__mega-parent" href="{{ child_collection.url }}">
+                          <span class="site-nav__mega-card-media">
+                            {% if child_collection.featured_image %}
+                              {{ child_collection.featured_image | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                            {% elsif child_collection.products.first.featured_media %}
+                              {{ child_collection.products.first.featured_media | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                            {% endif %}
+                          </span>
+                          <span class="site-nav__mega-card-copy">
+                            <strong>{{ child_collection.title }}</strong>
+                            <small>{{ child_collection.products_count }} finds</small>
+                          </span>
+                        </a>
+                        {% if grand_children != blank %}
+                          <div class="site-nav__mega-links">
+                            {% for grand_child in grand_children %}
+                              <a href="{{ grand_child.url }}">
+                                <span>{{ grand_child.title }}</span>
+                                <small>{{ grand_child.products_count }} finds</small>
+                              </a>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
       <a class="site-nav__sale" href="/collections/special-offer">Sale</a>
     </nav>
   </div>
@@ -128,31 +182,47 @@
         <div class="site-search__results" id="predictive-search-mobile" data-predictive-search-results hidden></div>
       </form>
       <a href="{{ collections_index_url }}">Shop by category</a>
-      {% for link in section.settings.menu.links %}
-        {% assign normalized_title = link.title | downcase %}
-        {% assign nav_url = link.url %}
-        {% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}
-          {% assign nav_url = collections_index_url %}
-        {% endif %}
-        {% assign linked_collection = blank %}
-        {% if link.type == 'collection_link' %}
-          {% assign linked_collection = link.object %}
-        {% endif %}
-        {% assign linked_children = blank %}
-        {% if linked_collection != blank %}
+      {% if mega_nav_collections != blank %}
+        {% for linked_collection in mega_nav_collections %}
           {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
-        {% endif %}
-        <div class="mobile-menu__group">
-          <a href="{{ nav_url }}">{{ link.title }}</a>
-          {% if linked_children != blank %}
-            <div class="mobile-menu__children">
-              {% for child_collection in linked_children %}
-                <a href="{{ child_collection.url }}">{{ child_collection.title }}</a>
-              {% endfor %}
-            </div>
+          <div class="mobile-menu__group">
+            <a href="{{ linked_collection.url }}">{{ linked_collection.title }}</a>
+            {% if linked_children != blank %}
+              <div class="mobile-menu__children">
+                {% for child_collection in linked_children %}
+                  <a href="{{ child_collection.url }}">{{ child_collection.title }}</a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        {% for link in section.settings.menu.links %}
+          {% assign normalized_title = link.title | downcase %}
+          {% assign nav_url = link.url %}
+          {% if normalized_title contains 'catalog' or normalized_title contains 'collection' %}
+            {% assign nav_url = collections_index_url %}
           {% endif %}
-        </div>
-      {% endfor %}
+          {% assign linked_collection = blank %}
+          {% if link.type == 'collection_link' %}
+            {% assign linked_collection = link.object %}
+          {% endif %}
+          {% assign linked_children = blank %}
+          {% if linked_collection != blank %}
+            {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
+          {% endif %}
+          <div class="mobile-menu__group">
+            <a href="{{ nav_url }}">{{ link.title }}</a>
+            {% if linked_children != blank %}
+              <div class="mobile-menu__children">
+                {% for child_collection in linked_children %}
+                  <a href="{{ child_collection.url }}">{{ child_collection.title }}</a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
       <a href="{{ routes.account_url }}">Account</a>
       <a href="{{ routes.cart_url }}">Basket ({{ cart.item_count }})</a>
     </div>
@@ -166,7 +236,13 @@
     {
       "type": "link_list",
       "id": "menu",
-      "label": "Menu"
+      "label": "Fallback menu"
+    },
+    {
+      "type": "collection_list",
+      "id": "mega_menu_collections",
+      "label": "Top-level collections for mega menu",
+      "limit": 8
     },
     {
       "type": "text",
