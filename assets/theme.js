@@ -523,6 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterToggle = document.querySelector('[data-filter-toggle]');
   const filterClose = document.querySelector('[data-filter-close]');
   const filterSidebar = document.querySelector('[data-filter-sidebar]');
+  const mobileFiltersQuery = window.matchMedia('(max-width: 1024px)');
 
   const predictiveSearchForms = Array.from(document.querySelectorAll('[data-predictive-search-form]'));
 
@@ -725,11 +726,35 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (filterToggle && filterSidebar) {
-    filterToggle.addEventListener('click', () => filterSidebar.classList.add('is-open'));
+    const syncFilterState = (isOpen) => {
+      filterSidebar.classList.toggle('is-open', isOpen);
+      filterToggle.setAttribute('aria-expanded', String(isOpen));
+    };
+
+    filterToggle.addEventListener('click', () => {
+      if (!mobileFiltersQuery.matches) return;
+      syncFilterState(!filterSidebar.classList.contains('is-open'));
+    });
+
+    const resetFiltersForViewport = (event) => {
+      if (!event.matches) {
+        filterSidebar.classList.remove('is-open');
+        filterToggle.setAttribute('aria-expanded', 'false');
+      }
+    };
+
+    if (typeof mobileFiltersQuery.addEventListener === 'function') {
+      mobileFiltersQuery.addEventListener('change', resetFiltersForViewport);
+    } else if (typeof mobileFiltersQuery.addListener === 'function') {
+      mobileFiltersQuery.addListener(resetFiltersForViewport);
+    }
   }
 
   if (filterClose && filterSidebar) {
-    filterClose.addEventListener('click', () => filterSidebar.classList.remove('is-open'));
+    filterClose.addEventListener('click', () => {
+      filterSidebar.classList.remove('is-open');
+      if (filterToggle) filterToggle.setAttribute('aria-expanded', 'false');
+    });
   }
 
   document.querySelectorAll('[data-randomized-listing]').forEach((listing) => {

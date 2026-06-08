@@ -123,7 +123,15 @@
       <div class="collection-toolbar">
         <div class="collection-toolbar__primary">
           {% if has_sidebar_content %}
-            <button type="button" class="filter-drawer-toggle" data-filter-toggle>Browse categories</button>
+            <button
+              type="button"
+              class="filter-drawer-toggle"
+              data-filter-toggle
+              aria-expanded="false"
+              aria-controls="CollectionFilters"
+            >
+              Browse categories
+            </button>
           {% endif %}
           <form class="collection-toolbar__sort" method="get" data-sort-form>
             <label for="SortBy">Sort by</label>
@@ -155,7 +163,7 @@
 
       <div class="collection-layout{% unless has_sidebar_content %} collection-layout--simple{% endunless %}">
         {% if has_sidebar_content %}
-          <aside class="collection-filters" data-filter-sidebar>
+          <aside class="collection-filters" id="CollectionFilters" data-filter-sidebar>
             <div class="collection-filters__header">
               <strong>Browse categories</strong>
               <button type="button" data-filter-close>Close</button>

@@ -4,6 +4,7 @@ Scripts are grouped by workflow:
 
 - [enrichment](./enrichment): product description and tag enrichment
 - [collection-taxonomy](./collection-taxonomy): catalog cache, taxonomy planning, and Shopify apply
+- [collection-descriptions](./collection-descriptions): AI-written collection copy
 
 Outputs stay ignored by git:
 
@@ -12,3 +13,4 @@ Outputs stay ignored by git:
 - `catalog-cache/`
 - `taxonomy-plans/`
 - `taxonomy-apply-output/`
+- `collection-description-output/`

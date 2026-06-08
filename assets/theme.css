@@ -2493,26 +2493,26 @@ textarea {
   .filter-drawer-toggle {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
   }
 
   .collection-filters {
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 50;
-    width: min(360px, 92vw);
-    overflow: auto;
+    display: none;
+    position: static;
+    z-index: auto;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 10px;
     padding: 18px;
     background: #fff;
-    border: 0;
-    border-right: 1px solid var(--line);
-    border-radius: 0;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    top: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+    top: auto;
   }
 
   .collection-filters.is-open {
-    transform: translateX(0);
+    display: grid;
   }
 
   .collection-filters__header button {
