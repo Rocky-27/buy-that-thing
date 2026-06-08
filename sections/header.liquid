@@ -85,11 +85,26 @@
                   {% for child_collection in linked_children %}
                     {% assign grand_children = child_collection.metafields.custom.child_collections.value %}
                     <div class="site-nav__mega-column">
-                      <a class="site-nav__mega-parent" href="{{ child_collection.url }}">{{ child_collection.title }}</a>
+                      <a class="site-nav__mega-parent" href="{{ child_collection.url }}">
+                        <span class="site-nav__mega-card-media">
+                          {% if child_collection.featured_image %}
+                            {{ child_collection.featured_image | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                          {% elsif child_collection.products.first.featured_media %}
+                            {{ child_collection.products.first.featured_media | image_url: width: 360 | image_tag: alt: child_collection.title, loading: 'lazy', widths: '180, 360', sizes: '180px' }}
+                          {% endif %}
+                        </span>
+                        <span class="site-nav__mega-card-copy">
+                          <strong>{{ child_collection.title }}</strong>
+                          <small>{{ child_collection.products_count }} finds</small>
+                        </span>
+                      </a>
                       {% if grand_children != blank %}
                         <div class="site-nav__mega-links">
                           {% for grand_child in grand_children %}
-                            <a href="{{ grand_child.url }}">{{ grand_child.title }}</a>
+                            <a href="{{ grand_child.url }}">
+                              <span>{{ grand_child.title }}</span>
+                              <small>{{ grand_child.products_count }} finds</small>
+                            </a>
                           {% endfor %}
                         </div>
                       {% endif %}
