@@ -299,6 +299,30 @@ document.addEventListener('DOMContentLoaded', () => {
     filterClose.addEventListener('click', () => filterSidebar.classList.remove('is-open'));
   }
 
+  const collectionSearchInput = document.querySelector('[data-collection-search-input]');
+  const collectionSearchGrid = document.querySelector('[data-collection-search-grid]');
+  const collectionSearchEmpty = document.querySelector('[data-collection-search-empty]');
+
+  if (collectionSearchInput && collectionSearchGrid) {
+    const searchItems = Array.from(collectionSearchGrid.querySelectorAll('[data-collection-search-item]'));
+
+    collectionSearchInput.addEventListener('input', () => {
+      const query = collectionSearchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      searchItems.forEach((item) => {
+        const haystack = item.dataset.searchText || '';
+        const matches = !query || haystack.includes(query);
+        item.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+
+      if (collectionSearchEmpty) {
+        collectionSearchEmpty.classList.toggle('is-hidden', visibleCount > 0 || !query);
+      }
+    });
+  }
+
   document.querySelectorAll('[data-randomized-listing]').forEach((listing) => {
     const visibleCount = Number(listing.dataset.visibleCount || 0);
     const items = Array.from(listing.querySelectorAll('[data-randomized-item]'));

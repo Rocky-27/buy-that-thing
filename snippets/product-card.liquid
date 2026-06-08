@@ -7,8 +7,13 @@
 {% if vendor_normalized == blank or vendor_normalized == 'unbranded' or vendor_normalized == 'na' or vendor_normalized == 'none' or vendor_normalized == 'unknown' or vendor_normalized == 'generic' or vendor_normalized == 'novendor' %}
   {% assign hide_vendor = true %}
 {% endif %}
+{% capture card_search_text %}{{ product.title }} {{ product.vendor }} {{ product.type }}{% endcapture %}
 
-<article class="product-card">
+<article
+  class="product-card"
+  data-collection-search-item
+  data-search-text="{{ card_search_text | downcase | escape }}"
+>
   <a class="product-card__image-link" href="{{ product.url }}">
     {% if product.featured_media %}
       {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}

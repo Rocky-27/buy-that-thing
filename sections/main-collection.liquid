@@ -9,6 +9,22 @@
       {% assign current_page_number = current_page | default: 1 %}
       {% assign page_offset = current_page_number | minus: 1 | times: products_per_page %}
       {% assign total_pages = total_products | times: 1.0 | divided_by: products_per_page | ceil %}
+      {% assign has_filter_options = false %}
+      {% for filter in collection.filters %}
+        {% if filter.type == 'price_range' %}
+          {% assign has_filter_options = true %}
+          {% break %}
+        {% endif %}
+        {% for value in filter.values %}
+          {% if value.count > 0 or value.active %}
+            {% assign has_filter_options = true %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+        {% if has_filter_options %}
+          {% break %}
+        {% endif %}
+      {% endfor %}
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="{{ routes.root_url }}">Home</a>
         <span>/</span>
@@ -26,7 +42,11 @@
       </div>
 
       <div class="collection-toolbar">
-        <button type="button" class="filter-drawer-toggle" data-filter-toggle>Filter and sort</button>
+        {% if has_filter_options %}
+          <button type="button" class="filter-drawer-toggle" data-filter-toggle>Filter and sort</button>
+        {% else %}
+          <div></div>
+        {% endif %}
         <div class="active-filter-chips">
           {% for filter in collection.filters %}
             {% for active_value in filter.active_values %}
@@ -65,68 +85,89 @@
         </form>
       </div>
 
-      <div class="collection-layout">
-        <aside class="collection-filters" data-filter-sidebar>
-          <div class="collection-filters__header">
-            <strong>Refine this collection</strong>
-            <button type="button" data-filter-close>Close</button>
-          </div>
+      <div class="collection-layout{% unless has_filter_options %} collection-layout--simple{% endunless %}">
+        {% if has_filter_options %}
+          <aside class="collection-filters" data-filter-sidebar>
+            <div class="collection-filters__header">
+              <strong>Refine this collection</strong>
+              <button type="button" data-filter-close>Close</button>
+            </div>
 
-          {% if collection.all_products_count > 0 %}
-            <a class="filter-category-link" href="{{ collection.url }}">{{ collection.title }}</a>
-          {% endif %}
+            {% if collection.all_products_count > 0 %}
+              <a class="filter-category-link" href="{{ collection.url }}">{{ collection.title }}</a>
+            {% endif %}
 
-          {% for filter in collection.filters %}
-            <details class="filter-group" open>
-              <summary>{{ filter.label }}</summary>
-              <div class="filter-group__body">
-                {% case filter.type %}
-                  {% when 'boolean', 'list' %}
-                    {% for value in filter.values limit: 12 %}
-                      <label class="filter-checkbox{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
-                        <input
-                          type="checkbox"
-                          name="{{ value.param_name }}"
-                          value="{{ value.value }}"
-                          {% if value.active %}checked{% endif %}
-                          {% if value.count == 0 and value.active == false %}disabled{% endif %}
-                          form="CollectionFilters"
-                        >
-                        <span>{{ value.label }}</span>
-                        <em>{{ value.count }}</em>
-                      </label>
-                    {% endfor %}
-                  {% when 'price_range' %}
+            {% for filter in collection.filters %}
+              {% assign visible_values = 0 %}
+              {% if filter.type == 'price_range' %}
+                <details class="filter-group" open>
+                  <summary>{{ filter.label }}</summary>
+                  <div class="filter-group__body">
                     <div class="price-filter">
                       <label>
                         Min
-                        <input form="CollectionFilters" name="{{ filter.min_value.param_name }}" type="number" min="0" placeholder="0">
+                        <input form="CollectionFilters" name="{{ filter.min_value.param_name }}" type="number" min="0" placeholder="0" {% if filter.min_value.value != nil %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}>
                       </label>
                       <label>
                         Max
-                        <input form="CollectionFilters" name="{{ filter.max_value.param_name }}" type="number" min="0" placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}">
+                        <input form="CollectionFilters" name="{{ filter.max_value.param_name }}" type="number" min="0" placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}" {% if filter.max_value.value != nil %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}>
                       </label>
                     </div>
-                {% endcase %}
-              </div>
-            </details>
-          {% endfor %}
+                  </div>
+                </details>
+              {% else %}
+                {% for value in filter.values %}
+                  {% if value.count > 0 or value.active %}
+                    {% assign visible_values = visible_values | plus: 1 %}
+                  {% endif %}
+                {% endfor %}
+                {% if visible_values > 0 %}
+                  <details class="filter-group" open>
+                    <summary>{{ filter.label }}</summary>
+                    <div class="filter-group__body">
+                      {% for value in filter.values limit: 12 %}
+                        {% if value.count > 0 or value.active %}
+                          <label class="filter-checkbox{% if value.count == 0 and value.active == false %} is-disabled{% endif %}">
+                            <input
+                              type="checkbox"
+                              name="{{ value.param_name }}"
+                              value="{{ value.value }}"
+                              {% if value.active %}checked{% endif %}
+                              {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                              form="CollectionFilters"
+                            >
+                            <span>{{ value.label }}</span>
+                            <em>{{ value.count }}</em>
+                          </label>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </details>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
 
-          <form id="CollectionFilters" class="filter-actions" method="get">
-            {% if sort_by != blank %}
-              <input type="hidden" name="sort_by" value="{{ sort_by }}">
-            {% endif %}
-            <button class="button button--primary" type="submit">Apply filters</button>
-            <a href="{{ collection.url }}">Clear all</a>
-          </form>
-        </aside>
+            <form id="CollectionFilters" class="filter-actions" method="get">
+              {% if sort_by != blank %}
+                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+              {% endif %}
+              <button class="button button--primary" type="submit">Apply filters</button>
+              <a href="{{ collection.url }}">Clear all</a>
+            </form>
+          </aside>
+        {% endif %}
 
         <div class="collection-products">
+          <div class="collection-quick-search">
+            <label for="CollectionQuickSearch">Search this collection</label>
+            <input id="CollectionQuickSearch" type="search" placeholder="Try a keyword, brand or product type" data-collection-search-input>
+            <p class="collection-quick-search__hint">Useful when the product data is light and the sidebar filters do not narrow things down much.</p>
+          </div>
           <div class="collection-products__meta">
             <span>{{ total_products }} products shown</span>
             <span>Free delivery included on every order</span>
           </div>
-          <div class="product-grid product-grid--listing">
+          <div class="product-grid product-grid--listing" data-collection-search-grid>
             {% assign rendered_product = false %}
             {% assign ordered_index = 0 %}
             {% assign shown_in_page = 0 %}
@@ -154,6 +195,7 @@
               <p class="collection-empty-state">Nothing matched those filters. Clear a few and the good stuff should reappear.</p>
             {% endunless %}
           </div>
+          <p class="collection-empty-state collection-empty-state--search is-hidden" data-collection-search-empty>No products in this collection matched that search. Try a broader keyword.</p>
         </div>
       </div>
 
