@@ -45,16 +45,16 @@
 
   <div class="header-services">
     <div class="page-width header-services__inner">
-      <span><strong>🚚</strong> Curated finds from a wide mix of suppliers</span>
-      <span><strong>✨</strong> Practical, quirky and properly useful picks</span>
-      <span><strong>💬</strong> A broad range without the endless trawling</span>
-      <span><strong>🔒</strong> Straightforward checkout, no nonsense at the end</span>
+      <span><strong>🚚</strong> Free delivery on every order</span>
+      <span><strong>✨</strong> Fresh finds, smart upgrades and standout buys</span>
+      <span><strong>💬</strong> Big range, quick browsing, less faff</span>
+      <span><strong>🔒</strong> Secure checkout</span>
     </div>
   </div>
 
   <div class="header-nav-wrap">
     <nav class="page-width site-nav" aria-label="Primary">
-      <a class="site-nav__all" href="{{ collections_index_url }}">Browse the full edit</a>
+      <a class="site-nav__all" href="{{ collections_index_url }}">Shop by category</a>
       {% if mega_nav_collections != blank %}
         {% for linked_collection in mega_nav_collections %}
           {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
@@ -65,11 +65,11 @@
                 <div class="site-nav__mega-grid">
                   <div class="site-nav__mega-intro">
                     <p class="site-nav__mega-eyebrow">{{ linked_collection.title }}</p>
-                    <h3>Explore {{ linked_collection.title }}</h3>
+                    <h3>Browse {{ linked_collection.title }}</h3>
                     {% if linked_collection.description != blank %}
                       <p>{{ linked_collection.description | strip_html | truncatewords: 18 }}</p>
                     {% endif %}
-                    <a href="{{ linked_collection.url }}">See all {{ linked_collection.title }}</a>
+                    <a href="{{ linked_collection.url }}">Shop all {{ linked_collection.title }}</a>
                   </div>
                   <div class="site-nav__mega-columns">
                     {% for child_collection in linked_children %}
@@ -128,11 +128,11 @@
                 <div class="site-nav__mega-grid">
                   <div class="site-nav__mega-intro">
                     <p class="site-nav__mega-eyebrow">{{ linked_collection.title }}</p>
-                    <h3>Explore {{ linked_collection.title }}</h3>
+                    <h3>Browse {{ linked_collection.title }}</h3>
                     {% if linked_collection.description != blank %}
                       <p>{{ linked_collection.description | strip_html | truncatewords: 18 }}</p>
                     {% endif %}
-                    <a href="{{ linked_collection.url }}">See all {{ linked_collection.title }}</a>
+                    <a href="{{ linked_collection.url }}">Shop all {{ linked_collection.title }}</a>
                   </div>
                   <div class="site-nav__mega-columns">
                     {% for child_collection in linked_children %}
@@ -181,7 +181,7 @@
         <button type="submit" aria-label="Search">Search</button>
         <div class="site-search__results" id="predictive-search-mobile" data-predictive-search-results hidden></div>
       </form>
-      <a href="{{ collections_index_url }}">Browse the full edit</a>
+      <a href="{{ collections_index_url }}">Shop by category</a>
       {% if mega_nav_collections != blank %}
         {% for linked_collection in mega_nav_collections %}
           {% assign linked_children = linked_collection.metafields.custom.child_collections.value %}
@@ -248,7 +248,7 @@
       "type": "text",
       "id": "search_placeholder",
       "label": "Search placeholder",
-      "default": "Search our edit of home finds, useful upgrades, gifts and odd little gems..."
+      "default": "Search clever home finds, garden wins, gifts and gadgets..."
     }
   ]
 }

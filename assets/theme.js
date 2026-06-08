@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <div class="delivery-lines">
-            <span>Seen recently</span>
+            <span>Recently viewed</span>
             <strong>${availabilityLabel}</strong>
           </div>
           <a class="product-card__basket" href="${escapeHtml(product.url)}">View item</a>

@@ -9,11 +9,11 @@
 
       <div class="search-header">
         <div>
-          <p class="section-eyebrow">Search the full edit</p>
+          <p class="section-eyebrow">Search the store</p>
           {% if search.performed %}
             <h1>{{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %} for “{{ search.terms | escape }}”</h1>
           {% else %}
-            <h1>Search across a wide mix of practical finds, giftable oddities and useful home upgrades.</h1>
+            <h1>Find the right product fast.</h1>
           {% endif %}
         </div>
 
@@ -53,8 +53,8 @@
         {% else %}
           <div class="search-empty-state">
             <h2>No matches for “{{ search.terms | escape }}”</h2>
-            <p>Try a broader phrase, a different category, or have a proper rummage through the wider collection.</p>
-            <a class="button button--primary" href="{{ routes.all_products_collection_url }}">See the full collection</a>
+            <p>Try a broader search term, check the spelling, or browse the full range instead.</p>
+            <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Browse all products</a>
           </div>
         {% endif %}
 
@@ -72,7 +72,7 @@
       {% else %}
         <div class="search-empty-state">
           <h2>Search for a product, brand or category</h2>
-          <p>We pull together all sorts from across the supplier mix, so a simple search is usually the fastest way in.</p>
+          <p>Search the full range and jump straight to the best match.</p>
         </div>
       {% endif %}
     </div>
