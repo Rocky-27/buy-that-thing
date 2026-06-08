@@ -1215,6 +1215,10 @@ textarea {
   font-weight: 800;
 }
 
+.product-return-link[hidden] {
+  display: none !important;
+}
+
 .product-return-link::before {
   content: "<-";
   font-size: 16px;
