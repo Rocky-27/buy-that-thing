@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "name": "Header group",
   "type": "header",
@@ -5,9 +14,17 @@
     "header": {
       "type": "header",
       "settings": {
-        "menu": "main-menu"
+        "menu": "main-menu",
+        "mega_menu_collections": [
+          "home",
+          "garden",
+          "diy-tools"
+        ],
+        "search_placeholder": "Search clever home finds, garden wins, gadgets..."
       }
     }
   },
-  "order": ["header"]
+  "order": [
+    "header"
+  ]
 }
