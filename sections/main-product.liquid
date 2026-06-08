@@ -28,6 +28,7 @@
               src="{{ current_variant.featured_media.preview_image | image_url: width: 1400 }}"
               alt="{{ current_variant.featured_media.alt | escape }}"
               loading="eager"
+              data-zoom-image="{% if current_variant.featured_media.preview_image %}{{ current_variant.featured_media.preview_image | image_url: width: 2200 }}{% endif %}"
               data-product-image
             >
           {% elsif product.featured_media %}
@@ -36,15 +37,24 @@
               src="{{ product.featured_media.preview_image | image_url: width: 1400 }}"
               alt="{{ product.featured_media.alt | escape }}"
               loading="eager"
+              data-zoom-image="{% if product.featured_media.preview_image %}{{ product.featured_media.preview_image | image_url: width: 2200 }}{% endif %}"
               data-product-image
             >
           {% endif %}
+          <button class="product-gallery__zoom" type="button" data-product-zoom-open>Enlarge</button>
         </div>
 
         {% if product.media.size > 1 %}
           <div class="product-gallery__thumbs">
             {% for media in product.media %}
-              <button class="product-thumb{% if forloop.first %} is-active{% endif %}" type="button" data-product-thumb data-image="{{ media.preview_image | image_url: width: 1400 }}">
+              <button
+                class="product-thumb{% if forloop.first %} is-active{% endif %}"
+                type="button"
+                data-product-thumb
+                data-image="{{ media.preview_image | image_url: width: 1400 }}"
+                data-zoom-image="{{ media.preview_image | image_url: width: 2200 }}"
+                data-image-alt="{{ media.alt | default: product.title | escape }}"
+              >
                 {{ media.preview_image | image_url: width: 320 | image_tag: loading: 'lazy' }}
               </button>
             {% endfor %}
@@ -197,6 +207,14 @@
         </div>
       </section>
     {% endif %}
+  </div>
+
+  <div class="product-zoom-modal" data-product-zoom hidden>
+    <button class="product-zoom-modal__close" type="button" aria-label="Close enlarged image" data-product-zoom-close>×</button>
+    <div class="product-zoom-modal__backdrop" data-product-zoom-close></div>
+    <div class="product-zoom-modal__dialog" role="dialog" aria-modal="true" aria-label="Enlarged product image">
+      <img class="product-zoom-modal__image" src="" alt="" data-product-zoom-image>
+    </div>
   </div>
 
   <script type="application/json" data-product-json>

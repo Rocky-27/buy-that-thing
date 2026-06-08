@@ -45,7 +45,7 @@ OPENAI_API_KEY=your-openai-api-key
 OPENAI_MODEL=gpt-5.4-mini
 
 ENRICHMENT_MARKER_TAG=AI Enriched
-ENRICHMENT_STYLE_BRIEF=Dry, lightly cheeky, plain-English product copy. Aim for understated wit, not stand-up comedy.
+ENRICHMENT_STYLE_BRIEF="The description should read as very concise, to the point, purely factual and no humour / wittiness. Please make it brief and to the point"
 ```
 
 Notes:
