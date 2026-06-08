@@ -1,0 +1,36 @@
+{% assign ai_crawlers = 'OAI-SearchBot|OAI-AdsBot|GPTBot|ClaudeBot|Claude-User|PerplexityBot|Perplexity-User|CCBot|Google-Extended' | split: '|' %}
+
+{% for group in robots.default_groups %}
+{{- group.user_agent }}
+{%- for rule in group.rules -%}
+{{ rule }}
+{%- endfor -%}
+{%- if group.sitemap != blank -%}
+{{ group.sitemap }}
+{%- endif -%}
+
+{% endfor %}
+
+{% assign wildcard_rules_rendered = false %}
+{% for group in robots.default_groups %}
+  {% if group.user_agent.value == '*' %}
+    {% assign wildcard_rules_rendered = true %}
+    {% for crawler in ai_crawlers %}
+User-agent: {{ crawler }}
+{%- for rule in group.rules -%}
+{{ rule }}
+{%- endfor -%}
+Allow: /
+
+    {% endfor %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% unless wildcard_rules_rendered %}
+  {% for crawler in ai_crawlers %}
+User-agent: {{ crawler }}
+Allow: /
+
+  {% endfor %}
+{% endunless %}
