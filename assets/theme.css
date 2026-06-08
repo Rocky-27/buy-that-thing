@@ -1032,10 +1032,55 @@ textarea {
   margin: 20px 0 28px;
 }
 
-.collection-children__grid {
+.collection-children__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.collection-children__header h2 {
+  margin: 0;
+}
+
+.collection-children__rail {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.collection-children__item {
+  flex: 0 0 auto;
+  min-width: 180px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.collection-children__item strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.collection-children__item span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.collection-children__item:hover,
+.collection-children__item:focus-visible {
+  border-color: var(--primary);
+  background: var(--accent-wash);
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .collection-title-row__description {
@@ -2211,7 +2256,6 @@ textarea {
   .department-grid,
   .collection-grid,
   .product-grid,
-  .collection-children__grid,
   .recently-viewed__grid {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -2381,7 +2425,6 @@ textarea {
   .department-grid,
   .browse-hub__search,
   .collection-grid,
-  .collection-children__grid,
   .product-grid,
   .product-grid--listing,
   .recently-viewed__grid,
@@ -2419,6 +2462,14 @@ textarea {
 
   .collection-title-row > div:first-child {
     display: block;
+  }
+
+  .collection-children__header {
+    display: block;
+  }
+
+  .collection-children__item {
+    min-width: 150px;
   }
 
   .collection-toolbar__sort {

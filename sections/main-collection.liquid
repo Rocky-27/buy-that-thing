@@ -93,17 +93,18 @@
 
       {% if child_collections != blank %}
         <section class="collection-children" aria-label="Subcategories">
-          <div class="section-heading section-heading--compact">
+          <div class="collection-children__header">
             <div>
-              <p class="section-eyebrow">Browse deeper</p>
-              <h2>Explore within {{ collection.title }}</h2>
+              <p class="section-eyebrow">Shop within</p>
+              <h2>More ways to browse {{ collection.title }}</h2>
             </div>
           </div>
-          <div class="collection-children__grid">
+          <div class="collection-children__rail">
             {% for child_collection in child_collections %}
-              {% render 'collection-card',
-                collection: child_collection,
-                custom_cta: 'Open category' %}
+              <a class="collection-children__item" href="{{ child_collection.url }}">
+                <strong>{{ child_collection.title }}</strong>
+                <span>{{ child_collection.products_count }} finds</span>
+              </a>
             {% endfor %}
           </div>
         </section>

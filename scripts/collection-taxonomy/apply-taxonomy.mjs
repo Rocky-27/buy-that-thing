@@ -84,6 +84,36 @@ function indexCollectionsByHandle(collections) {
   return new Map((collections || []).map((collection) => [collection.handle, collection]));
 }
 
+function buildAncestorHandlesByCollection(collections) {
+  const collectionsByHandle = new Map((collections || []).map((collection) => [collection.handle, collection]));
+  const cache = new Map();
+
+  const resolveAncestors = (handle, stack = new Set()) => {
+    if (!handle) return [];
+    if (cache.has(handle)) return cache.get(handle);
+    if (stack.has(handle)) return [];
+
+    const collection = collectionsByHandle.get(handle);
+    if (!collection || !collection.parent_handle) {
+      cache.set(handle, []);
+      return [];
+    }
+
+    const parentHandle = collection.parent_handle;
+    stack.add(handle);
+    const resolved = [parentHandle, ...resolveAncestors(parentHandle, stack)];
+    stack.delete(handle);
+    cache.set(handle, resolved);
+    return resolved;
+  };
+
+  for (const collection of collections || []) {
+    resolveAncestors(collection.handle);
+  }
+
+  return cache;
+}
+
 async function findCollectionByHandle({ shop, token, handle }) {
   const query = `
     query CollectionByHandle($query: String!) {
@@ -118,6 +148,9 @@ async function findCollectionByHandle({ shop, token, handle }) {
 }
 
 function buildProductTagPlan(products, collections) {
+  const collectionsByHandle = new Map((collections || []).map((collection) => [collection.handle, collection]));
+  const ancestorHandlesByCollection = buildAncestorHandlesByCollection(collections);
+
   return (products || []).map((product) => {
     const addTags = [];
     const matchedCollections = [];
@@ -127,6 +160,14 @@ function buildProductTagPlan(products, collections) {
       if (productMatchesGroups(product, collection.match_groups)) {
         addTags.push(collection.managed_tag);
         matchedCollections.push(collection.handle);
+
+        const ancestorHandles = ancestorHandlesByCollection.get(collection.handle) || [];
+        for (const ancestorHandle of ancestorHandles) {
+          const ancestorCollection = collectionsByHandle.get(ancestorHandle);
+          if (!ancestorCollection?.managed_tag) continue;
+          addTags.push(ancestorCollection.managed_tag);
+          matchedCollections.push(ancestorHandle);
+        }
       }
     }
 
