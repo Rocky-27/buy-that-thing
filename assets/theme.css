@@ -1168,6 +1168,25 @@ textarea {
   object-fit: contain;
 }
 
+.product-gallery__magnifier {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-size: 200%;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.product-gallery__main.is-zooming .product-gallery__image {
+  opacity: 0;
+}
+
+.product-gallery__main.is-zooming .product-gallery__magnifier {
+  opacity: 1;
+}
+
 .product-gallery__zoom {
   position: absolute;
   right: 12px;
@@ -1180,6 +1199,7 @@ textarea {
   color: var(--ink);
   font-weight: 800;
   cursor: pointer;
+  z-index: 1;
 }
 
 .product-gallery__thumbs {
@@ -2284,6 +2304,10 @@ textarea {
     min-height: 34px;
     padding: 0 10px;
     font-size: 13px;
+  }
+
+  .product-gallery__magnifier {
+    display: none;
   }
 
   .cart-item {

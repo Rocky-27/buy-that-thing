@@ -21,7 +21,7 @@
 
     <div class="product-template__grid">
       <div class="product-gallery">
-        <div class="product-gallery__main">
+        <div class="product-gallery__main" data-product-zoom-surface>
           {% if current_variant.featured_media %}
             <img
               class="product-gallery__image"
@@ -41,6 +41,7 @@
               data-product-image
             >
           {% endif %}
+          <div class="product-gallery__magnifier" data-product-magnifier aria-hidden="true"></div>
           <button class="product-gallery__zoom" type="button" data-product-zoom-open>Enlarge</button>
         </div>
 

@@ -316,7 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!productRoot) return;
 
   const moneyFormat = productRoot.dataset.moneyFormat || '${{amount}}';
+  const zoomSurface = productRoot.querySelector('[data-product-zoom-surface]');
   const productImage = productRoot.querySelector('[data-product-image]');
+  const magnifier = productRoot.querySelector('[data-product-magnifier]');
   const thumbs = productRoot.querySelectorAll('[data-product-thumb]');
   const zoomOpen = productRoot.querySelector('[data-product-zoom-open]');
   const zoomModal = document.querySelector('[data-product-zoom]');
@@ -353,6 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!productImage) return;
     if (src) productImage.dataset.zoomImage = src;
     if (alt) productImage.alt = alt;
+    if (magnifier) {
+      magnifier.style.backgroundImage = `url("${productImage.dataset.zoomImage || productImage.src}")`;
+    }
     if (zoomImage) {
       zoomImage.src = productImage.dataset.zoomImage || productImage.src;
       zoomImage.alt = productImage.alt || '';
@@ -363,6 +368,10 @@ document.addEventListener('DOMContentLoaded', () => {
     preloadImage(thumb.dataset.image);
     preloadImage(thumb.dataset.zoomImage);
   });
+
+  if (productImage) {
+    syncZoomImage(productImage.dataset.zoomImage, productImage.alt);
+  }
 
   thumbs.forEach((thumb) => {
     thumb.addEventListener('click', () => {
@@ -375,12 +384,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  if (zoomSurface && productImage && magnifier && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const clearMagnifier = () => {
+      zoomSurface.classList.remove('is-zooming');
+    };
+
+    zoomSurface.addEventListener('mousemove', (event) => {
+      const rect = zoomSurface.getBoundingClientRect();
+      const offsetX = event.clientX - rect.left;
+      const offsetY = event.clientY - rect.top;
+      const xPercent = Math.min(Math.max((offsetX / rect.width) * 100, 0), 100);
+      const yPercent = Math.min(Math.max((offsetY / rect.height) * 100, 0), 100);
+
+      zoomSurface.classList.add('is-zooming');
+      magnifier.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+    });
+
+    zoomSurface.addEventListener('mouseleave', clearMagnifier);
+  }
+
   if (zoomOpen && zoomModal && zoomImage && productImage) {
-    zoomOpen.addEventListener('click', () => {
+    const openZoom = () => {
       syncZoomImage(productImage.dataset.zoomImage, productImage.alt);
       zoomModal.hidden = false;
       document.body.style.overflow = 'hidden';
+    };
+
+    zoomOpen.addEventListener('click', () => {
+      openZoom();
     });
+
+    if (zoomSurface) {
+      zoomSurface.addEventListener('click', (event) => {
+        if (event.target === zoomOpen) return;
+        openZoom();
+      });
+    }
 
     zoomCloseTriggers.forEach((trigger) => {
       trigger.addEventListener('click', () => {
@@ -425,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saleCallout.classList.add('is-hidden');
       }
     }
-    if (productImage && variant.featured_image && variant.featured_image.src) {
+  if (productImage && variant.featured_image && variant.featured_image.src) {
       productImage.src = variant.featured_image.src;
       syncZoomImage(variant.featured_image.src, productImage.alt);
     }
