@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <div class="delivery-lines">
-            <span>Recently viewed</span>
+            <span>Seen recently</span>
             <strong>${availabilityLabel}</strong>
           </div>
           <a class="product-card__basket" href="${escapeHtml(product.url)}">View item</a>
@@ -521,8 +521,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuToggle = document.querySelector('[data-menu-toggle]');
   const mobileMenu = document.querySelector('[data-mobile-menu]');
   const filterToggle = document.querySelector('[data-filter-toggle]');
-  const filterClose = document.querySelector('[data-filter-close]');
-  const filterSidebar = document.querySelector('[data-filter-sidebar]');
+  const filterClose = document.querySelector('[data-filter-close-mobile]');
+  const filterSidebar = document.querySelector('[data-filter-sidebar-mobile]');
   const mobileFiltersQuery = window.matchMedia('(max-width: 1024px)');
 
   const predictiveSearchForms = Array.from(document.querySelectorAll('[data-predictive-search-form]'));
@@ -727,6 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (filterToggle && filterSidebar) {
     const syncFilterState = (isOpen) => {
+      filterSidebar.hidden = !isOpen;
       filterSidebar.classList.toggle('is-open', isOpen);
       filterToggle.setAttribute('aria-expanded', String(isOpen));
     };
@@ -738,8 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetFiltersForViewport = (event) => {
       if (!event.matches) {
-        filterSidebar.classList.remove('is-open');
-        filterToggle.setAttribute('aria-expanded', 'false');
+        syncFilterState(false);
       }
     };
 
@@ -750,10 +750,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (filterClose && filterSidebar) {
+    if (filterClose && filterSidebar) {
     filterClose.addEventListener('click', () => {
-      filterSidebar.classList.remove('is-open');
-      if (filterToggle) filterToggle.setAttribute('aria-expanded', 'false');
+      syncFilterState(false);
+    });
+  }
+
+  if (filterToggle && filterSidebar) {
+    document.addEventListener('click', (event) => {
+      if (!mobileFiltersQuery.matches) return;
+      if (filterSidebar.hidden) return;
+      if (filterToggle.contains(event.target) || filterSidebar.contains(event.target)) return;
+      syncFilterState(false);
     });
   }
 

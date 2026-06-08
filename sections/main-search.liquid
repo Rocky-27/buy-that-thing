@@ -9,16 +9,16 @@
 
       <div class="search-header">
         <div>
-          <p class="section-eyebrow">Search the store</p>
+          <p class="section-eyebrow">Search the full edit</p>
           {% if search.performed %}
             <h1>{{ search.results_count }} result{% if search.results_count != 1 %}s{% endif %} for “{{ search.terms | escape }}”</h1>
           {% else %}
-            <h1>Find the good stuff fast.</h1>
+            <h1>Search across a wide mix of practical finds, giftable oddities and useful home upgrades.</h1>
           {% endif %}
         </div>
 
         <form class="search-template__form" action="{{ routes.search_url }}" method="get" role="search">
-          <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Try vase, storage, garden, lamp..." required>
+          <input type="search" name="q" value="{{ search.terms | escape }}" placeholder="Try vase, storage, garden lighting, wall art..." required>
           <button class="button button--primary" type="submit">Search</button>
         </form>
       </div>
@@ -53,8 +53,8 @@
         {% else %}
           <div class="search-empty-state">
             <h2>No matches for “{{ search.terms | escape }}”</h2>
-            <p>Try a broader search term, check the spelling, or browse the full range instead.</p>
-            <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Browse all products</a>
+            <p>Try a broader phrase, a different category, or have a proper rummage through the wider collection.</p>
+            <a class="button button--primary" href="{{ routes.all_products_collection_url }}">See the full collection</a>
           </div>
         {% endif %}
 
@@ -72,7 +72,7 @@
       {% else %}
         <div class="search-empty-state">
           <h2>Search for a product, brand or category</h2>
-          <p>Start with something simple and we will do the digging.</p>
+          <p>We pull together all sorts from across the supplier mix, so a simple search is usually the fastest way in.</p>
         </div>
       {% endif %}
     </div>

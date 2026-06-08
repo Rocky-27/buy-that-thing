@@ -1275,6 +1275,10 @@ textarea {
   flex-wrap: wrap;
 }
 
+.collection-toolbar__primary {
+  position: relative;
+}
+
 .collection-toolbar__status {
   padding: 14px 16px;
   border: 1px solid var(--line);
@@ -1299,6 +1303,14 @@ textarea {
 .collection-toolbar__note {
   color: var(--muted);
   font-size: 14px;
+}
+
+.collection-mobile-categories[hidden] {
+  display: none !important;
+}
+
+.collection-mobile-categories {
+  display: none;
 }
 
 .filter-drawer-toggle {
@@ -2494,6 +2506,24 @@ textarea {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .collection-mobile-categories {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    z-index: 25;
+    width: min(380px, 100%);
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  }
+
+  .collection-mobile-categories.is-open {
+    display: grid;
+    gap: 14px;
   }
 
   .collection-filters {

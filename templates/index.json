@@ -43,10 +43,10 @@
       },
       "block_order": ["stat_1", "stat_2", "stat_3", "stat_4"],
       "settings": {
-        "eyebrow": "Interesting finds | Useful upgrades | Free delivery every time",
-        "heading": "We find the useful stuff, the clever stuff and the occasionally ridiculous stuff",
-        "text": "Shop problem-solvers, home upgrades, giftable bits and odd little winners with free delivery built into every order.",
-        "primary_label": "Browse the latest finds"
+        "eyebrow": "Curated from all over | Practical picks | Unexpected favourites",
+        "heading": "A broad, carefully chosen mix of useful home finds, clever upgrades and things with a bit more character",
+        "text": "We pull together products from a wide range of suppliers so you can browse one thoughtful edit of practical buys, quirky discoveries and everyday things worth bringing home.",
+        "primary_label": "Explore the latest picks"
       }
     },
     "value_props": {
@@ -56,27 +56,27 @@
           "type": "item",
           "settings": {
             "icon": "✓",
-            "eyebrow": "Free delivery",
-            "heading": "Included on every order.",
-            "text": "No minimum spend. No checkout sting in the tail."
+            "eyebrow": "Curated selection",
+            "heading": "Chosen from a wide supplier mix.",
+            "text": "A broader range than a single-brand shop, filtered down into the things most worth a look."
           }
         },
         "value_2": {
           "type": "item",
           "settings": {
             "icon": "£",
-            "eyebrow": "Deals worth opening",
-            "heading": "Fresh savings added regularly.",
-            "text": "Find home, garden, tech and everyday picks that feel handy, surprising or both."
+            "eyebrow": "Worth checking back for",
+            "heading": "Fresh finds and better-value picks keep landing.",
+            "text": "Homeware, garden pieces, useful gadgets and giftable bits all in the same running edit."
           }
         },
         "value_3": {
           "type": "item",
           "settings": {
             "icon": "↺",
-            "eyebrow": "Shop with confidence",
-            "heading": "Clear pricing, useful detail, easy support.",
-            "text": "Compare options fast and check out without second-guessing the basics."
+            "eyebrow": "Less trawling, more finding",
+            "heading": "A simpler way to browse a lot of different stock.",
+            "text": "The aim is to bring the practical, the unusual and the genuinely handy into one place without the usual marketplace chaos."
           }
         }
       },
@@ -94,24 +94,24 @@
           "type": "tile",
           "settings": {
             "eyebrow": "Start here",
-            "heading": "Useful things, smart upgrades and the occasional why-not find.",
-            "text": "Browse buys that make life easier, homes better or gift ideas a bit less predictable."
+            "heading": "A mix of practical upgrades, personality pieces and finds you would not usually stumble across in one go.",
+            "text": "From home fixes to garden bits to odd little gift ideas, this is the broadest view of what the shop is trying to do well."
           }
         },
         "promo_2": {
           "type": "tile",
           "settings": {
             "eyebrow": "Worth a peek",
-            "heading": "Interesting finds without the endless scrolling.",
-            "text": "Skip the filler and head straight for the products that feel handy, surprising or weirdly perfect."
+            "heading": "The sort of catalogue you can properly rummage through without wading through pages of filler.",
+            "text": "We are not trying to be everything. We are trying to surface the useful, the fun and the slightly unexpected."
           }
         },
         "promo_3": {
           "type": "tile",
           "settings": {
-            "eyebrow": "Finish the job",
-            "heading": "The extras that make the main buy feel properly sorted.",
-            "text": "Find the add-ons, accessories and finishing touches that stop a good idea being half-done."
+            "eyebrow": "Finish the room, sort the corner, find the extra bit",
+            "heading": "Often it is the smaller add-ons and supporting pieces that make the main buy feel right.",
+            "text": "That might mean the storage that tidies it up, the accessory that completes it, or the extra detail that gives it more life."
           }
         }
       },
@@ -122,8 +122,8 @@
       "type": "newsletter-band",
       "settings": {
         "eyebrow": "Inbox perks",
-        "heading": "Get the good finds before everyone else.",
-        "text": "Sign up for deal drops, restock alerts and useful or gloriously unnecessary finds worth seeing first."
+        "heading": "Be first to see the new finds worth knowing about.",
+        "text": "Sign up for fresh arrivals, back-in-stock notes and a steady stream of practical, quirky and unexpectedly good things."
       }
     }
   },

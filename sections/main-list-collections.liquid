@@ -2,33 +2,33 @@
   <div class="page-width">
     <div class="section-heading">
       <div>
-        <p class="section-eyebrow">Shop every corner</p>
-        <h1>Browse by category and go straight to the good stuff.</h1>
+        <p class="section-eyebrow">Browse the full mix</p>
+        <h1>Explore a curated mix of practical buys, quirky finds and the sort of things you did not know you needed.</h1>
       </div>
     </div>
 
     <div class="browse-hub">
       <div class="browse-hub__copy">
-        <strong>Not sure where it lives?</strong>
-        <p>Skip the guessing. Search the full catalogue or dive straight into every product in one place.</p>
+        <strong>Not sure where it belongs?</strong>
+        <p>We source across a broad supplier base, so the quickest route is either a search or a full wander through everything in one place.</p>
       </div>
       <form class="browse-hub__search" action="{{ routes.search_url }}" method="get" role="search">
-        <input type="search" name="q" placeholder="Search all products" aria-label="Search all products">
+        <input type="search" name="q" placeholder="Search the full collection" aria-label="Search the full collection">
         <button type="submit">Search</button>
       </form>
       <div class="browse-hub__actions">
-        <a class="button button--primary" href="{{ routes.all_products_collection_url }}">Shop all products</a>
-        <a class="text-link" href="/collections/special-offer">See sale picks</a>
+        <a class="button button--primary" href="{{ routes.all_products_collection_url }}">See everything</a>
+        <a class="text-link" href="/collections/special-offer">Browse reduced finds</a>
       </div>
     </div>
 
     <div class="collection-grid">
       {% render 'collection-card',
-        custom_title: 'Shop everything',
-        custom_text: 'The full range, all in one place. Best for a proper rummage.',
+        custom_title: 'Everything in one place',
+        custom_text: 'The full mixed bag, ready for a proper rummage through the lot.',
         custom_count: collections.all.products_count,
         custom_url: routes.all_products_collection_url,
-        custom_cta: 'See every product'
+        custom_cta: 'View the full collection'
       %}
       {% for collection in collections %}
         {% if collection.products_count > 0 %}

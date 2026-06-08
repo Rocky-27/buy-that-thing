@@ -128,10 +128,32 @@
               class="filter-drawer-toggle"
               data-filter-toggle
               aria-expanded="false"
-              aria-controls="CollectionFilters"
+              aria-controls="CollectionFiltersMobile"
             >
               Browse categories
             </button>
+            <div class="collection-mobile-categories" id="CollectionFiltersMobile" data-filter-sidebar-mobile hidden>
+              <div class="collection-filters__header">
+                <strong>Browse categories</strong>
+                <button type="button" data-filter-close-mobile>Close</button>
+              </div>
+              {% if child_collections != blank %}
+                <div class="filter-browse">
+                  <div class="filter-browse__heading">
+                    <strong>Browse this department</strong>
+                    <span>Jump straight into the most relevant subcategory.</span>
+                  </div>
+                  <div class="filter-browse__links">
+                    {% for child_collection in child_collections %}
+                      <a class="filter-browse__link" href="{{ child_collection.url }}">
+                        <span>{{ child_collection.title }}</span>
+                        <em>{{ child_collection.products_count }} finds</em>
+                      </a>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
           {% endif %}
           <form class="collection-toolbar__sort" method="get" data-sort-form>
             <label for="SortBy">Sort by</label>
