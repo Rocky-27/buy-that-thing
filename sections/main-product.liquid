@@ -172,6 +172,31 @@
         <p>Free delivery is included on every order. Final delivery timing and any supplier-specific return details are confirmed during checkout so you know exactly what to expect.</p>
       </details>
     </div>
+
+    {% assign similar_collection = product.collections.first %}
+    {% assign similar_products_rendered = 0 %}
+    {% if similar_collection != blank and similar_collection.products_count > 1 %}
+      <section class="product-similar">
+        <div class="section-heading">
+          <div>
+            <p class="section-eyebrow">Similar to this item</p>
+            <h2>More finds in the same vein</h2>
+          </div>
+          <a class="text-link" href="{{ similar_collection.url }}">Shop {{ similar_collection.title }}</a>
+        </div>
+        <div class="product-grid">
+          {% for related_product in similar_collection.products %}
+            {% if related_product.handle != product.handle %}
+              {% render 'product-card', product: related_product %}
+              {% assign similar_products_rendered = similar_products_rendered | plus: 1 %}
+            {% endif %}
+            {% if similar_products_rendered >= 4 %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
   </div>
 
   <script type="application/json" data-product-json>

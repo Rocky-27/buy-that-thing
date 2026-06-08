@@ -1512,6 +1512,10 @@ textarea {
   margin-top: 28px;
 }
 
+.product-similar {
+  margin-top: 34px;
+}
+
 .product-detail-tabs details {
   border-top: 1px solid var(--line);
   padding: 16px 0;
