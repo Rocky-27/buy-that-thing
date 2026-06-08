@@ -342,6 +342,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const isSearchReturnUrl = (url) => {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.pathname === '/search';
+    } catch (error) {
+      return false;
+    }
+  };
+
   const formatMoneyValue = (cents, moneyFormat = '${{amount}}') => {
     const value = (Number(cents) / 100).toFixed(2);
     return moneyFormat.replace(/\{\{\s*amount\s*\}\}/, value);
@@ -736,21 +745,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const explicitReturnSource = productUrl.searchParams.get('bt_source');
   const explicitReturnUrl = productUrl.searchParams.get('bt_return');
   const explicitReturnHandle = productUrl.searchParams.get('bt_handle');
+  const currentProductPath = `${productUrl.pathname}${productUrl.search}`;
 
   let returnSearchUrl = '';
   let returnSearchHandle = '';
 
-  if (explicitReturnSource === 'search' && explicitReturnUrl && explicitReturnHandle === productHandle) {
+  if (
+    explicitReturnSource === 'search' &&
+    explicitReturnUrl &&
+    explicitReturnHandle === productHandle &&
+    isSearchReturnUrl(explicitReturnUrl) &&
+    normalizePageUrl(explicitReturnUrl) !== normalizePageUrl(currentProductPath)
+  ) {
     returnSearchUrl = explicitReturnUrl;
     returnSearchHandle = explicitReturnHandle;
   } else if (
     listingContext &&
     listingContext.sourceType === 'search' &&
     listingContext.productHandle === productHandle &&
-    listingContext.url
+    listingContext.url &&
+    isSearchReturnUrl(listingContext.url) &&
+    normalizePageUrl(listingContext.url) !== normalizePageUrl(currentProductPath)
   ) {
     returnSearchUrl = listingContext.url;
     returnSearchHandle = listingContext.productHandle;
+  } else if (listingContext && listingContext.sourceType === 'search' && !isSearchReturnUrl(listingContext.url || '')) {
+    removeSessionValue(listingContextKey);
   }
 
   if (
