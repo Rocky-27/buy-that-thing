@@ -77,6 +77,7 @@ textarea {
   z-index: 30;
   background: #fff;
   border-bottom: 1px solid var(--line);
+  overflow: visible;
 }
 
 .header-main {
@@ -353,13 +354,15 @@ textarea {
   border-top: 1px solid var(--line);
   background: #fff;
   position: relative;
+  overflow: visible;
+  z-index: 31;
 }
 
 .site-nav {
   display: flex;
   align-items: stretch;
   gap: 0;
-  overflow-x: auto;
+  overflow: visible;
   white-space: nowrap;
   position: relative;
 }
@@ -378,6 +381,7 @@ textarea {
 .site-nav__item {
   position: relative;
   display: flex;
+  overflow: visible;
 }
 
 .site-nav__item--has-children > a::after {
@@ -399,7 +403,7 @@ textarea {
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 45;
+  z-index: 60;
   width: min(980px, calc(100vw - 48px));
   padding-top: 10px;
   opacity: 0;
