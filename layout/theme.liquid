@@ -115,7 +115,7 @@
     {{ 'theme.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'theme.js' | asset_url }}" defer="defer"></script>
   </head>
-  <body class="site-shell">
+  <body class="site-shell" data-page-type="{{ request.page_type }}">
     <a class="skip-link" href="#MainContent">Skip to content</a>
     {% sections 'header-group' %}
     <main id="MainContent" class="main-content">

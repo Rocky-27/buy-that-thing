@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const recentStorageKey = 'buy-that-thing:recently-viewed';
   const listingContextKey = 'buy-that-thing:listing-context';
   const listingRestoreKey = 'buy-that-thing:listing-restore';
+  const pageType = document.body?.dataset.pageType || '';
   const escapeHtml = (value) =>
     value
       .replace(/&/g, '&amp;')
@@ -327,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const getListingSourceType = () => {
-    if (window.location.pathname.startsWith('/search')) return 'search';
-    if (window.location.pathname.startsWith('/collections/')) return 'collection';
+    if (pageType === 'search') return 'search';
+    if (pageType === 'collection') return 'collection';
     return null;
   };
 
@@ -423,6 +424,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const productCard = link.closest('[data-product-handle]');
         const productHandle = productCard?.dataset.productHandle;
         if (!productHandle) return;
+
+        if (listingSourceType === 'search') {
+          const destinationUrl = new URL(link.href, window.location.origin);
+          destinationUrl.searchParams.set('bt_source', 'search');
+          destinationUrl.searchParams.set('bt_return', `${window.location.pathname}${window.location.search}`);
+          destinationUrl.searchParams.set('bt_handle', productHandle);
+          link.href = `${destinationUrl.pathname}${destinationUrl.search}${destinationUrl.hash}`;
+        }
 
         writeSessionJson(listingContextKey, {
           sourceType: listingSourceType,
@@ -723,24 +732,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const returnToSearchLink = document.querySelector('[data-return-to-search]');
   const productHandle = productRoot.dataset.productHandle;
   const listingContext = readSessionJson(listingContextKey);
+  const productUrl = new URL(window.location.href);
+  const explicitReturnSource = productUrl.searchParams.get('bt_source');
+  const explicitReturnUrl = productUrl.searchParams.get('bt_return');
+  const explicitReturnHandle = productUrl.searchParams.get('bt_handle');
 
-  if (
-    returnToSearchLink &&
-    productHandle &&
+  let returnSearchUrl = '';
+  let returnSearchHandle = '';
+
+  if (explicitReturnSource === 'search' && explicitReturnUrl && explicitReturnHandle === productHandle) {
+    returnSearchUrl = explicitReturnUrl;
+    returnSearchHandle = explicitReturnHandle;
+  } else if (
     listingContext &&
     listingContext.sourceType === 'search' &&
     listingContext.productHandle === productHandle &&
     listingContext.url
   ) {
+    returnSearchUrl = listingContext.url;
+    returnSearchHandle = listingContext.productHandle;
+  }
+
+  if (
+    returnToSearchLink &&
+    productHandle &&
+    returnSearchUrl &&
+    returnSearchHandle === productHandle
+  ) {
     returnToSearchLink.hidden = false;
-    returnToSearchLink.href = listingContext.url;
+    returnToSearchLink.href = returnSearchUrl;
     returnToSearchLink.addEventListener('click', (event) => {
       event.preventDefault();
       writeSessionJson(listingRestoreKey, {
-        url: listingContext.url,
-        productHandle: listingContext.productHandle
+        url: returnSearchUrl,
+        productHandle: returnSearchHandle
       });
-      window.location.href = listingContext.url;
+      window.location.href = returnSearchUrl;
     });
   }
 

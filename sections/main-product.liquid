@@ -206,7 +206,12 @@
 
     {% assign similar_collection = breadcrumb_collection | default: product.collections.first %}
     {% assign similar_products_rendered = 0 %}
-    {% if similar_collection != blank and similar_collection.products_count > 1 %}
+    {% assign related_handles = '|' | append: product.handle | append: '|' %}
+    {% assign similar_parent_collection = blank %}
+    {% if similar_collection != blank %}
+      {% assign similar_parent_collection = similar_collection.metafields.custom.parent_collection.value %}
+    {% endif %}
+    {% if similar_collection != blank %}
       <section class="product-similar">
         <div class="section-heading">
           <div>
@@ -217,14 +222,54 @@
         </div>
         <div class="product-grid">
           {% for related_product in similar_collection.products %}
-            {% if related_product.handle != product.handle %}
+            {% assign related_token = '|' | append: related_product.handle | append: '|' %}
+            {% unless related_handles contains related_token %}
               {% render 'product-card', product: related_product %}
               {% assign similar_products_rendered = similar_products_rendered | plus: 1 %}
-            {% endif %}
+              {% assign related_handles = related_handles | append: related_product.handle | append: '|' %}
+            {% endunless %}
             {% if similar_products_rendered >= 4 %}
               {% break %}
             {% endif %}
           {% endfor %}
+
+          {% if similar_products_rendered < 4 and similar_parent_collection != blank %}
+            {% assign sibling_collections = similar_parent_collection.metafields.custom.child_collections.value %}
+            {% if sibling_collections != blank %}
+              {% for sibling_collection in sibling_collections %}
+                {% if sibling_collection.handle != similar_collection.handle %}
+                  {% for related_product in sibling_collection.products %}
+                    {% assign related_token = '|' | append: related_product.handle | append: '|' %}
+                    {% unless related_handles contains related_token %}
+                      {% render 'product-card', product: related_product %}
+                      {% assign similar_products_rendered = similar_products_rendered | plus: 1 %}
+                      {% assign related_handles = related_handles | append: related_product.handle | append: '|' %}
+                    {% endunless %}
+                    {% if similar_products_rendered >= 4 %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+                {% if similar_products_rendered >= 4 %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+          {% endif %}
+
+          {% if similar_products_rendered < 4 and similar_parent_collection != blank %}
+            {% for related_product in similar_parent_collection.products %}
+              {% assign related_token = '|' | append: related_product.handle | append: '|' %}
+              {% unless related_handles contains related_token %}
+                {% render 'product-card', product: related_product %}
+                {% assign similar_products_rendered = similar_products_rendered | plus: 1 %}
+                {% assign related_handles = related_handles | append: related_product.handle | append: '|' %}
+              {% endunless %}
+              {% if similar_products_rendered >= 4 %}
+                {% break %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         </div>
       </section>
     {% endif %}
