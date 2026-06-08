@@ -86,6 +86,8 @@
       {% endif %}
       {% assign viewing_from = paginate.current_offset | plus: 1 %}
       {% assign viewing_to = paginate.current_offset | plus: collection.products.size %}
+      {% capture count_query_suffix %}{% if products_per_page != blank %}{% if products_per_page == 24 %}count=24{% elsif products_per_page == 18 %}count=18{% elsif products_per_page == 30 %}count=30{% elsif products_per_page == 36 %}count=36{% endif %}{% endif %}{% endcapture %}
+      {% assign count_query_suffix = count_query_suffix | strip %}
       {% if paginate.items == 0 %}
         {% assign viewing_from = 0 %}
         {% assign viewing_to = 0 %}
@@ -281,6 +283,23 @@
         {% endif %}
 
         <div class="collection-products">
+          {% if paginate.pages > 1 %}
+            <nav class="pagination pagination--top" aria-label="Pagination">
+              {% if paginate.previous %}
+                <a href="{{ paginate.previous.url }}{% if count_query_suffix != blank %}{% if paginate.previous.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">Previous</a>
+              {% endif %}
+              {% for part in paginate.parts %}
+                {% if part.is_link %}
+                  <a href="{{ part.url }}{% if count_query_suffix != blank %}{% if part.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">{{ part.title }}</a>
+                {% else %}
+                  <span{% if part.title == paginate.current_page %} aria-current="page"{% endif %}>{{ part.title }}</span>
+                {% endif %}
+              {% endfor %}
+              {% if paginate.next %}
+                <a href="{{ paginate.next.url }}{% if count_query_suffix != blank %}{% if paginate.next.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">Next</a>
+              {% endif %}
+            </nav>
+          {% endif %}
           <div class="product-grid product-grid--listing">
             {% if collection.products.size > 0 %}
               {% for product in collection.products %}
@@ -296,17 +315,17 @@
       {% if paginate.pages > 1 %}
         <nav class="pagination" aria-label="Pagination">
           {% if paginate.previous %}
-            <a href="{{ paginate.previous.url }}">Previous</a>
+            <a href="{{ paginate.previous.url }}{% if count_query_suffix != blank %}{% if paginate.previous.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">Previous</a>
           {% endif %}
           {% for part in paginate.parts %}
             {% if part.is_link %}
-              <a href="{{ part.url }}">{{ part.title }}</a>
+              <a href="{{ part.url }}{% if count_query_suffix != blank %}{% if part.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">{{ part.title }}</a>
             {% else %}
               <span{% if part.title == paginate.current_page %} aria-current="page"{% endif %}>{{ part.title }}</span>
             {% endif %}
           {% endfor %}
           {% if paginate.next %}
-            <a href="{{ paginate.next.url }}">Next</a>
+            <a href="{{ paginate.next.url }}{% if count_query_suffix != blank %}{% if paginate.next.url contains '?' %}&{{ count_query_suffix }}{% else %}?{{ count_query_suffix }}{% endif %}{% endif %}">Next</a>
           {% endif %}
         </nav>
       {% endif %}

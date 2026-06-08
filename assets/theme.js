@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const recentStorageKey = 'buy-that-thing:recently-viewed';
+  const listingContextKey = 'buy-that-thing:listing-context';
+  const listingRestoreKey = 'buy-that-thing:listing-restore';
   const escapeHtml = (value) =>
     value
       .replace(/&/g, '&amp;')
@@ -299,6 +301,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  const readSessionJson = (key) => {
+    try {
+      const value = window.sessionStorage.getItem(key);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const writeSessionJson = (key, value) => {
+    try {
+      window.sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      return;
+    }
+  };
+
+  const removeSessionValue = (key) => {
+    try {
+      window.sessionStorage.removeItem(key);
+    } catch (error) {
+      return;
+    }
+  };
+
+  const getListingSourceType = () => {
+    if (window.location.pathname.startsWith('/search')) return 'search';
+    if (window.location.pathname.startsWith('/collections/')) return 'collection';
+    return null;
+  };
+
+  const normalizePageUrl = (url) => {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return `${parsed.pathname}${parsed.search}`;
+    } catch (error) {
+      return '';
+    }
+  };
+
   const formatMoneyValue = (cents, moneyFormat = '${{amount}}') => {
     const value = (Number(cents) / 100).toFixed(2);
     return moneyFormat.replace(/\{\{\s*amount\s*\}\}/, value);
@@ -360,6 +402,50 @@ document.addEventListener('DOMContentLoaded', () => {
         .map((item) => buildRecentlyViewedCard(item, moneyFormat))
         .join('');
       recentlyViewedRoot.hidden = false;
+    }
+  }
+
+  const listingSourceType = getListingSourceType();
+  if (listingSourceType) {
+    document.querySelectorAll('[data-product-link]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        const productCard = link.closest('[data-product-handle]');
+        const productHandle = productCard?.dataset.productHandle;
+        if (!productHandle) return;
+
+        writeSessionJson(listingContextKey, {
+          sourceType: listingSourceType,
+          url: `${window.location.pathname}${window.location.search}`,
+          productHandle,
+          timestamp: Date.now()
+        });
+      });
+    });
+
+    const pendingRestore = readSessionJson(listingRestoreKey);
+    if (pendingRestore && normalizePageUrl(pendingRestore.url) === normalizePageUrl(window.location.href)) {
+      const targetCard = document.querySelector(`[data-product-handle="${pendingRestore.productHandle}"]`);
+      if (targetCard) {
+        window.requestAnimationFrame(() => {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetCard.classList.add('product-card--restored');
+          window.setTimeout(() => {
+            targetCard.classList.remove('product-card--restored');
+          }, 2200);
+        });
+      }
+      removeSessionValue(listingRestoreKey);
     }
   }
 
@@ -633,6 +719,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const productRoot = document.querySelector('[data-product-root]');
   if (!productRoot) return;
+
+  const returnToSearchLink = document.querySelector('[data-return-to-search]');
+  const productHandle = productRoot.dataset.productHandle;
+  const listingContext = readSessionJson(listingContextKey);
+
+  if (
+    returnToSearchLink &&
+    productHandle &&
+    listingContext &&
+    listingContext.sourceType === 'search' &&
+    listingContext.productHandle === productHandle &&
+    listingContext.url
+  ) {
+    returnToSearchLink.hidden = false;
+    returnToSearchLink.href = listingContext.url;
+    returnToSearchLink.addEventListener('click', (event) => {
+      event.preventDefault();
+      writeSessionJson(listingRestoreKey, {
+        url: listingContext.url,
+        productHandle: listingContext.productHandle
+      });
+      window.location.href = listingContext.url;
+    });
+  }
 
   const moneyFormat = productRoot.dataset.moneyFormat || '${{amount}}';
   const zoomSurface = productRoot.querySelector('[data-product-zoom-surface]');

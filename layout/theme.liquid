@@ -41,6 +41,24 @@
       }
     </script>
     {% if request.page_type == 'product' or request.page_type == 'collection' or request.page_type == 'page' %}
+      {% if request.page_type == 'product' %}
+        {% assign breadcrumb_collection = blank %}
+        {% if collection and collection.handle == 'special-offer' %}
+          {% assign breadcrumb_collection = collection %}
+        {% elsif collection %}
+          {% assign breadcrumb_collection = collection %}
+        {% else %}
+          {% for product_collection in product.collections %}
+            {% if product_collection.handle != 'special-offer' %}
+              {% assign breadcrumb_collection = product_collection %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          {% if breadcrumb_collection == blank %}
+            {% assign breadcrumb_collection = product.collections.first %}
+          {% endif %}
+        {% endif %}
+      {% endif %}
       <script type="application/ld+json">
         {
           "@context": "https://schema.org",
@@ -60,12 +78,12 @@
                 "item": {{ shop.url | append: collection.url | json }}
               }
             {% elsif request.page_type == 'product' %}
-              {% if product.collections.first %}
+              {% if breadcrumb_collection %}
                 , {
                   "@type": "ListItem",
                   "position": 2,
-                  "name": {{ product.collections.first.title | json }},
-                  "item": {{ shop.url | append: product.collections.first.url | json }}
+                  "name": {{ breadcrumb_collection.title | json }},
+                  "item": {{ shop.url | append: breadcrumb_collection.url | json }}
                 }
                 , {
                   "@type": "ListItem",

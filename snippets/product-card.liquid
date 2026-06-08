@@ -3,13 +3,17 @@
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
 {% assign savings = product.compare_at_price_max | minus: product.price %}
 {% assign vendor_normalized = product.vendor | downcase | strip | replace: '-', '' | replace: '_', '' | replace: '.', '' | replace: ' ', '' %}
+{% assign product_card_url = product.url %}
+{% if collection %}
+  {% assign product_card_url = product.url | within: collection %}
+{% endif %}
 {% assign hide_vendor = false %}
 {% if vendor_normalized == blank or vendor_normalized == 'unbranded' or vendor_normalized == 'na' or vendor_normalized == 'none' or vendor_normalized == 'unknown' or vendor_normalized == 'generic' or vendor_normalized == 'novendor' %}
   {% assign hide_vendor = true %}
 {% endif %}
 
-<article class="product-card">
-  <a class="product-card__image-link" href="{{ product.url }}">
+<article class="product-card" data-product-handle="{{ product.handle }}">
+  <a class="product-card__image-link" href="{{ product_card_url }}" data-product-link>
     {% if product.featured_media %}
       {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}
     {% endif %}
@@ -26,7 +30,7 @@
           <span>{{ preview_option.name }}</span>
           <div>
             {% for value in preview_option.values limit: 4 %}
-              <a href="{{ product.url }}" title="{{ value | escape }}" data-label="{{ value | escape }}">{{ value }}</a>
+              <a href="{{ product_card_url }}" title="{{ value | escape }}" data-label="{{ value | escape }}" data-product-link>{{ value }}</a>
             {% endfor %}
           </div>
         </div>
@@ -39,7 +43,7 @@
       {% unless hide_vendor %}
         <p class="product-card__vendor">{{ product.vendor }}</p>
       {% endunless %}
-      <h3><a href="{{ product.url }}">{{ product.title }}</a></h3>
+      <h3><a href="{{ product_card_url }}" data-product-link>{{ product.title }}</a></h3>
     </div>
 
     {% if rating != blank %}

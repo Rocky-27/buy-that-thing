@@ -3,21 +3,41 @@
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
 {% assign savings = current_variant.compare_at_price | minus: current_variant.price %}
 {% assign vendor_normalized = product.vendor | downcase | strip | replace: '-', '' | replace: '_', '' | replace: '.', '' | replace: ' ', '' %}
+{% assign breadcrumb_collection = blank %}
+{% if collection and collection.handle == 'special-offer' %}
+  {% assign breadcrumb_collection = collection %}
+{% elsif collection %}
+  {% assign breadcrumb_collection = collection %}
+{% else %}
+  {% for product_collection in product.collections %}
+    {% if product_collection.handle != 'special-offer' %}
+      {% assign breadcrumb_collection = product_collection %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  {% if breadcrumb_collection == blank %}
+    {% assign breadcrumb_collection = product.collections.first %}
+  {% endif %}
+{% endif %}
 {% assign hide_vendor = false %}
 {% if vendor_normalized == blank or vendor_normalized == 'unbranded' or vendor_normalized == 'na' or vendor_normalized == 'none' or vendor_normalized == 'unknown' or vendor_normalized == 'generic' or vendor_normalized == 'novendor' %}
   {% assign hide_vendor = true %}
 {% endif %}
-<section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}">
+<section class="product-template" data-product-root data-money-format="{{ shop.money_format | escape }}" data-product-handle="{{ product.handle }}">
   <div class="page-width">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="{{ routes.root_url }}">Home</a>
       <span>/</span>
-      {% if product.collections.first %}
-        <a href="{{ product.collections.first.url }}">{{ product.collections.first.title }}</a>
+      {% if breadcrumb_collection %}
+        <a href="{{ breadcrumb_collection.url }}">{{ breadcrumb_collection.title }}</a>
         <span>/</span>
       {% endif %}
       <span>{{ product.title }}</span>
     </nav>
+
+    <div class="product-return-links">
+      <a class="product-return-link" href="#" data-return-to-search hidden>Return to search</a>
+    </div>
 
     <div class="product-template__grid">
       <div class="product-gallery">
@@ -184,7 +204,7 @@
       </details>
     </div>
 
-    {% assign similar_collection = product.collections.first %}
+    {% assign similar_collection = breadcrumb_collection | default: product.collections.first %}
     {% assign similar_products_rendered = 0 %}
     {% if similar_collection != blank and similar_collection.products_count > 1 %}
       <section class="product-similar">
