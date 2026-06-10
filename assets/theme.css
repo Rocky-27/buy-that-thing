@@ -1624,6 +1624,12 @@ textarea {
   transform: translateY(-50%);
 }
 
+.product-gallery__nav span {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
 .product-gallery__nav--prev {
   left: 12px;
 }

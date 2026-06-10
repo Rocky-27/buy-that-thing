@@ -1,4 +1,10 @@
 {% assign card_variant = product.selected_or_first_available_variant %}
+{% for variant in product.variants %}
+  {% if variant.available and variant.compare_at_price > variant.price %}
+    {% assign card_variant = variant %}
+    {% break %}
+  {% endif %}
+{% endfor %}
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
 {% assign savings = card_variant.compare_at_price | minus: card_variant.price %}

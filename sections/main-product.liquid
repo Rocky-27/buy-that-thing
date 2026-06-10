@@ -62,8 +62,12 @@
             >
           {% endif %}
           {% if product.media.size > 1 %}
-            <button class="product-gallery__nav product-gallery__nav--prev" type="button" aria-label="Previous image" data-product-gallery-prev>‹</button>
-            <button class="product-gallery__nav product-gallery__nav--next" type="button" aria-label="Next image" data-product-gallery-next>›</button>
+            <button class="product-gallery__nav product-gallery__nav--prev" type="button" aria-label="Previous image" data-product-gallery-prev>
+              <span aria-hidden="true">‹</span>
+            </button>
+            <button class="product-gallery__nav product-gallery__nav--next" type="button" aria-label="Next image" data-product-gallery-next>
+              <span aria-hidden="true">›</span>
+            </button>
           {% endif %}
           <div class="product-gallery__magnifier" data-product-magnifier aria-hidden="true"></div>
           <button class="product-gallery__zoom" type="button" data-product-zoom-open>Enlarge</button>

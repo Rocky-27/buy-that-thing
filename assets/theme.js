@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const listingContextKey = 'buy-that-thing:listing-context';
   const listingRestoreKey = 'buy-that-thing:listing-restore';
   const pageType = document.body?.dataset.pageType || '';
+  const siteMoneyFormat = document.body?.dataset.moneyFormat || document.querySelector('[data-recently-viewed]')?.dataset.moneyFormat || '${{amount}}';
   const escapeHtml = (value) =>
     value
       .replace(/&/g, '&amp;')
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const getSearchMoneyFormat = () => {
-    return document.querySelector('[data-recently-viewed]')?.dataset.moneyFormat || '${{amount}}';
+    return siteMoneyFormat;
   };
 
   const buildPredictiveSearchMarkup = ({ query, queries = [], collections = [], products = [] }) => {
@@ -351,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const formatMoneyValue = (cents, moneyFormat = '${{amount}}') => {
+  const formatMoneyValue = (cents, moneyFormat = siteMoneyFormat) => {
     const value = (Number(cents) / 100).toFixed(2);
     return moneyFormat.replace(/\{\{\s*amount\s*\}\}/, value);
   };
@@ -504,7 +505,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentBadge = card.querySelector('[data-card-badge]');
       const savings = Number(variant.compare_at_price || 0) - Number(variant.price || 0);
       if (savings > 0) {
-        const badgeText = `Save ${formatMoneyValue(savings)}`;
+        const badgeText = `Save ${formatMoneyValue(savings, siteMoneyFormat)}`;
         if (currentBadge) {
           currentBadge.textContent = badgeText;
         } else if (imageLink) {
@@ -527,13 +528,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (image && variant.featured_image) {
         image.src = variant.featured_image;
+        image.removeAttribute('srcset');
+        image.alt = variant.title || image.alt;
       }
 
       if (priceRoot) {
         if (variant.compare_at_price && variant.compare_at_price > variant.price) {
-          priceRoot.innerHTML = `<div class="price"><span class="price__current">${formatMoneyValue(variant.price)}</span><span class="price__compare">${formatMoneyValue(variant.compare_at_price)}</span></div>`;
+          priceRoot.innerHTML = `<div class="price"><span class="price__current">${formatMoneyValue(variant.price, siteMoneyFormat)}</span><span class="price__compare">${formatMoneyValue(variant.compare_at_price, siteMoneyFormat)}</span></div>`;
         } else {
-          priceRoot.innerHTML = `<div class="price"><span class="price__current">${formatMoneyValue(variant.price)}</span></div>`;
+          priceRoot.innerHTML = `<div class="price"><span class="price__current">${formatMoneyValue(variant.price, siteMoneyFormat)}</span></div>`;
         }
       }
 
@@ -1015,13 +1018,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   if (prevMediaButton && thumbs.length > 1) {
-    prevMediaButton.addEventListener('click', () => {
+    prevMediaButton.addEventListener('click', (event) => {
+      event.stopPropagation();
       setActiveThumb(activeThumbIndex - 1);
     });
   }
 
   if (nextMediaButton && thumbs.length > 1) {
-    nextMediaButton.addEventListener('click', () => {
+    nextMediaButton.addEventListener('click', (event) => {
+      event.stopPropagation();
       setActiveThumb(activeThumbIndex + 1);
     });
   }
@@ -1058,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (zoomSurface) {
       zoomSurface.addEventListener('click', (event) => {
-        if (event.target === zoomOpen) return;
+        if (event.target === zoomOpen || event.target.closest('[data-product-gallery-prev], [data-product-gallery-next]')) return;
         openZoom();
       });
     }
