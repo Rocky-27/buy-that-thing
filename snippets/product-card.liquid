@@ -1,7 +1,7 @@
 {% assign card_variant = product.selected_or_first_available_variant %}
 {% assign rating = product.metafields.reviews.rating.value %}
 {% assign rating_count = product.metafields.reviews.rating_count.value %}
-{% assign savings = product.compare_at_price_max | minus: product.price %}
+{% assign savings = card_variant.compare_at_price | minus: card_variant.price %}
 {% assign vendor_normalized = product.vendor | downcase | strip | replace: '-', '' | replace: '_', '' | replace: '.', '' | replace: ' ', '' %}
 {% assign product_card_url = product.url %}
 {% if collection %}
@@ -14,11 +14,13 @@
 
 <article class="product-card" data-product-handle="{{ product.handle }}">
   <a class="product-card__image-link" href="{{ product_card_url }}" data-product-link>
-    {% if product.featured_media %}
-      {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy' }}
+    {% if card_variant.featured_media %}
+      {{ card_variant.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy', data-card-image: '' }}
+    {% elsif product.featured_media %}
+      {{ product.featured_media | image_url: width: 900 | image_tag: class: 'product-card__image', loading: 'lazy', data-card-image: '' }}
     {% endif %}
-    {% if product.compare_at_price_max > product.price %}
-      <span class="product-badge">Save {{ savings | money }}</span>
+    {% if card_variant.compare_at_price > card_variant.price %}
+      <span class="product-badge" data-card-badge>Save {{ savings | money }}</span>
     {% endif %}
   </a>
 
@@ -30,7 +32,15 @@
           <span>{{ preview_option.name }}</span>
           <div>
             {% for value in preview_option.values limit: 4 %}
-              <a href="{{ product_card_url }}" title="{{ value | escape }}" data-label="{{ value | escape }}" data-product-link>{{ value }}</a>
+              <button
+                type="button"
+                title="{{ value | escape }}"
+                data-label="{{ value | escape }}"
+                data-card-option-value="{{ value | escape }}"
+                {% if card_variant.option1 == value %}class="is-active"{% endif %}
+              >
+                {{ value }}
+              </button>
             {% endfor %}
           </div>
         </div>
@@ -58,7 +68,7 @@
     {% endif %}
 
     <div class="product-card__price">
-      {% render 'price', product: product %}
+      {% render 'price', product: product, target: card_variant %}
     </div>
 
     <div class="delivery-lines">
@@ -70,7 +80,7 @@
       {% if product.variants.size > 1 %}
         <label class="card-variant-select">
           <span>Pick your option</span>
-          <select name="id">
+          <select name="id" data-card-variant-select>
             {% for variant in product.variants %}
               <option
                 value="{{ variant.id }}"
@@ -83,11 +93,27 @@
           </select>
         </label>
       {% else %}
-        <input type="hidden" name="id" value="{{ card_variant.id }}">
+        <input type="hidden" name="id" value="{{ card_variant.id }}" data-card-variant-select>
       {% endif %}
-      <button class="product-card__basket" type="submit" {% unless product.available %}disabled{% endunless %}>
-        {% if product.available %}Add to basket{% else %}Sold out{% endif %}
+      <button class="product-card__basket" type="submit" {% unless card_variant.available %}disabled{% endunless %} data-card-add-to-cart>
+        {% if card_variant.available %}Add to basket{% else %}Sold out{% endif %}
       </button>
     {% endform %}
   </div>
+
+  <script type="application/json" data-card-variants>
+    [
+      {% for variant in product.variants %}
+        {
+          "id": {{ variant.id | json }},
+          "title": {{ variant.title | json }},
+          "available": {{ variant.available | json }},
+          "price": {{ variant.price | json }},
+          "compare_at_price": {{ variant.compare_at_price | default: 0 | json }},
+          "option1": {{ variant.option1 | json }},
+          "featured_image": {% if variant.featured_media %}{{ variant.featured_media.preview_image | image_url: width: 900 | json }}{% elsif product.featured_media %}{{ product.featured_media.preview_image | image_url: width: 900 | json }}{% else %}""{% endif %}
+        }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]
+  </script>
 </article>

@@ -61,6 +61,10 @@
               data-product-image
             >
           {% endif %}
+          {% if product.media.size > 1 %}
+            <button class="product-gallery__nav product-gallery__nav--prev" type="button" aria-label="Previous image" data-product-gallery-prev>‹</button>
+            <button class="product-gallery__nav product-gallery__nav--next" type="button" aria-label="Next image" data-product-gallery-next>›</button>
+          {% endif %}
           <div class="product-gallery__magnifier" data-product-magnifier aria-hidden="true"></div>
           <button class="product-gallery__zoom" type="button" data-product-zoom-open>Enlarge</button>
         </div>
@@ -72,6 +76,7 @@
                 class="product-thumb{% if forloop.first %} is-active{% endif %}"
                 type="button"
                 data-product-thumb
+                data-media-id="{{ media.id }}"
                 data-image="{{ media.preview_image | image_url: width: 1400 }}"
                 data-zoom-image="{{ media.preview_image | image_url: width: 2200 }}"
                 data-image-alt="{{ media.alt | default: product.title | escape }}"

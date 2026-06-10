@@ -1,5 +1,5 @@
 {% liquid
-  assign target = product
+  assign target = target | default: product
   if use_variant
     assign target = product.selected_or_first_available_variant
   endif

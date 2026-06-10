@@ -37,12 +37,16 @@ async function loadEnvFile(filePath) {
 function parseArgs(argv) {
   const args = {
     write: false,
-    replaceTags: false,
+    overwriteTags: false,
+    includeEnriched: false,
+    titlesOnly: false,
+    descriptionsOnly: false,
     limit: null,
     ids: [],
     query: 'status:active',
     outputDir: path.join(cwd, 'enrichment-output'),
-    backupDir: path.join(cwd, 'enrichment-backups')
+    backupDir: path.join(cwd, 'enrichment-backups'),
+    taxonomyPlanFile: path.join(cwd, 'taxonomy-plans', 'shopify-collection-taxonomy-plan.json')
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -53,8 +57,23 @@ function parseArgs(argv) {
       continue;
     }
 
-    if (arg === '--replace-tags') {
-      args.replaceTags = true;
+    if (arg === '--overwrite-tags' || arg === '--replace-tags') {
+      args.overwriteTags = true;
+      continue;
+    }
+
+    if (arg === '--include-enriched') {
+      args.includeEnriched = true;
+      continue;
+    }
+
+    if (arg === '--titles-only') {
+      args.titlesOnly = true;
+      continue;
+    }
+
+    if (arg === '--descriptions-only') {
+      args.descriptionsOnly = true;
       continue;
     }
 
@@ -90,6 +109,12 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+
+    if (arg === '--taxonomy-plan') {
+      args.taxonomyPlanFile = path.resolve(cwd, argv[index + 1] || args.taxonomyPlanFile);
+      index += 1;
+      continue;
+    }
   }
 
   return args;
@@ -101,6 +126,12 @@ function requiredEnv(name) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
+}
+
+function validateArgs(args) {
+  if (args.titlesOnly && args.descriptionsOnly) {
+    throw new Error('Use either --titles-only or --descriptions-only, not both.');
+  }
 }
 
 async function getShopifyAdminAccessToken(shop) {
@@ -158,10 +189,24 @@ function getStyleViolations(descriptionHtml) {
   const lower = plainText.toLowerCase();
   const violations = [];
 
-  const bannedPhrases = ['exactly what it says on the tin', 'does what it says on the tin'];
+  const bannedPhrases = [
+    'exactly what it says on the tin',
+    'does what it says on the tin',
+    'no fuss',
+    'hassle free',
+    'simple yet effective'
+  ];
   for (const phrase of bannedPhrases) {
     if (lower.includes(phrase)) {
       violations.push(`Avoid the stock phrase "${phrase}".`);
+    }
+  }
+
+  const vagueClaims = ['simple', 'easy', 'practical', 'handy', 'versatile', 'stylish'];
+  for (const word of vagueClaims) {
+    const regex = new RegExp(`\\b${word}\\b`, 'i');
+    if (regex.test(plainText)) {
+      violations.push(`Avoid vague filler like "${word}" unless the sentence explains why with a concrete product detail.`);
     }
   }
 
@@ -225,6 +270,74 @@ function getStyleViolations(descriptionHtml) {
 
 function uniqueTags(tags) {
   return Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)));
+}
+
+function getManagedTagPrefix() {
+  return process.env.COLLECTION_MANAGED_TAG_PREFIX || 'taxonomy:';
+}
+
+function isManagedTaxonomyTag(tag, prefix = getManagedTagPrefix()) {
+  return typeof tag === 'string' && tag.startsWith(prefix);
+}
+
+function splitTags(tags, prefix = getManagedTagPrefix()) {
+  const managed = [];
+  const unmanaged = [];
+
+  for (const tag of Array.isArray(tags) ? tags : []) {
+    if (isManagedTaxonomyTag(tag, prefix)) {
+      managed.push(tag);
+    } else {
+      unmanaged.push(tag);
+    }
+  }
+
+  return { managed, unmanaged };
+}
+
+async function loadTaxonomyPlan(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    const parsed = JSON.parse(raw);
+    const collections = Array.isArray(parsed.collections) ? parsed.collections : [];
+
+    return {
+      managedTagPrefix: parsed.managed_tag_prefix || getManagedTagPrefix(),
+      collections: collections
+        .filter((collection) => collection?.managed_tag && collection?.title)
+        .map((collection) => ({
+          title: collection.title,
+          handle: collection.handle || '',
+          managed_tag: collection.managed_tag,
+          parent_handle: collection.parent_handle || null,
+          rationale: collection.rationale || ''
+        }))
+    };
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return null;
+    }
+    throw error;
+  }
+}
+
+function normalizeWhitespace(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function resolveCleanTitle(currentTitle, suggestedTitle) {
+  const fallbackTitle = normalizeWhitespace(currentTitle);
+  const nextTitle = normalizeWhitespace(suggestedTitle);
+
+  if (!nextTitle) {
+    return fallbackTitle;
+  }
+
+  if (nextTitle.length < 8) {
+    return fallbackTitle;
+  }
+
+  return nextTitle;
 }
 
 function toShopifyGid(id) {
@@ -370,12 +483,12 @@ async function fetchProducts({ shop, token, ids, limit, query }) {
   return results;
 }
 
-async function requestEnrichment(product, styleFeedback = '') {
+async function requestEnrichment(product, taxonomyPlan, styleFeedback = '') {
   const apiKey = requiredEnv('OPENAI_API_KEY');
   const model = process.env.OPENAI_MODEL || 'gpt-5.4-mini';
   const styleBrief =
     process.env.ENRICHMENT_STYLE_BRIEF ||
-    'Write concise, factual, plain-English product copy. Keep it brief, useful, and commercially usable.';
+    'Rewrite from a consumer-led point of view using only the supplied facts. Keep the tone factual, informative, confident, and commercially useful. Make the copy feel like a smart customer recommendation rather than generic catalogue filler.';
   const sourceDescription = stripHtml(product.descriptionHtml || '');
   const currentTags = Array.isArray(product.tags) ? product.tags : [];
 
@@ -396,6 +509,15 @@ async function requestEnrichment(product, styleFeedback = '') {
     }))
   };
 
+  const taxonomyChoices =
+    taxonomyPlan?.collections.map((collection) => ({
+      title: collection.title,
+      handle: collection.handle,
+      managed_tag: collection.managed_tag,
+      parent_handle: collection.parent_handle,
+      rationale: collection.rationale
+    })) || [];
+
   const response = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {
@@ -411,7 +533,7 @@ async function requestEnrichment(product, styleFeedback = '') {
             {
               type: 'input_text',
               text:
-                'You rewrite Shopify product descriptions and suggest tags. Stay strictly factual. Use only information explicitly present in the supplied product data. Do not invent materials, dimensions, performance claims, compatibility, certifications, or benefits. Follow style_brief as the primary instruction for tone, cadence, and personality. If the source data is thin, keep the copy short rather than making things up. Avoid stock phrases, repeated sentence structures, and repeated wording. Output valid JSON only.'
+                'You rewrite Shopify product descriptions and suggest product tags. Treat the existing description as a fact source only, never as wording to preserve. Produce a genuine rewrite with a consistent consumer-led voice. Stay strictly factual. Use only information explicitly present in the supplied product data. Do not invent materials, dimensions, performance claims, compatibility, certifications, or benefits. Follow style_brief as the primary instruction for tone, cadence, and personality. If the source data is thin, keep the copy short rather than making things up. Avoid stock phrases, repeated sentence structures, vague filler, and repeated wording. Prefer a tight taxonomy over broad or decorative tags. Output valid JSON only.'
             }
           ]
         },
@@ -422,9 +544,10 @@ async function requestEnrichment(product, styleFeedback = '') {
               type: 'input_text',
               text: JSON.stringify({
                 task:
-                  'Write a concise HTML description for a Shopify product and propose factual tags. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Avoid hype, unverifiable superlatives, filler, and repeated stock phrasing. If the source data is sparse, keep the copy brief. Tag suggestions should be factual product/category/use-case terms only and should complement the existing tags rather than replacing them.',
+                  'Write a concise HTML description for a Shopify product, propose factual product tags, choose any matching collection taxonomy tags from the supplied allowed list, and return a cleaned product title. The description must be a full rewrite, not a tidy-up of the source wording. Write from a consumer-led perspective, like a grounded product review that highlights the main reasons to buy, while staying strictly tied to the supplied facts. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Explain selling points through concrete details, not vague adjectives. Avoid hype, unverifiable superlatives, filler, repeated stock phrasing, and loose wording like "no fuss", "simple", or "easy" unless supported by a specific factual reason. The cleaned_title must keep the core product identity and factual specs, but remove trailing marketing flourishes, jokey taglines, and decorative copy such as text after a dash that adds no factual product detail. Do not invent new specs or rename the product category. If the source data is sparse, keep the copy brief. Factual tags should be tight, useful, and taxonomy-friendly: prefer product type, key format, clear material, and explicit use context; avoid room tags, mood tags, duplicate synonyms, and broad parent categories when a more precise tag exists. Collection taxonomy tags must be chosen only from allowed_collection_tags. Do not invent collection tags or handles.',
                 style_brief: styleBrief,
                 style_feedback: styleFeedback,
+                allowed_collection_tags: taxonomyChoices,
                 product: payload
               })
             }
@@ -440,15 +563,21 @@ async function requestEnrichment(product, styleFeedback = '') {
             type: 'object',
             additionalProperties: false,
             properties: {
+              cleaned_title: { type: 'string' },
               description_html: { type: 'string' },
-              tags: {
+              factual_tags: {
                 type: 'array',
                 items: { type: 'string' },
                 maxItems: 12
               },
+              collection_tags: {
+                type: 'array',
+                items: { type: 'string' },
+                maxItems: 8
+              },
               notes: { type: 'string' }
             },
-            required: ['description_html', 'tags', 'notes']
+            required: ['cleaned_title', 'description_html', 'factual_tags', 'collection_tags', 'notes']
           }
         }
       }
@@ -472,11 +601,11 @@ async function requestEnrichment(product, styleFeedback = '') {
   return JSON.parse(outputText);
 }
 
-async function enrichWithOpenAI(product) {
+async function enrichWithOpenAI(product, taxonomyPlan) {
   let styleFeedback = '';
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const suggestion = await requestEnrichment(product, styleFeedback);
+    const suggestion = await requestEnrichment(product, taxonomyPlan, styleFeedback);
     const violations = getStyleViolations(suggestion.description_html);
 
     if (violations.length === 0 || attempt === 2) {
@@ -491,7 +620,7 @@ async function enrichWithOpenAI(product) {
   }
 }
 
-async function updateProduct({ shop, token, productId, descriptionHtml, tags }) {
+async function updateProduct({ shop, token, productId, title, descriptionHtml, tags }) {
   const document = `
     mutation UpdateProduct($product: ProductUpdateInput!) {
       productUpdate(product: $product) {
@@ -515,8 +644,9 @@ async function updateProduct({ shop, token, productId, descriptionHtml, tags }) 
     variables: {
       product: {
         id: productId,
-        descriptionHtml,
-        tags
+        ...(title !== undefined ? { title } : {}),
+        ...(descriptionHtml !== undefined ? { descriptionHtml } : {}),
+        ...(tags !== undefined ? { tags } : {})
       }
     }
   });
@@ -556,12 +686,23 @@ async function main() {
   await loadEnvFile(path.join(cwd, '.env.enrich'));
 
   const args = parseArgs(process.argv.slice(2));
+  validateArgs(args);
   const shop = requiredEnv('SHOPIFY_SHOP_DOMAIN');
   const shopifyToken = await getShopifyAdminAccessToken(shop);
   const markerTag = process.env.ENRICHMENT_MARKER_TAG || '';
+  const taxonomyPlan = await loadTaxonomyPlan(args.taxonomyPlanFile);
+  const managedTagPrefix = taxonomyPlan?.managedTagPrefix || getManagedTagPrefix();
 
-  if (args.replaceTags) {
-    console.log('--replace-tags is deprecated. Existing tags will be preserved and new tags will be added.');
+  if (args.overwriteTags) {
+    console.log('Tag overwrite mode enabled. Existing non-marker tags will be replaced by the new enrichment output.');
+  }
+
+  if (taxonomyPlan) {
+    console.log(
+      `Loaded taxonomy plan from ${args.taxonomyPlanFile} with ${taxonomyPlan.collections.length} managed collection tags.`
+    );
+  } else {
+    console.log(`No taxonomy plan found at ${args.taxonomyPlanFile}. Collection tag selection will be skipped.`);
   }
 
   await fs.mkdir(args.outputDir, { recursive: true });
@@ -582,7 +723,7 @@ async function main() {
     const currentTags = Array.isArray(product.tags) ? product.tags : [];
     const currentDescription = stripHtml(product.descriptionHtml || '');
 
-    if (markerTag && currentTags.includes(markerTag)) {
+    if (!args.includeEnriched && markerTag && currentTags.includes(markerTag)) {
       console.log(`Skipping ${product.title} (${product.id}) because it already has marker tag "${markerTag}"`);
       continue;
     }
@@ -596,20 +737,34 @@ async function main() {
         timestamp
       });
 
-      const suggestion = await enrichWithOpenAI(product);
-      const mergedTags = uniqueTags([...currentTags, ...suggestion.tags]);
-      const finalTags = markerTag ? uniqueTags([...mergedTags, markerTag]) : mergedTags;
+      const suggestion = await enrichWithOpenAI(product, taxonomyPlan);
+      const cleanedTitle = resolveCleanTitle(product.title, suggestion.cleaned_title);
+      const shouldUpdateTitle = !args.descriptionsOnly;
+      const shouldUpdateDescription = !args.titlesOnly;
+      const shouldUpdateTags = !args.titlesOnly && !args.descriptionsOnly;
+      const { managed: currentManagedTags, unmanaged: currentUnmanagedTags } = splitTags(currentTags, managedTagPrefix);
+      const suggestedFactualTags = uniqueTags(suggestion.factual_tags || []);
+      const suggestedCollectionTags = uniqueTags(
+        (suggestion.collection_tags || []).filter((tag) => isManagedTaxonomyTag(tag, managedTagPrefix))
+      );
+      const baseTags = args.overwriteTags ? [] : currentUnmanagedTags;
+      const rebuiltTags = uniqueTags([...baseTags, ...suggestedFactualTags, ...suggestedCollectionTags]);
+      const finalTags = shouldUpdateTags && markerTag ? uniqueTags([...rebuiltTags, markerTag]) : rebuiltTags;
 
       report.push({
         productId: product.id,
         title: product.title,
+        suggestedTitle: cleanedTitle,
         currentTags,
-        suggestedTags: suggestion.tags,
+        currentManagedTags,
+        suggestedFactualTags,
+        suggestedCollectionTags,
         finalTags,
         currentDescription,
         backupPath,
         suggestedDescriptionHtml: suggestion.description_html,
         notes: suggestion.notes,
+        updateMode: args.titlesOnly ? 'titles-only' : args.descriptionsOnly ? 'descriptions-only' : 'full',
         mode: args.write ? 'write' : 'dry-run'
       });
 
@@ -618,8 +773,9 @@ async function main() {
           shop,
           token: shopifyToken,
           productId: product.id,
-          descriptionHtml: suggestion.description_html,
-          tags: finalTags
+          title: shouldUpdateTitle ? cleanedTitle : undefined,
+          descriptionHtml: shouldUpdateDescription ? suggestion.description_html : undefined,
+          tags: shouldUpdateTags ? finalTags : undefined
         });
         console.log(`Updated ${product.title}`);
       }

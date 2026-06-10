@@ -1,5 +1,7 @@
 # Plan Taxonomy
 
+For the simplest end-to-end store workflow, start with [README-shopify-ai-catalog-flow.md](../../README-shopify-ai-catalog-flow.md).
+
 Script:
 
 - [plan-taxonomy.mjs](scripts/collection-taxonomy/plan-taxonomy.mjs)

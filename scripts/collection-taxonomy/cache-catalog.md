@@ -1,5 +1,7 @@
 # Cache Catalog
 
+For the simplest end-to-end store workflow, start with [README-shopify-ai-catalog-flow.md](../../README-shopify-ai-catalog-flow.md).
+
 Script:
 
 - [cache-catalog.mjs](scripts/collection-taxonomy/cache-catalog.mjs)

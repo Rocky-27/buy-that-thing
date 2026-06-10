@@ -1,5 +1,7 @@
 # Shopify Collection Taxonomy Workflow
 
+For the simplest full-store operating procedure, use [README-shopify-ai-catalog-flow.md](README-shopify-ai-catalog-flow.md).
+
 This repo now includes local scripts to:
 
 1. cache Shopify products and collections
@@ -129,4 +131,5 @@ node scripts/collection-taxonomy/apply-taxonomy.mjs --collections-only --write
 3. Review the plan JSON carefully.
 4. Run an apply dry-run.
 5. Apply with `--write`.
-6. Review new collections in Shopify admin and publish any new ones that should go live.
+6. Run product enrichment against the approved taxonomy plan.
+7. Review new collections in Shopify admin and publish any new ones that should go live.

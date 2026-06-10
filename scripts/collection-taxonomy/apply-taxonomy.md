@@ -1,5 +1,7 @@
 # Apply Taxonomy
 
+For the simplest end-to-end store workflow, start with [README-shopify-ai-catalog-flow.md](../../README-shopify-ai-catalog-flow.md).
+
 Script:
 
 - [apply-taxonomy.mjs](scripts/collection-taxonomy/apply-taxonomy.mjs)
@@ -54,3 +56,4 @@ What it writes:
 - additive product tags
 - smart collections
 - collection hierarchy metafields
+- product-to-collection assignment via managed collection tags
