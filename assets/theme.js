@@ -950,6 +950,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const productCardNode = productRoot.querySelector('[data-product-card-json]');
   const variants = variantsNode ? JSON.parse(variantsNode.textContent) : [];
   const productCardData = productCardNode ? JSON.parse(productCardNode.textContent) : null;
+  const desktopZoomQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+  let zoomLocked = false;
 
   const formatMoney = (cents) => {
     return formatMoneyValue(cents, moneyFormat);
@@ -989,6 +991,22 @@ document.addEventListener('DOMContentLoaded', () => {
     syncZoomImage(productImage.dataset.zoomImage, productImage.alt);
   }
 
+  const clearMagnifier = () => {
+    if (!zoomSurface) return;
+    if (zoomLocked) return;
+    zoomSurface.classList.remove('is-zooming');
+  };
+
+  const setDesktopZoomLocked = (nextState) => {
+    if (!zoomSurface || !desktopZoomQuery.matches) return;
+    zoomLocked = nextState;
+    zoomSurface.classList.toggle('is-zoom-locked', zoomLocked);
+    zoomSurface.classList.toggle('is-zooming', zoomLocked);
+    if (zoomOpen) {
+      zoomOpen.textContent = zoomLocked ? 'Zoom out' : 'Zoom in';
+    }
+  };
+
   let activeThumbIndex = Math.max(
     0,
     Array.from(thumbs).findIndex((thumb) => thumb.classList.contains('is-active'))
@@ -1020,6 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (prevMediaButton && thumbs.length > 1) {
     prevMediaButton.addEventListener('click', (event) => {
       event.stopPropagation();
+      setDesktopZoomLocked(false);
       setActiveThumb(activeThumbIndex - 1);
     });
   }
@@ -1027,15 +1046,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (nextMediaButton && thumbs.length > 1) {
     nextMediaButton.addEventListener('click', (event) => {
       event.stopPropagation();
+      setDesktopZoomLocked(false);
       setActiveThumb(activeThumbIndex + 1);
     });
   }
 
-  if (zoomSurface && productImage && magnifier && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const clearMagnifier = () => {
-      zoomSurface.classList.remove('is-zooming');
-    };
-
+  if (zoomSurface && productImage && magnifier && desktopZoomQuery.matches) {
     zoomSurface.addEventListener('mousemove', (event) => {
       const rect = zoomSurface.getBoundingClientRect();
       const offsetX = event.clientX - rect.left;
@@ -1045,6 +1061,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       zoomSurface.classList.add('is-zooming');
       magnifier.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+    });
+
+    zoomSurface.addEventListener('mouseenter', () => {
+      zoomSurface.classList.add('is-zoom-ready');
     });
 
     zoomSurface.addEventListener('mouseleave', clearMagnifier);
@@ -1057,13 +1077,24 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.style.overflow = 'hidden';
     };
 
-    zoomOpen.addEventListener('click', () => {
+    zoomOpen.addEventListener('click', (event) => {
+      if (desktopZoomQuery.matches) {
+        event.stopPropagation();
+        setDesktopZoomLocked(!zoomLocked);
+        return;
+      }
+
       openZoom();
     });
 
     if (zoomSurface) {
       zoomSurface.addEventListener('click', (event) => {
         if (event.target === zoomOpen || event.target.closest('[data-product-gallery-prev], [data-product-gallery-next]')) return;
+        if (desktopZoomQuery.matches) {
+          setDesktopZoomLocked(!zoomLocked);
+          return;
+        }
+
         openZoom();
       });
     }
@@ -1112,6 +1143,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     if (productImage && variant.featured_image && variant.featured_image.src) {
+      setDesktopZoomLocked(false);
       const matchingThumbIndex = Array.from(thumbs).findIndex(
         (thumb) => thumb.dataset.image === variant.featured_image.src
       );

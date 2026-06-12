@@ -39,8 +39,11 @@ function parseArgs(argv) {
     write: false,
     overwriteTags: false,
     includeEnriched: false,
+    onlyEnriched: false,
     titlesOnly: false,
     descriptionsOnly: false,
+    tagsOnly: false,
+    reviewCollectionTags: false,
     limit: null,
     ids: [],
     query: 'status:active',
@@ -67,6 +70,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--only-enriched') {
+      args.onlyEnriched = true;
+      args.includeEnriched = true;
+      continue;
+    }
+
     if (arg === '--titles-only') {
       args.titlesOnly = true;
       continue;
@@ -74,6 +83,16 @@ function parseArgs(argv) {
 
     if (arg === '--descriptions-only') {
       args.descriptionsOnly = true;
+      continue;
+    }
+
+    if (arg === '--tags-only') {
+      args.tagsOnly = true;
+      continue;
+    }
+
+    if (arg === '--review-collection-tags') {
+      args.reviewCollectionTags = true;
       continue;
     }
 
@@ -131,6 +150,10 @@ function requiredEnv(name) {
 function validateArgs(args) {
   if (args.titlesOnly && args.descriptionsOnly) {
     throw new Error('Use either --titles-only or --descriptions-only, not both.');
+  }
+
+  if (args.tagsOnly && (args.titlesOnly || args.descriptionsOnly)) {
+    throw new Error('Use --tags-only by itself, not with --titles-only or --descriptions-only.');
   }
 }
 
@@ -483,7 +506,8 @@ async function fetchProducts({ shop, token, ids, limit, query }) {
   return results;
 }
 
-async function requestEnrichment(product, taxonomyPlan, styleFeedback = '') {
+async function requestEnrichment(product, taxonomyPlan, options = {}) {
+  const { styleFeedback = '', tagsOnly = false, reviewCollectionTags = false, currentManagedTags = [] } = options;
   const apiKey = requiredEnv('OPENAI_API_KEY');
   const model = process.env.OPENAI_MODEL || 'gpt-5.4-mini';
   const styleBrief =
@@ -544,10 +568,16 @@ async function requestEnrichment(product, taxonomyPlan, styleFeedback = '') {
               type: 'input_text',
               text: JSON.stringify({
                 task:
-                  'Write a concise HTML description for a Shopify product, propose factual product tags, choose any matching collection taxonomy tags from the supplied allowed list, and return a cleaned product title. The description must be a full rewrite, not a tidy-up of the source wording. Write from a consumer-led perspective, like a grounded product review that highlights the main reasons to buy, while staying strictly tied to the supplied facts. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Explain selling points through concrete details, not vague adjectives. Avoid hype, unverifiable superlatives, filler, repeated stock phrasing, and loose wording like "no fuss", "simple", or "easy" unless supported by a specific factual reason. The cleaned_title must keep the core product identity and factual specs, but remove trailing marketing flourishes, jokey taglines, and decorative copy such as text after a dash that adds no factual product detail. Do not invent new specs or rename the product category. If the source data is sparse, keep the copy brief. Factual tags should be tight, useful, and taxonomy-friendly: prefer product type, key format, clear material, and explicit use context; avoid room tags, mood tags, duplicate synonyms, and broad parent categories when a more precise tag exists. Collection taxonomy tags must be chosen only from allowed_collection_tags. Do not invent collection tags or handles.',
+                  tagsOnly
+                    ? 'Review the product facts and propose a tight factual tag set. Also review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
+                    : 'Write a concise HTML description for a Shopify product, propose factual product tags, and return a cleaned product title. The description must be a full rewrite, not a tidy-up of the source wording. Write from a consumer-led perspective, like a grounded product review that highlights the main reasons to buy, while staying strictly tied to the supplied facts. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Explain selling points through concrete details, not vague adjectives. Avoid hype, unverifiable superlatives, filler, repeated stock phrasing, and loose wording like "no fuss", "simple", or "easy" unless supported by a specific factual reason. The cleaned_title must keep the core product identity and factual specs, but remove trailing marketing flourishes, jokey taglines, and decorative copy such as text after a dash that adds no factual product detail. Do not invent new specs or rename the product category. If the source data is sparse, keep the copy brief. Factual tags should be tight, useful, and taxonomy-friendly: prefer product type, key format, clear material, and explicit use context; avoid room tags, mood tags, duplicate synonyms, and broad parent categories when a more precise tag exists. ' +
+                      (reviewCollectionTags
+                        ? 'Review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
+                        : 'Do not propose or change collection taxonomy tags. Return an empty collection tag list unless a current managed tag is undeniably correct and already present.'),
                 style_brief: styleBrief,
                 style_feedback: styleFeedback,
                 allowed_collection_tags: taxonomyChoices,
+                current_managed_collection_tags: currentManagedTags,
                 product: payload
               })
             }
@@ -601,12 +631,15 @@ async function requestEnrichment(product, taxonomyPlan, styleFeedback = '') {
   return JSON.parse(outputText);
 }
 
-async function enrichWithOpenAI(product, taxonomyPlan) {
+async function enrichWithOpenAI(product, taxonomyPlan, options = {}) {
   let styleFeedback = '';
 
   for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const suggestion = await requestEnrichment(product, taxonomyPlan, styleFeedback);
-    const violations = getStyleViolations(suggestion.description_html);
+    const suggestion = await requestEnrichment(product, taxonomyPlan, {
+      ...options,
+      styleFeedback
+    });
+    const violations = options.tagsOnly ? [] : getStyleViolations(suggestion.description_html);
 
     if (violations.length === 0 || attempt === 2) {
       return suggestion;
@@ -697,6 +730,14 @@ async function main() {
     console.log('Tag overwrite mode enabled. Existing non-marker tags will be replaced by the new enrichment output.');
   }
 
+  if (args.tagsOnly) {
+    console.log('Tags-only mode enabled. Titles and descriptions will not be updated.');
+  }
+
+  if (args.reviewCollectionTags) {
+    console.log('Collection tag review enabled. Managed taxonomy tags may be kept, replaced, or removed based on product facts.');
+  }
+
   if (taxonomyPlan) {
     console.log(
       `Loaded taxonomy plan from ${args.taxonomyPlanFile} with ${taxonomyPlan.collections.length} managed collection tags.`
@@ -722,9 +763,15 @@ async function main() {
   for (const product of products) {
     const currentTags = Array.isArray(product.tags) ? product.tags : [];
     const currentDescription = stripHtml(product.descriptionHtml || '');
+    const isAlreadyEnriched = markerTag && currentTags.includes(markerTag);
 
-    if (!args.includeEnriched && markerTag && currentTags.includes(markerTag)) {
+    if (!args.includeEnriched && isAlreadyEnriched) {
       console.log(`Skipping ${product.title} (${product.id}) because it already has marker tag "${markerTag}"`);
+      continue;
+    }
+
+    if (args.onlyEnriched && !isAlreadyEnriched) {
+      console.log(`Skipping ${product.title} (${product.id}) because it does not have marker tag "${markerTag}"`);
       continue;
     }
 
@@ -737,19 +784,25 @@ async function main() {
         timestamp
       });
 
-      const suggestion = await enrichWithOpenAI(product, taxonomyPlan);
-      const cleanedTitle = resolveCleanTitle(product.title, suggestion.cleaned_title);
-      const shouldUpdateTitle = !args.descriptionsOnly;
-      const shouldUpdateDescription = !args.titlesOnly;
-      const shouldUpdateTags = !args.titlesOnly && !args.descriptionsOnly;
       const { managed: currentManagedTags, unmanaged: currentUnmanagedTags } = splitTags(currentTags, managedTagPrefix);
+      const suggestion = await enrichWithOpenAI(product, taxonomyPlan, {
+        tagsOnly: args.tagsOnly,
+        reviewCollectionTags: args.reviewCollectionTags,
+        currentManagedTags
+      });
+      const cleanedTitle = resolveCleanTitle(product.title, suggestion.cleaned_title);
+      const shouldUpdateTitle = !args.tagsOnly && !args.descriptionsOnly;
+      const shouldUpdateDescription = !args.tagsOnly && !args.titlesOnly;
+      const shouldUpdateTags = args.tagsOnly || (!args.titlesOnly && !args.descriptionsOnly);
       const suggestedFactualTags = uniqueTags(suggestion.factual_tags || []);
       const suggestedCollectionTags = uniqueTags(
         (suggestion.collection_tags || []).filter((tag) => isManagedTaxonomyTag(tag, managedTagPrefix))
       );
       const baseTags = args.overwriteTags ? [] : currentUnmanagedTags;
-      const rebuiltTags = uniqueTags([...baseTags, ...suggestedFactualTags, ...suggestedCollectionTags]);
-      const finalTags = shouldUpdateTags && markerTag ? uniqueTags([...rebuiltTags, markerTag]) : rebuiltTags;
+      const rebuiltTags = uniqueTags([...baseTags, ...suggestedFactualTags]);
+      const managedTagsForFinal = args.reviewCollectionTags ? suggestedCollectionTags : currentManagedTags;
+      const finalTagsBase = uniqueTags([...managedTagsForFinal, ...rebuiltTags]);
+      const finalTags = shouldUpdateTags && markerTag ? uniqueTags([...finalTagsBase, markerTag]) : finalTagsBase;
 
       report.push({
         productId: product.id,
@@ -764,7 +817,7 @@ async function main() {
         backupPath,
         suggestedDescriptionHtml: suggestion.description_html,
         notes: suggestion.notes,
-        updateMode: args.titlesOnly ? 'titles-only' : args.descriptionsOnly ? 'descriptions-only' : 'full',
+        updateMode: args.tagsOnly ? 'tags-only' : args.titlesOnly ? 'titles-only' : args.descriptionsOnly ? 'descriptions-only' : 'full',
         mode: args.write ? 'write' : 'dry-run'
       });
 

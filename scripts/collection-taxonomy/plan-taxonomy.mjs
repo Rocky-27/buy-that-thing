@@ -28,14 +28,36 @@ const VALID_SORT_ORDERS = new Set([
   'PRICE_DESC'
 ]);
 
+const TITLE_STOP_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'at',
+  'by',
+  'for',
+  'from',
+  'in',
+  'of',
+  'on',
+  'or',
+  'the',
+  'to',
+  'with',
+  'set',
+  'pack',
+  'cm',
+  'mm'
+]);
+
 function parseArgs(argv) {
   const args = {
     cacheFile: DEFAULT_CACHE_FILE,
     engine: process.env.COLLECTION_TAXONOMY_ENGINE || 'openai',
     outputDir: path.join(cwd, 'taxonomy-plans'),
     planFile: path.join(cwd, 'taxonomy-plans', DEFAULT_PLAN_FILENAME),
-    maxCollections: Number(process.env.COLLECTION_TAXONOMY_MAX_COLLECTIONS || 24),
-    samplePerType: 4
+    maxCollections: Number(process.env.COLLECTION_TAXONOMY_MAX_COLLECTIONS || 72),
+    minCollections: Number(process.env.COLLECTION_TAXONOMY_MIN_COLLECTIONS || 40),
+    samplePerType: 12
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -73,6 +95,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--min-collections') {
+      args.minCollections = Number(argv[index + 1] || args.minCollections) || args.minCollections;
+      index += 1;
+      continue;
+    }
+
     if (arg === '--sample-per-type') {
       args.samplePerType = Number(argv[index + 1] || args.samplePerType) || args.samplePerType;
       index += 1;
@@ -90,6 +118,42 @@ function normalizeSortOrder(value) {
     .replace(/[\s-]+/g, '_');
 
   return VALID_SORT_ORDERS.has(normalized) ? normalized : 'BEST_SELLING';
+}
+
+function tokenizeTitle(title) {
+  return String(title || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 3 && !TITLE_STOP_WORDS.has(token) && !/^\d+$/.test(token));
+}
+
+function buildTopTitlePhrases(products, limit = 12) {
+  const phraseMap = new Map();
+
+  for (const product of products || []) {
+    const tokens = tokenizeTitle(product.title);
+    const phrasesForProduct = new Set();
+
+    for (let index = 0; index < tokens.length; index += 1) {
+      const unigram = tokens[index];
+      if (unigram) phrasesForProduct.add(unigram);
+
+      const bigram = tokens[index + 1] ? `${tokens[index]} ${tokens[index + 1]}` : null;
+      if (bigram) phrasesForProduct.add(bigram);
+    }
+
+    for (const phrase of phrasesForProduct) {
+      phraseMap.set(phrase, (phraseMap.get(phrase) || 0) + 1);
+    }
+  }
+
+  return Array.from(phraseMap.entries())
+    .filter(([, count]) => count >= 2)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, limit)
+    .map(([phrase, count]) => ({ phrase, count }));
 }
 
 function buildCatalogSummary(catalog, samplePerType) {
@@ -114,7 +178,8 @@ function buildCatalogSummary(catalog, samplePerType) {
   }
 
   const productTypes = topEntriesFromMap(productTypeMap, 80).map(({ value, count }) => {
-    const sampleProducts = (byProductType.get(value) || []).slice(0, samplePerType).map((product) => ({
+    const productsForType = byProductType.get(value) || [];
+    const sampleProducts = productsForType.slice(0, samplePerType).map((product) => ({
       id: product.id,
       title: product.title,
       vendor: product.vendor,
@@ -126,6 +191,7 @@ function buildCatalogSummary(catalog, samplePerType) {
     return {
       product_type: value,
       count,
+      title_phrases: buildTopTitlePhrases(productsForType, 12),
       sample_products: sampleProducts
     };
   });
@@ -204,6 +270,7 @@ function buildHeuristicPlan(catalog, prefix, maxCollections) {
 }
 
 async function buildOpenAIPlan(catalog, prefix, args) {
+  const minCollections = Math.min(args.minCollections, args.maxCollections);
   const summary = buildCatalogSummary(catalog, args.samplePerType);
   const schema = {
     type: 'object',
@@ -212,6 +279,7 @@ async function buildOpenAIPlan(catalog, prefix, args) {
       summary: { type: 'string' },
       collections: {
         type: 'array',
+        minItems: minCollections,
         maxItems: args.maxCollections,
         items: {
           type: 'object',
@@ -275,17 +343,26 @@ async function buildOpenAIPlan(catalog, prefix, args) {
     'Use the catalog summary to propose a practical collection hierarchy.',
     'Every proposed collection must be implemented as a smart collection driven by one managed product tag.',
     `Managed tags should use the prefix "${prefix}".`,
+    `Target between ${minCollections} and ${args.maxCollections} collections unless the catalog genuinely cannot support that many specific buckets.`,
+    'Prefer a more granular taxonomy with commercially useful child collections where the catalog clearly supports them.',
+    'Use the title phrase signals and sample products to split broad parent collections into narrower, specific child collections.',
+    'For a catalog of this size, broad umbrellas alone are not enough. Break major branches into clear product-form, function, and use-case subcategories.',
     'Prefer rules that are specific enough to avoid noisy over-tagging.',
+    'Do not rely on existing taxonomy tags as the primary signal if they appear noisy or overly broad.',
     'A product can match more than one collection.',
+    'A product should match multiple collections only when the fit is explicit and high confidence, not speculative.',
     'Use parent_handle to express hierarchy depth.',
     'Do not propose nested URLs. Only propose collections, hierarchy, and local matching rules.',
     'Keep the plan commercially sensible and avoid tiny or redundant collections unless clearly useful.',
+    'Prefer 2 to 4 levels and favor specific functional or product-form subcategories over generic room-based buckets.',
+    'If a parent category contains enough distinct product forms, create child collections for those forms rather than stopping at the parent.',
     `sort_order must be one of: ${Array.from(VALID_SORT_ORDERS).join(', ')}.`
   ].join(' ');
 
   const inputPayload = {
     task: 'Create a smart-collection taxonomy plan for Shopify.',
     constraints: {
+      min_collections: minCollections,
       max_collections: args.maxCollections,
       managed_tag_prefix: prefix,
       available_condition_fields: ['title', 'vendor', 'product_type', 'existing_tags'],

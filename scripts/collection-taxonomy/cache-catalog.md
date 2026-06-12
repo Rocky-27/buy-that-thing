@@ -30,4 +30,10 @@ Useful:
 node scripts/collection-taxonomy/cache-catalog.mjs --product-query "status:active"
 node scripts/collection-taxonomy/cache-catalog.mjs --product-limit 50 --collection-limit 20
 node scripts/collection-taxonomy/cache-catalog.mjs --cache-file catalog-cache/my-cache.json
+node scripts/collection-taxonomy/cache-catalog.mjs --inter-page-delay-ms 1000
 ```
+
+Notes:
+
+- The script now retries Shopify Admin GraphQL throttle responses automatically.
+- Use `--inter-page-delay-ms` to slow down page fetches if you have just run other heavy Admin API jobs and the throttle bucket is low.

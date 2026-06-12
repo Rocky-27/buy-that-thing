@@ -3,7 +3,9 @@
 import path from 'node:path';
 import {
   cwd,
+  defaultManagedTagPrefix,
   getShopifyAdminAccessToken,
+  splitTagsByManagedPrefix,
   loadEnrichmentEnv,
   productMatchesGroups,
   readJsonFile,
@@ -147,13 +149,15 @@ async function findCollectionByHandle({ shop, token, handle }) {
   return data.collections.nodes[0] || null;
 }
 
-function buildProductTagPlan(products, collections) {
+function buildProductTagPlan(products, collections, managedTagPrefix) {
   const collectionsByHandle = new Map((collections || []).map((collection) => [collection.handle, collection]));
   const ancestorHandlesByCollection = buildAncestorHandlesByCollection(collections);
 
   return (products || []).map((product) => {
     const addTags = [];
     const matchedCollections = [];
+    const currentTags = product.tags || [];
+    const { managed: currentManagedTags, unmanaged: unmanagedTags } = splitTagsByManagedPrefix(currentTags, managedTagPrefix);
 
     for (const collection of collections) {
       if (!collection.managed_tag) continue;
@@ -171,11 +175,13 @@ function buildProductTagPlan(products, collections) {
       }
     }
 
-    const finalTags = uniqueTags([...(product.tags || []), ...addTags]);
+    const finalTags = uniqueTags([...unmanagedTags, ...addTags]);
     return {
       productId: product.id,
       title: product.title,
-      currentTags: product.tags || [],
+      currentTags,
+      currentManagedTags,
+      removedManagedTags: currentManagedTags.filter((tag) => !addTags.includes(tag)),
       addTags: uniqueTags(addTags),
       finalTags,
       matchedCollections
@@ -422,8 +428,9 @@ async function main() {
   const token = args.write ? await getShopifyAdminAccessToken(shop) : null;
 
   const plannedCollections = Array.isArray(plan.collections) ? plan.collections : [];
+  const managedTagPrefix = plan.managed_tag_prefix || defaultManagedTagPrefix();
   const existingCollectionsByHandle = indexCollectionsByHandle(catalog.collections || []);
-  const productTagPlan = buildProductTagPlan(catalog.products || [], plannedCollections);
+  const productTagPlan = buildProductTagPlan(catalog.products || [], plannedCollections, managedTagPrefix);
   const hierarchy = buildCollectionHierarchyPlan(plannedCollections);
 
   const collectionActions = plannedCollections.map((collection) => {
@@ -460,7 +467,9 @@ async function main() {
     dry_run: !args.write,
     collections_only: args.collectionsOnly,
     planned_collection_count: plannedCollections.length,
-    product_tag_updates: productTagPlan.filter((entry) => entry.addTags.length > 0).length,
+    product_tag_updates: productTagPlan.filter(
+      (entry) => entry.addTags.length > 0 || entry.removedManagedTags.length > 0
+    ).length,
     collection_actions: collectionActions
   };
 
@@ -527,7 +536,7 @@ async function main() {
 
     if (!args.collectionsOnly) {
       for (const update of productTagPlan) {
-        if (update.addTags.length === 0) continue;
+        if (update.addTags.length === 0 && update.removedManagedTags.length === 0) continue;
 
         try {
           await updateProductTags({

@@ -1638,6 +1638,22 @@ textarea {
   right: 12px;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .product-gallery__main {
+    cursor: zoom-in;
+  }
+
+  .product-gallery__main.is-zoom-locked {
+    cursor: zoom-out;
+  }
+
+  .product-gallery__nav,
+  .product-gallery__zoom,
+  .product-thumb {
+    cursor: pointer;
+  }
+}
+
 .product-gallery__thumbs {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -2546,11 +2562,10 @@ textarea {
   }
 
   .collection-mobile-categories {
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 0;
-    z-index: 25;
-    width: min(380px, 100%);
+    position: static;
+    z-index: auto;
+    width: 100%;
+    margin-top: 12px;
     padding: 16px;
     border: 1px solid var(--line);
     border-radius: 16px;
@@ -2588,6 +2603,14 @@ textarea {
     background: #fff;
     border-radius: var(--radius);
     padding: 6px 10px;
+  }
+
+  .collection-toolbar__primary {
+    align-items: stretch;
+  }
+
+  .collection-toolbar__primary > .collection-mobile-categories {
+    flex-basis: 100%;
   }
 }
 

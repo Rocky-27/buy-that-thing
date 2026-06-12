@@ -16,7 +16,17 @@
           {% assign billboard_products_shown = 0 %}
           {% assign billboard_candidates_rendered = 0 %}
           {% assign billboard_candidates_limit = 9 %}
-          {% for product in offer_collection.products %}
+          {% assign billboard_candidate_total = offer_collection.all_products_count | default: offer_collection.products_count %}
+          {% assign billboard_candidate_window = billboard_candidate_total | minus: billboard_candidates_limit %}
+          {% if billboard_candidate_window < 0 %}
+            {% assign billboard_candidate_window = 0 %}
+          {% endif %}
+          {% assign billboard_random_seed = 'now' | date: '%s' | plus: section.id.size | plus: 17 %}
+          {% assign billboard_offset = 0 %}
+          {% if billboard_candidate_window > 0 %}
+            {% assign billboard_offset = billboard_random_seed | modulo: billboard_candidate_window %}
+          {% endif %}
+          {% for product in offer_collection.products limit: billboard_candidates_limit offset: billboard_offset %}
             {% if product.available %}
               <a class="billboard-product" href="{{ product.url }}" data-randomized-item {% if billboard_products_shown >= 3 %}hidden{% endif %}>
                 {% if product.featured_media %}

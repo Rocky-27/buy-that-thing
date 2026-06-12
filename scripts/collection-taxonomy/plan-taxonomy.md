@@ -39,3 +39,9 @@ Override files if needed:
 ```bash
 node scripts/collection-taxonomy/plan-taxonomy.mjs --cache-file catalog-cache/my-cache.json --plan-file taxonomy-plans/my-plan.json --engine openai
 ```
+
+Notes:
+
+- The planner now defaults to a larger collection budget, a minimum target collection count, and more sample products per product type so it can propose more granular child collections.
+- If you want to push specificity harder, raise `--max-collections` and `--min-collections`.
+- If you want to constrain it again, use `--max-collections` with a lower number.

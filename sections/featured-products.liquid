@@ -16,7 +16,17 @@
         {% assign shown_products = 0 %}
         {% assign rendered_candidates = 0 %}
         {% assign candidate_limit = section.settings.products_to_show | plus: 8 %}
-        {% for product in display_collection.products %}
+        {% assign available_candidate_total = display_collection.all_products_count | default: display_collection.products_count %}
+        {% assign candidate_window = available_candidate_total | minus: candidate_limit %}
+        {% if candidate_window < 0 %}
+          {% assign candidate_window = 0 %}
+        {% endif %}
+        {% assign random_seed = 'now' | date: '%s' | plus: section.id.size %}
+        {% assign collection_offset = 0 %}
+        {% if candidate_window > 0 %}
+          {% assign collection_offset = random_seed | modulo: candidate_window %}
+        {% endif %}
+        {% for product in display_collection.products limit: candidate_limit offset: collection_offset %}
           {% if product.available %}
             <div data-randomized-item {% if shown_products >= section.settings.products_to_show %}hidden{% endif %}>
               {% render 'product-card', product: product %}

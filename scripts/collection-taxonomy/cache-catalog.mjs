@@ -8,6 +8,7 @@ import {
   loadEnrichmentEnv,
   requiredEnv,
   shopifyGraphQL,
+  sleep,
   timestampSlug,
   writeJsonFile
 } from './lib/shopify-taxonomy-utils.mjs';
@@ -19,6 +20,7 @@ function parseArgs(argv) {
     productQuery: 'status:active',
     productLimit: null,
     collectionLimit: null,
+    interPageDelayMs: Number(process.env.SHOPIFY_CACHE_INTER_PAGE_DELAY_MS || 250) || 250,
     outputDir: path.join(cwd, 'catalog-cache'),
     cacheFile: path.join(cwd, 'catalog-cache', DEFAULT_CACHE_FILENAME)
   };
@@ -44,6 +46,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--inter-page-delay-ms') {
+      args.interPageDelayMs = Number(argv[index + 1] || args.interPageDelayMs) || args.interPageDelayMs;
+      index += 1;
+      continue;
+    }
+
     if (arg === '--output-dir') {
       args.outputDir = path.resolve(cwd, argv[index + 1] || args.outputDir);
       args.cacheFile = path.join(args.outputDir, DEFAULT_CACHE_FILENAME);
@@ -62,7 +70,7 @@ function parseArgs(argv) {
   return args;
 }
 
-async function fetchProducts({ shop, token, query, limit }) {
+async function fetchProducts({ shop, token, query, limit, interPageDelayMs }) {
   const document = `
     query ProductsPage($cursor: String, $query: String!) {
       products(first: 100, after: $cursor, query: $query, sortKey: TITLE) {
@@ -138,12 +146,15 @@ async function fetchProducts({ shop, token, query, limit }) {
 
     hasNextPage = connection.pageInfo.hasNextPage;
     cursor = connection.pageInfo.endCursor;
+    if (hasNextPage) {
+      await sleep(interPageDelayMs);
+    }
   }
 
   return products;
 }
 
-async function fetchCollections({ shop, token, limit }) {
+async function fetchCollections({ shop, token, limit, interPageDelayMs }) {
   const document = `
     query CollectionsPage($cursor: String) {
       collections(first: 100, after: $cursor, sortKey: TITLE) {
@@ -229,6 +240,9 @@ async function fetchCollections({ shop, token, limit }) {
 
     hasNextPage = connection.pageInfo.hasNextPage;
     cursor = connection.pageInfo.endCursor;
+    if (hasNextPage) {
+      await sleep(interPageDelayMs);
+    }
   }
 
   return collections;
@@ -248,14 +262,16 @@ async function main() {
     shop,
     token,
     query: args.productQuery,
-    limit: args.productLimit
+    limit: args.productLimit,
+    interPageDelayMs: args.interPageDelayMs
   });
 
   console.log('Caching Shopify collections...');
   const collections = await fetchCollections({
     shop,
     token,
-    limit: args.collectionLimit
+    limit: args.collectionLimit,
+    interPageDelayMs: args.interPageDelayMs
   });
 
   const payload = {

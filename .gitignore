@@ -1,8 +1,11 @@
 .env.enrich.local
 .env.enrich
+.env.pricing.local
+.env.pricing
 enrichment-output/
 enrichment-backups/
 catalog-cache/
 taxonomy-plans/
 taxonomy-apply-output/
 collection-description-output/
+pricing-output/

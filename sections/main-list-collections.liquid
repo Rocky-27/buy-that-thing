@@ -31,7 +31,8 @@
         custom_cta: 'See every product'
       %}
       {% for collection in collections %}
-        {% if collection.products_count > 0 %}
+        {% assign parent_collection = collection.metafields.custom.parent_collection.value %}
+        {% if collection.products_count > 0 and parent_collection == blank %}
           {% render 'collection-card', collection: collection %}
         {% endif %}
       {% endfor %}

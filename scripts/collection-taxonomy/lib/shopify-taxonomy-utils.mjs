@@ -86,28 +86,83 @@ export async function getShopifyAdminAccessToken(shop) {
   return payload.access_token;
 }
 
+export async function sleep(ms) {
+  if (!ms || ms <= 0) return;
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getRetryAfterDelayMs(response) {
+  const retryAfter = Number(response.headers.get('retry-after') || 0);
+  return Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 0;
+}
+
+function isThrottleError(payload) {
+  return Array.isArray(payload?.errors) && payload.errors.some((error) => String(error.message || '').includes('THROTTLED'));
+}
+
+function computeBackoffDelayMs(attempt, response, payload) {
+  const retryAfterDelayMs = response ? getRetryAfterDelayMs(response) : 0;
+  if (retryAfterDelayMs > 0) return retryAfterDelayMs;
+
+  const throttleStatus = payload?.extensions?.cost?.throttleStatus || null;
+  const currentlyAvailable = Number(throttleStatus?.currentlyAvailable ?? 0);
+  const restoreRate = Number(throttleStatus?.restoreRate ?? 50);
+
+  if (currentlyAvailable <= 0 && restoreRate > 0) {
+    return Math.max(1000, Math.ceil(1000 / restoreRate) * 10);
+  }
+
+  const baseDelayMs = Number(process.env.SHOPIFY_GRAPHQL_RETRY_BASE_DELAY_MS || 1500) || 1500;
+  return baseDelayMs * Math.max(1, attempt);
+}
+
 export async function shopifyGraphQL({ shop, token, query, variables = {} }) {
   const apiVersion = process.env.SHOPIFY_API_VERSION || '2025-10';
-  const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': token
-    },
-    body: JSON.stringify({ query, variables })
-  });
+  const maxAttempts = Number(process.env.SHOPIFY_GRAPHQL_RETRY_MAX_ATTEMPTS || 6) || 6;
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Shopify request failed (${response.status}): ${body}`);
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const response = await fetch(`https://${shop}/admin/api/${apiVersion}/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': token
+      },
+      body: JSON.stringify({ query, variables })
+    });
+
+    if (response.status === 429) {
+      if (attempt === maxAttempts) {
+        const body = await response.text();
+        throw new Error(`Shopify request failed (${response.status}): ${body}`);
+      }
+
+      await sleep(computeBackoffDelayMs(attempt, response, null));
+      continue;
+    }
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Shopify request failed (${response.status}): ${body}`);
+    }
+
+    const payload = await response.json();
+    if (isThrottleError(payload)) {
+      if (attempt === maxAttempts) {
+        throw new Error(`Shopify GraphQL throttled after ${maxAttempts} attempts: ${JSON.stringify(payload.errors)}`);
+      }
+
+      await sleep(computeBackoffDelayMs(attempt, response, payload));
+      continue;
+    }
+
+    if (payload.errors) {
+      throw new Error(`Shopify GraphQL error: ${JSON.stringify(payload.errors)}`);
+    }
+
+    return payload.data;
   }
 
-  const payload = await response.json();
-  if (payload.errors) {
-    throw new Error(`Shopify GraphQL error: ${JSON.stringify(payload.errors)}`);
-  }
-
-  return payload.data;
+  throw new Error('Shopify GraphQL request failed after retries.');
 }
 
 export async function ensureDir(dirPath) {
@@ -158,6 +213,25 @@ export function defaultManagedTagPrefix() {
 export function buildManagedTag(prefix, handle) {
   const normalizedPrefix = prefix.endsWith(':') || prefix.endsWith('/') ? prefix : `${prefix}:`;
   return `${normalizedPrefix}${handle}`;
+}
+
+export function isManagedTaxonomyTag(tag, prefix = defaultManagedTagPrefix()) {
+  return typeof tag === 'string' && tag.startsWith(prefix);
+}
+
+export function splitTagsByManagedPrefix(tags, prefix = defaultManagedTagPrefix()) {
+  const managed = [];
+  const unmanaged = [];
+
+  for (const tag of Array.isArray(tags) ? tags : []) {
+    if (isManagedTaxonomyTag(tag, prefix)) {
+      managed.push(tag);
+    } else {
+      unmanaged.push(tag);
+    }
+  }
+
+  return { managed, unmanaged };
 }
 
 export function topEntriesFromMap(map, limit = 20) {
