@@ -34,6 +34,7 @@ function parseArgs(argv) {
     cacheFile: DEFAULT_CACHE_FILE,
     planFile: DEFAULT_PLAN_FILE,
     collectionsOnly: false,
+    deleteUnplannedCollections: false,
     write: false,
     outputDir: path.join(cwd, 'taxonomy-apply-output')
   };
@@ -60,6 +61,11 @@ function parseArgs(argv) {
 
     if (arg === '--collections-only') {
       args.collectionsOnly = true;
+      continue;
+    }
+
+    if (arg === '--delete-unplanned-collections') {
+      args.deleteUnplannedCollections = true;
       continue;
     }
 
@@ -419,6 +425,38 @@ async function deleteCollectionMetafields({ shop, token, identifiers }) {
   }
 }
 
+async function deleteCollection({ shop, token, collectionId }) {
+  const mutation = `
+    mutation CollectionDelete($input: CollectionDeleteInput!) {
+      collectionDelete(input: $input) {
+        deletedCollectionId
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const data = await shopifyGraphQL({
+    shop,
+    token,
+    query: mutation,
+    variables: {
+      input: {
+        id: collectionId
+      }
+    }
+  });
+
+  const errors = data.collectionDelete.userErrors || [];
+  if (errors.length > 0) {
+    throw new Error(`Shopify collectionDelete failed: ${JSON.stringify(errors)}`);
+  }
+
+  return data.collectionDelete.deletedCollectionId;
+}
+
 async function main() {
   await loadEnrichmentEnv();
   const args = parseArgs(process.argv.slice(2));
@@ -428,10 +466,18 @@ async function main() {
   const token = args.write ? await getShopifyAdminAccessToken(shop) : null;
 
   const plannedCollections = Array.isArray(plan.collections) ? plan.collections : [];
+  const plannedHandles = new Set(plannedCollections.map((collection) => collection.handle));
   const managedTagPrefix = plan.managed_tag_prefix || defaultManagedTagPrefix();
   const existingCollectionsByHandle = indexCollectionsByHandle(catalog.collections || []);
   const productTagPlan = buildProductTagPlan(catalog.products || [], plannedCollections, managedTagPrefix);
   const hierarchy = buildCollectionHierarchyPlan(plannedCollections);
+  const collectionDeletionCandidates = (catalog.collections || [])
+    .filter((collection) => !plannedHandles.has(collection.handle))
+    .map((collection) => ({
+      id: collection.id,
+      handle: collection.handle,
+      title: collection.title
+    }));
 
   const collectionActions = plannedCollections.map((collection) => {
     const existing = existingCollectionsByHandle.get(collection.handle) || null;
@@ -466,10 +512,12 @@ async function main() {
   const summary = {
     dry_run: !args.write,
     collections_only: args.collectionsOnly,
+    delete_unplanned_collections: args.deleteUnplannedCollections,
     planned_collection_count: plannedCollections.length,
     product_tag_updates: productTagPlan.filter(
       (entry) => entry.addTags.length > 0 || entry.removedManagedTags.length > 0
     ).length,
+    collection_deletions_planned: args.deleteUnplannedCollections ? collectionDeletionCandidates.length : 0,
     collection_actions: collectionActions
   };
 
@@ -627,6 +675,26 @@ async function main() {
         error: error.message
       });
     }
+
+    if (args.deleteUnplannedCollections) {
+      for (const collection of collectionDeletionCandidates) {
+        try {
+          await deleteCollection({
+            shop,
+            token,
+            collectionId: collection.id
+          });
+        } catch (error) {
+          errors.push({
+            collectionId: collection.id,
+            handle: collection.handle,
+            title: collection.title,
+            action: 'collection-delete',
+            error: error.message
+          });
+        }
+      }
+    }
   }
 
   const outputPath = path.join(args.outputDir, `shopify-collection-taxonomy-apply-${timestampSlug()}.json`);
@@ -637,6 +705,7 @@ async function main() {
     summary,
     product_tag_plan: productTagPlan,
     collection_actions: collectionActions,
+    collection_deletion_candidates: collectionDeletionCandidates,
     hierarchy_preview: Object.fromEntries(hierarchy.entries()),
     errors
   });
@@ -645,6 +714,9 @@ async function main() {
   console.log(args.write ? 'Mode: write' : 'Mode: dry-run');
   console.log(`Products receiving new tags: ${summary.product_tag_updates}`);
   console.log(`Collections in plan: ${summary.planned_collection_count}`);
+  if (args.deleteUnplannedCollections) {
+    console.log(`Collections planned for deletion: ${collectionDeletionCandidates.length}`);
+  }
   if (errors.length > 0) {
     console.log(`Warnings/errors: ${errors.length}`);
   }

@@ -34,6 +34,11 @@ async function loadEnvFile(filePath) {
   }
 }
 
+async function sleep(ms) {
+  if (!ms || ms <= 0) return;
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function parseArgs(argv) {
   const args = {
     write: false,
@@ -44,6 +49,7 @@ function parseArgs(argv) {
     descriptionsOnly: false,
     tagsOnly: false,
     reviewCollectionTags: false,
+    concurrency: Number(process.env.ENRICHMENT_CONCURRENCY || 4) || 4,
     limit: null,
     ids: [],
     query: 'status:active',
@@ -93,6 +99,12 @@ function parseArgs(argv) {
 
     if (arg === '--review-collection-tags') {
       args.reviewCollectionTags = true;
+      continue;
+    }
+
+    if (arg === '--concurrency') {
+      args.concurrency = Number(argv[index + 1] || args.concurrency) || args.concurrency;
+      index += 1;
       continue;
     }
 
@@ -154,6 +166,10 @@ function validateArgs(args) {
 
   if (args.tagsOnly && (args.titlesOnly || args.descriptionsOnly)) {
     throw new Error('Use --tags-only by itself, not with --titles-only or --descriptions-only.');
+  }
+
+  if (!Number.isFinite(args.concurrency) || args.concurrency < 1) {
+    throw new Error('--concurrency must be a positive integer.');
   }
 }
 
@@ -542,84 +558,119 @@ async function requestEnrichment(product, taxonomyPlan, options = {}) {
       rationale: collection.rationale
     })) || [];
 
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model,
-      input: [
-        {
-          role: 'system',
-          content: [
-            {
-              type: 'input_text',
-              text:
-                'You rewrite Shopify product descriptions and suggest product tags. Treat the existing description as a fact source only, never as wording to preserve. Produce a genuine rewrite with a consistent consumer-led voice. Stay strictly factual. Use only information explicitly present in the supplied product data. Do not invent materials, dimensions, performance claims, compatibility, certifications, or benefits. Follow style_brief as the primary instruction for tone, cadence, and personality. If the source data is thin, keep the copy short rather than making things up. Avoid stock phrases, repeated sentence structures, vague filler, and repeated wording. Prefer a tight taxonomy over broad or decorative tags. Output valid JSON only.'
-            }
-          ]
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'input_text',
-              text: JSON.stringify({
-                task:
-                  tagsOnly
-                    ? 'Review the product facts and propose a tight factual tag set. Also review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
-                    : 'Write a concise HTML description for a Shopify product, propose factual product tags, and return a cleaned product title. The description must be a full rewrite, not a tidy-up of the source wording. Write from a consumer-led perspective, like a grounded product review that highlights the main reasons to buy, while staying strictly tied to the supplied facts. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Explain selling points through concrete details, not vague adjectives. Avoid hype, unverifiable superlatives, filler, repeated stock phrasing, and loose wording like "no fuss", "simple", or "easy" unless supported by a specific factual reason. The cleaned_title must keep the core product identity and factual specs, but remove trailing marketing flourishes, jokey taglines, and decorative copy such as text after a dash that adds no factual product detail. Do not invent new specs or rename the product category. If the source data is sparse, keep the copy brief. Factual tags should be tight, useful, and taxonomy-friendly: prefer product type, key format, clear material, and explicit use context; avoid room tags, mood tags, duplicate synonyms, and broad parent categories when a more precise tag exists. ' +
-                      (reviewCollectionTags
-                        ? 'Review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
-                        : 'Do not propose or change collection taxonomy tags. Return an empty collection tag list unless a current managed tag is undeniably correct and already present.'),
-                style_brief: styleBrief,
-                style_feedback: styleFeedback,
-                allowed_collection_tags: taxonomyChoices,
-                current_managed_collection_tags: currentManagedTags,
-                product: payload
-              })
-            }
-          ]
-        }
-      ],
-      text: {
-        format: {
-          type: 'json_schema',
-          name: 'shopify_product_enrichment',
-          strict: true,
-          schema: {
-            type: 'object',
-            additionalProperties: false,
-            properties: {
-              cleaned_title: { type: 'string' },
-              description_html: { type: 'string' },
-              factual_tags: {
-                type: 'array',
-                items: { type: 'string' },
-                maxItems: 12
-              },
-              collection_tags: {
-                type: 'array',
-                items: { type: 'string' },
-                maxItems: 8
-              },
-              notes: { type: 'string' }
-            },
-            required: ['cleaned_title', 'description_html', 'factual_tags', 'collection_tags', 'notes']
+  const requestBody = {
+    model,
+    input: [
+      {
+        role: 'system',
+        content: [
+          {
+            type: 'input_text',
+            text:
+              'You rewrite Shopify product descriptions and suggest product tags. Treat the existing description as a fact source only, never as wording to preserve. Produce a genuine rewrite with a consistent consumer-led voice. Stay strictly factual. Use only information explicitly present in the supplied product data. Do not invent materials, dimensions, performance claims, compatibility, certifications, or benefits. Follow style_brief as the primary instruction for tone, cadence, and personality. If the source data is thin, keep the copy short rather than making things up. Avoid stock phrases, repeated sentence structures, vague filler, and repeated wording. Prefer a tight taxonomy over broad or decorative tags. Output valid JSON only.'
           }
+        ]
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'input_text',
+            text: JSON.stringify({
+              task:
+                tagsOnly
+                  ? 'Review the product facts and propose a tight factual tag set. Also review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
+                  : 'Write a concise HTML description for a Shopify product, propose factual product tags, and return a cleaned product title. The description must be a full rewrite, not a tidy-up of the source wording. Write from a consumer-led perspective, like a grounded product review that highlights the main reasons to buy, while staying strictly tied to the supplied facts. Description should normally be 2 short paragraphs and, if factual feature items exist, one short bullet list. Use short, direct sentences. Vary sentence openings and structure. Explain selling points through concrete details, not vague adjectives. Avoid hype, unverifiable superlatives, filler, repeated stock phrasing, and loose wording like "no fuss", "simple", or "easy" unless supported by a specific factual reason. The cleaned_title must keep the core product identity and factual specs, but remove trailing marketing flourishes, jokey taglines, and decorative copy such as text after a dash that adds no factual product detail. Do not invent new specs or rename the product category. If the source data is sparse, keep the copy brief. Factual tags should be tight, useful, and taxonomy-friendly: prefer product type, key format, clear material, and explicit use context; avoid room tags, mood tags, duplicate synonyms, and broad parent categories when a more precise tag exists. ' +
+                    (reviewCollectionTags
+                      ? 'Review the current managed collection taxonomy tags against the allowed collection tags. Keep a collection tag only if the product clearly belongs there, remove it if the fit is wrong, and add a new one only when the fit is explicit and high confidence. If no allowed collection tag is clearly correct, return an empty collection tag list. Do not guess.'
+                      : 'Do not propose or change collection taxonomy tags. Return an empty collection tag list unless a current managed tag is undeniably correct and already present.'),
+              style_brief: styleBrief,
+              style_feedback: styleFeedback,
+              allowed_collection_tags: taxonomyChoices,
+              current_managed_collection_tags: currentManagedTags,
+              product: payload
+            })
+          }
+        ]
+      }
+    ],
+    text: {
+      format: {
+        type: 'json_schema',
+        name: 'shopify_product_enrichment',
+        strict: true,
+        schema: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            cleaned_title: { type: 'string' },
+            description_html: { type: 'string' },
+            factual_tags: {
+              type: 'array',
+              items: { type: 'string' },
+              maxItems: 12
+            },
+            collection_tags: {
+              type: 'array',
+              items: { type: 'string' },
+              maxItems: 8
+            },
+            notes: { type: 'string' }
+          },
+          required: ['cleaned_title', 'description_html', 'factual_tags', 'collection_tags', 'notes']
         }
       }
-    })
-  });
+    }
+  };
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`OpenAI request failed (${response.status}): ${body}`);
+  const maxAttempts = Number(process.env.OPENAI_RETRY_MAX_ATTEMPTS || 6) || 6;
+  const retryBaseDelayMs = Number(process.env.OPENAI_RETRY_BASE_DELAY_MS || 2000) || 2000;
+  const requestDelayMs = Number(process.env.OPENAI_REQUEST_DELAY_MS || 0) || 0;
+  const retryJitterMs = Number(process.env.OPENAI_RETRY_JITTER_MS || 750) || 750;
+
+  if (requestDelayMs > 0) {
+    await sleep(requestDelayMs);
   }
 
-  const data = await response.json();
+  let data;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (response.status === 429) {
+      if (attempt === maxAttempts) {
+        const body = await response.text();
+        throw new Error(`OpenAI request failed (${response.status}): ${body}`);
+      }
+
+      const retryAfterSeconds = Number(response.headers.get('retry-after') || 0);
+      const retryAfterMs = Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0 ? retryAfterSeconds * 1000 : 0;
+      const jitterMs = Math.floor(Math.random() * retryJitterMs);
+      const delayMs = retryAfterMs > 0 ? retryAfterMs + jitterMs : retryBaseDelayMs * attempt + jitterMs;
+      console.warn(`OpenAI rate limited for ${product.title}. Retrying in ${delayMs}ms (attempt ${attempt}/${maxAttempts}).`);
+      await sleep(delayMs);
+      continue;
+    }
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`OpenAI request failed (${response.status}): ${body}`);
+    }
+
+    data = await response.json();
+    break;
+  }
+
+  if (!data) {
+    throw new Error(`No OpenAI response returned for product ${product.id}`);
+  }
   const outputText =
     data.output_text ||
     data.output?.flatMap((item) => item.content || []).find((item) => item.type === 'output_text')?.text;
@@ -759,20 +810,21 @@ async function main() {
 
   const report = [];
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  let nextIndex = 0;
 
-  for (const product of products) {
+  async function processProduct(product) {
     const currentTags = Array.isArray(product.tags) ? product.tags : [];
     const currentDescription = stripHtml(product.descriptionHtml || '');
     const isAlreadyEnriched = markerTag && currentTags.includes(markerTag);
 
     if (!args.includeEnriched && isAlreadyEnriched) {
       console.log(`Skipping ${product.title} (${product.id}) because it already has marker tag "${markerTag}"`);
-      continue;
+      return;
     }
 
     if (args.onlyEnriched && !isAlreadyEnriched) {
       console.log(`Skipping ${product.title} (${product.id}) because it does not have marker tag "${markerTag}"`);
-      continue;
+      return;
     }
 
     console.log(`Processing ${product.title} (${product.id})`);
@@ -841,6 +893,22 @@ async function main() {
       console.error(`Failed ${product.title}: ${error.message}`);
     }
   }
+
+  async function worker() {
+    while (true) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+
+      if (currentIndex >= products.length) {
+        return;
+      }
+
+      await processProduct(products[currentIndex]);
+    }
+  }
+
+  const workerCount = Math.min(args.concurrency, products.length || 1);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
   const outputPath = path.join(args.outputDir, `shopify-enrichment-${timestamp}.json`);
   await fs.writeFile(outputPath, JSON.stringify(report, null, 2));

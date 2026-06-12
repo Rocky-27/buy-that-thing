@@ -16,7 +16,7 @@
           {% assign billboard_products_shown = 0 %}
           {% assign billboard_candidates_rendered = 0 %}
           {% assign billboard_candidates_limit = 9 %}
-          {% assign billboard_candidate_total = offer_collection.all_products_count | default: offer_collection.products_count %}
+          {% assign billboard_candidate_total = offer_collection.products.size %}
           {% assign billboard_candidate_window = billboard_candidate_total | minus: billboard_candidates_limit %}
           {% if billboard_candidate_window < 0 %}
             {% assign billboard_candidate_window = 0 %}

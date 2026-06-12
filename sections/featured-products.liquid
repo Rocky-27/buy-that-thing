@@ -16,7 +16,7 @@
         {% assign shown_products = 0 %}
         {% assign rendered_candidates = 0 %}
         {% assign candidate_limit = section.settings.products_to_show | plus: 8 %}
-        {% assign available_candidate_total = display_collection.all_products_count | default: display_collection.products_count %}
+        {% assign available_candidate_total = display_collection.products.size %}
         {% assign candidate_window = available_candidate_total | minus: candidate_limit %}
         {% if candidate_window < 0 %}
           {% assign candidate_window = 0 %}

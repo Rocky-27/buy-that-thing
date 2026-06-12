@@ -34,6 +34,7 @@ node scripts/enrichment/enrich-products.mjs --ids 1234567890,2345678901
 node scripts/enrichment/enrich-products.mjs --query "status:active"
 node scripts/enrichment/enrich-products.mjs --include-enriched --limit 5
 node scripts/enrichment/enrich-products.mjs --only-enriched --tags-only --review-collection-tags --include-enriched --limit 5
+node scripts/enrichment/enrich-products.mjs --concurrency 8 --limit 50
 node scripts/enrichment/enrich-products.mjs --titles-only --include-enriched --limit 5
 node scripts/enrichment/enrich-products.mjs --descriptions-only --limit 5
 node scripts/enrichment/enrich-products.mjs --write --overwrite-tags --include-enriched --limit 20
@@ -48,6 +49,7 @@ Notes:
 - `--titles-only` updates only the product title.
 - `--descriptions-only` updates only the product description.
 - `--tags-only` updates only tags and leaves title/description untouched.
+- `--concurrency` controls how many products are processed in parallel. Default is `4`.
 - `--titles-only` and `--descriptions-only` cannot be used together.
 - `--only-enriched` targets only products that already have the enrichment marker tag.
 - If a taxonomy plan file is present, the script asks OpenAI to choose collection tags only from that managed taxonomy list.
@@ -56,3 +58,9 @@ Notes:
 - In `--overwrite-tags` mode, managed taxonomy tags are preserved and only non-managed factual tags are rebuilt.
 - `--review-collection-tags` lets the AI review the current managed collection tags against the allowed taxonomy list and keep, replace, or remove them when the fit is explicit.
 - This script does not create collections. Collection creation and product-to-collection assignment happen in the taxonomy workflow first, then this script enriches the products against that approved taxonomy.
+- OpenAI `429` rate limits are now retried automatically with backoff.
+- Optional pacing env vars:
+  `OPENAI_REQUEST_DELAY_MS`
+  `OPENAI_RETRY_BASE_DELAY_MS`
+  `OPENAI_RETRY_MAX_ATTEMPTS`
+  `OPENAI_RETRY_JITTER_MS`

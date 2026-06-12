@@ -45,6 +45,12 @@ Collections only write:
 node scripts/collection-taxonomy/apply-taxonomy.mjs --collections-only --write
 ```
 
+Collections only write and delete collections not present in the plan:
+
+```bash
+node scripts/collection-taxonomy/apply-taxonomy.mjs --collections-only --delete-unplanned-collections --write
+```
+
 Override files if needed:
 
 ```bash
@@ -57,3 +63,7 @@ What it writes:
 - smart collections
 - collection hierarchy metafields
 - product-to-collection assignment via managed collection tags
+
+Optional destructive mode:
+
+- `--delete-unplanned-collections` will delete Shopify collections whose handles are not present in the current taxonomy plan file.
