@@ -21,12 +21,15 @@ The scripts read from `.env` at the project root:
 - `SHOPIFY_API_VERSION`
 - `SHOPIFY_CLIENT_ID`
 - `SHOPIFY_CLIENT_SECRET`
+- `AVASAM_CONSUMER_KEY`
+- `AVASAM_SECRET_KEY`
 - `OLLAMA_BASE_URL` (optional, defaults to `http://localhost:11434`)
 - `OLLAMA_MODEL` (optional, only used as a prompt default)
 
 Optional:
 
 - `SHOPIFY_ADMIN_ACCESS_TOKEN`
+- `AVASAM_API_BASE_URL` (optional, defaults to `https://app.avasam.com`)
 
 ## Shopify auth
 
@@ -48,6 +51,64 @@ This fetches:
 - `storage/catalog/collections.json`
 
 Collections are stored with title, description, and the detected smart-collection tag rule when one exists.
+
+### Pull Avasam catalog
+
+```bash
+php scripts/pull-avasam-catalog.php
+```
+
+This fetches the full seller product feed from Avasam, then matches it against existing Shopify variants by SKU first and barcode second.
+It does not pull the whole Avasam catalogue by default.
+Instead it uses Avasam's mapped inventory endpoint to define scope, keeps only records whose SKU or barcode already exists in Shopify, and then enriches those mapped SKUs with per-product detail from `SeekerProductModule/GetProductBySKU`.
+
+It writes:
+
+- `storage/catalog/avasam-products.json`
+- `storage/catalog/avasam-shopify-products.json`
+
+The raw Avasam cache includes the full product payload, the observed top-level fields, and the unique extended property names seen across the feed.
+The matched cache includes the Avasam product data alongside the matching Shopify product and variant so you can decide what should later become Shopify metafields or frontend fields.
+
+For large stores, prefer running this by Shopify subset rather than the whole catalogue.
+The most useful filter is a Shopify collection, for example `garden-furniture`.
+
+Optional flags:
+
+- `--limit=250`
+- `--max-products=0`
+- `--shopify-collection-handle=garden-furniture`
+- `--shopify-collection-id=687029158227`
+- `--shopify-vendor=Artisan Furniture`
+- `--shopify-product-type=Home`
+- `--level=0`
+- `--currency=GBP`
+- `--substatus=empty`
+- `--resume=true|false`
+- `--checkpoint-every=25`
+- `--retries=3`
+- `--retry-delay-ms=1500`
+- `--continue-on-error=true|false`
+- `--raw-output-path=storage/catalog/avasam-products.json`
+- `--matched-output-path=storage/catalog/avasam-shopify-products.json`
+- `--checkpoint-path=storage/runtime/avasam-pull-progress.json`
+- `--error-log-path=storage/logs/avasam-pull-errors.jsonl`
+
+During long runs, the script now:
+
+- checkpoints partial progress to disk
+- rewrites the output JSON files incrementally with `is_partial: true`
+- resumes from the checkpoint when rerun with the same config
+- logs per-SKU failures to `storage/logs/avasam-pull-errors.jsonl`
+
+Example scoped run:
+
+```bash
+php scripts/pull-avasam-catalog.php \
+  --shopify-collection-handle=garden-furniture \
+  --resume=true \
+  --checkpoint-every=25
+```
 
 ### Review with Ollama
 
